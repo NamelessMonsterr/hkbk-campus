@@ -125,16 +125,19 @@ function ui(){
 }
 function fwd(){if(cur<N-1)setStep(cur+1,1);else stop()}
 function back(){if(cur>0)setStep(cur-1,-1)}
-$('cf').onclick=function(e){e.stopPropagation();fwd()};$('pr').onclick=fwd;$('pl').onclick=back;
+var STRIDE=3;
+function tapF(){if(cur<N-1)setStep(Math.min(cur+STRIDE,N-1),1);else stop()}
+function tapB(){if(cur>0)setStep(Math.max(cur-STRIDE,0),-1)}
+$('cf').onclick=function(e){e.stopPropagation();tapF()};$('pr').onclick=tapF;$('pl').onclick=tapB;
 document.addEventListener('keydown',function(e){
   if($('p360').style.display==='block'){if(e.key==='Escape')close360();return}
   if(!started)return;
-  if(e.key==='ArrowUp'||e.key==='ArrowRight'||e.key===' '||e.key==='w'){e.preventDefault();fwd()}
-  if(e.key==='ArrowDown'||e.key==='ArrowLeft'||e.key==='s'){e.preventDefault();back()}});
-var wl=0;$('stage').addEventListener('wheel',function(e){e.preventDefault();var n=Date.now();if(n-wl<180)return;wl=n;if(e.deltaY<0)fwd();else back()},{passive:false});
+  if(e.key==='ArrowUp'||e.key==='ArrowRight'||e.key===' '||e.key==='w'){e.preventDefault();tapF()}
+  if(e.key==='ArrowDown'||e.key==='ArrowLeft'||e.key==='s'){e.preventDefault();tapB()}});
+var wl=0;$('stage').addEventListener('wheel',function(e){e.preventDefault();var n=Date.now();if(n-wl<180)return;wl=n;if(e.deltaY<0)tapF();else tapB()},{passive:false});
 var sx=0,sy=0;$('stage').addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY});
 $('stage').addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)<30&&Math.abs(dy)<30)return;if(Math.abs(dy)>Math.abs(dx)){if(dy<0)fwd();else back()}else{if(dx<0)fwd();else back()}});
+  if(Math.abs(dx)<30&&Math.abs(dy)<30)return;if(Math.abs(dy)>Math.abs(dx)){if(dy<0)tapF();else tapB()}else{if(dx<0)tapF();else tapB()}});
 function play(){playing=true;$('play').textContent='Pause';timer=setInterval(fwd,900)}
 function stop(){playing=false;$('play').textContent='Walk';clearInterval(timer)}
 $('play').onclick=function(){playing?stop():play()};
