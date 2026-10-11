@@ -18,7 +18,7 @@ Every frame is a still taken from real walkthrough video of the campus. There ar
 ## How it is built
 
 - Static HTML, CSS and vanilla JavaScript. No build step, no framework.
-- The walk's frames are packed into one binary file, `walk/frames4_0.bin`. `walk/walk-data.js` holds the stop list, map positions and frame offsets, and `walk/index.html` is the player.
+- The walk's frames are packed into two binary files, `walk/frames4_0.bin` and `walk/frames4_1.bin`. `walk/walk-data.js` holds the stop list, map positions and frame offsets, and `walk/index.html` is the player.
 - 360 view support uses [Pannellum](https://pannellum.org/) (`walk/lib/`). It only appears at stops that have a panorama.
 - The enquiry assistant lives in `campus-explorer/` (`js/chatbot-engine.js`, `js/chatbot-ui.js`, `data/knowledge-base.js`). Its own README covers how it works and how to test it.
 - Hosted on GitHub Pages, served from the `main` branch root.
