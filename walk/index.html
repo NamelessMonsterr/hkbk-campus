@@ -123,10 +123,11 @@ function ui(){
   var b=$('b360');b.style.display=(atStop&&s.pano)?'inline-block':'none';
   if(started)history.replaceState(null,'','#'+(cur+1));
 }
-function fwd(){if(cur<N-1)setStep(cur+1,1);else stop()}
+function endOfWalk(){stop();toast('End of walk - tap Walk to replay')}
+function fwd(){if(cur<N-1)setStep(cur+1,1);else endOfWalk()}
 function back(){if(cur>0)setStep(cur-1,-1)}
 var STRIDE=3;
-function tapF(){if(cur<N-1)setStep(Math.min(cur+STRIDE,N-1),1);else stop()}
+function tapF(){if(cur<N-1)setStep(Math.min(cur+STRIDE,N-1),1);else endOfWalk()}
 function tapB(){if(cur>0)setStep(Math.max(cur-STRIDE,0),-1)}
 $('cf').onclick=function(e){e.stopPropagation();tapF()};$('pr').onclick=tapF;$('pl').onclick=tapB;
 document.addEventListener('keydown',function(e){
