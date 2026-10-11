@@ -1,0 +1,652 @@
+{
+ "frames": [
+  {
+   "file": "f0001.jpg",
+   "clip": "IMG_0204",
+   "t": 0.0
+  },
+  {
+   "file": "f0002.jpg",
+   "clip": "IMG_0205",
+   "t": 0.3
+  },
+  {
+   "file": "f0003.jpg",
+   "clip": "IMG_0205",
+   "t": 2.16
+  },
+  {
+   "file": "f0004.jpg",
+   "clip": "IMG_0205",
+   "t": 4.02
+  },
+  {
+   "file": "f0005.jpg",
+   "clip": "IMG_0205",
+   "t": 5.88
+  },
+  {
+   "file": "f0006.jpg",
+   "clip": "IMG_0205",
+   "t": 7.74
+  },
+  {
+   "file": "f0007.jpg",
+   "clip": "IMG_0205",
+   "t": 9.6
+  },
+  {
+   "file": "f0008.jpg",
+   "clip": "IMG_0201",
+   "t": 0.5
+  },
+  {
+   "file": "f0009.jpg",
+   "clip": "IMG_0201",
+   "t": 2.43
+  },
+  {
+   "file": "f0010.jpg",
+   "clip": "IMG_0201",
+   "t": 4.36
+  },
+  {
+   "file": "f0011.jpg",
+   "clip": "IMG_0201",
+   "t": 6.29
+  },
+  {
+   "file": "f0012.jpg",
+   "clip": "IMG_0201",
+   "t": 8.21
+  },
+  {
+   "file": "f0013.jpg",
+   "clip": "IMG_0201",
+   "t": 10.14
+  },
+  {
+   "file": "f0014.jpg",
+   "clip": "IMG_0201",
+   "t": 12.07
+  },
+  {
+   "file": "f0015.jpg",
+   "clip": "IMG_0201",
+   "t": 14.0
+  },
+  {
+   "file": "f0016.jpg",
+   "clip": "IMG_0196",
+   "t": 0.5
+  },
+  {
+   "file": "f0017.jpg",
+   "clip": "IMG_0196",
+   "t": 2.67
+  },
+  {
+   "file": "f0018.jpg",
+   "clip": "IMG_0196",
+   "t": 4.83
+  },
+  {
+   "file": "f0019.jpg",
+   "clip": "IMG_0196",
+   "t": 7.0
+  },
+  {
+   "file": "f0020.jpg",
+   "clip": "IMG_0196",
+   "t": 9.17
+  },
+  {
+   "file": "f0021.jpg",
+   "clip": "IMG_0196",
+   "t": 11.33
+  },
+  {
+   "file": "f0022.jpg",
+   "clip": "IMG_0196",
+   "t": 13.5
+  },
+  {
+   "file": "f0023.jpg",
+   "clip": "IMG_0196",
+   "t": 15.67
+  },
+  {
+   "file": "f0024.jpg",
+   "clip": "IMG_0196",
+   "t": 17.83
+  },
+  {
+   "file": "f0025.jpg",
+   "clip": "IMG_0196",
+   "t": 20.0
+  },
+  {
+   "file": "f0026.jpg",
+   "clip": "IMG_0192",
+   "t": 0.5
+  },
+  {
+   "file": "f0027.jpg",
+   "clip": "IMG_0192",
+   "t": 1.85
+  },
+  {
+   "file": "f0028.jpg",
+   "clip": "IMG_0192",
+   "t": 3.2
+  },
+  {
+   "file": "f0029.jpg",
+   "clip": "IMG_0192",
+   "t": 4.55
+  },
+  {
+   "file": "f0030.jpg",
+   "clip": "IMG_0192",
+   "t": 5.89
+  },
+  {
+   "file": "f0031.jpg",
+   "clip": "IMG_0192",
+   "t": 7.24
+  },
+  {
+   "file": "f0032.jpg",
+   "clip": "IMG_0192",
+   "t": 8.59
+  },
+  {
+   "file": "f0033.jpg",
+   "clip": "IMG_0192",
+   "t": 9.94
+  },
+  {
+   "file": "f0034.jpg",
+   "clip": "IMG_0192",
+   "t": 11.29
+  },
+  {
+   "file": "f0035.jpg",
+   "clip": "IMG_0192",
+   "t": 12.64
+  },
+  {
+   "file": "f0036.jpg",
+   "clip": "IMG_0192",
+   "t": 13.98
+  },
+  {
+   "file": "f0037.jpg",
+   "clip": "IMG_0192",
+   "t": 15.33
+  },
+  {
+   "file": "f0038.jpg",
+   "clip": "IMG_0192",
+   "t": 16.68
+  },
+  {
+   "file": "f0039.jpg",
+   "clip": "IMG_0192",
+   "t": 18.03
+  },
+  {
+   "file": "f0040.jpg",
+   "clip": "IMG_0192",
+   "t": 19.38
+  },
+  {
+   "file": "f0041.jpg",
+   "clip": "IMG_0192",
+   "t": 20.73
+  },
+  {
+   "file": "f0042.jpg",
+   "clip": "IMG_0192",
+   "t": 22.08
+  },
+  {
+   "file": "f0043.jpg",
+   "clip": "IMG_0192",
+   "t": 23.42
+  },
+  {
+   "file": "f0044.jpg",
+   "clip": "IMG_0192",
+   "t": 24.77
+  },
+  {
+   "file": "f0045.jpg",
+   "clip": "IMG_0192",
+   "t": 26.12
+  },
+  {
+   "file": "f0046.jpg",
+   "clip": "IMG_0192",
+   "t": 27.47
+  },
+  {
+   "file": "f0047.jpg",
+   "clip": "IMG_0192",
+   "t": 28.82
+  },
+  {
+   "file": "f0048.jpg",
+   "clip": "IMG_0192",
+   "t": 30.17
+  },
+  {
+   "file": "f0049.jpg",
+   "clip": "IMG_0192",
+   "t": 31.52
+  },
+  {
+   "file": "f0050.jpg",
+   "clip": "IMG_0192",
+   "t": 32.86
+  },
+  {
+   "file": "f0051.jpg",
+   "clip": "IMG_0192",
+   "t": 34.21
+  },
+  {
+   "file": "f0052.jpg",
+   "clip": "IMG_0192",
+   "t": 35.56
+  },
+  {
+   "file": "f0053.jpg",
+   "clip": "IMG_0192",
+   "t": 36.91
+  },
+  {
+   "file": "f0054.jpg",
+   "clip": "IMG_0192",
+   "t": 38.26
+  },
+  {
+   "file": "f0055.jpg",
+   "clip": "IMG_0192",
+   "t": 39.61
+  },
+  {
+   "file": "f0056.jpg",
+   "clip": "IMG_0192",
+   "t": 40.95
+  },
+  {
+   "file": "f0057.jpg",
+   "clip": "IMG_0192",
+   "t": 42.3
+  },
+  {
+   "file": "f0058.jpg",
+   "clip": "IMG_0192",
+   "t": 43.65
+  },
+  {
+   "file": "f0059.jpg",
+   "clip": "IMG_0192",
+   "t": 45.0
+  },
+  {
+   "file": "f0060.jpg",
+   "clip": "IMG_0192",
+   "t": 46.35
+  },
+  {
+   "file": "f0061.jpg",
+   "clip": "IMG_0192",
+   "t": 47.7
+  },
+  {
+   "file": "f0062.jpg",
+   "clip": "IMG_0192",
+   "t": 49.05
+  },
+  {
+   "file": "f0063.jpg",
+   "clip": "IMG_0192",
+   "t": 50.39
+  },
+  {
+   "file": "f0064.jpg",
+   "clip": "IMG_0192",
+   "t": 51.74
+  },
+  {
+   "file": "f0065.jpg",
+   "clip": "IMG_0192",
+   "t": 53.09
+  },
+  {
+   "file": "f0066.jpg",
+   "clip": "IMG_0192",
+   "t": 54.44
+  },
+  {
+   "file": "f0067.jpg",
+   "clip": "IMG_0192",
+   "t": 55.79
+  },
+  {
+   "file": "f0068.jpg",
+   "clip": "IMG_0192",
+   "t": 57.14
+  },
+  {
+   "file": "f0069.jpg",
+   "clip": "IMG_0192",
+   "t": 58.48
+  },
+  {
+   "file": "f0070.jpg",
+   "clip": "IMG_0192",
+   "t": 59.83
+  },
+  {
+   "file": "f0071.jpg",
+   "clip": "IMG_0192",
+   "t": 61.18
+  },
+  {
+   "file": "f0072.jpg",
+   "clip": "IMG_0192",
+   "t": 62.53
+  },
+  {
+   "file": "f0073.jpg",
+   "clip": "IMG_0192",
+   "t": 63.88
+  },
+  {
+   "file": "f0074.jpg",
+   "clip": "IMG_0192",
+   "t": 65.23
+  },
+  {
+   "file": "f0075.jpg",
+   "clip": "IMG_0192",
+   "t": 66.58
+  },
+  {
+   "file": "f0076.jpg",
+   "clip": "IMG_0192",
+   "t": 67.92
+  },
+  {
+   "file": "f0077.jpg",
+   "clip": "IMG_0192",
+   "t": 69.27
+  },
+  {
+   "file": "f0078.jpg",
+   "clip": "IMG_0192",
+   "t": 70.62
+  },
+  {
+   "file": "f0079.jpg",
+   "clip": "IMG_0192",
+   "t": 71.97
+  },
+  {
+   "file": "f0080.jpg",
+   "clip": "IMG_0192",
+   "t": 73.32
+  },
+  {
+   "file": "f0081.jpg",
+   "clip": "IMG_0192",
+   "t": 74.67
+  },
+  {
+   "file": "f0082.jpg",
+   "clip": "IMG_0192",
+   "t": 76.02
+  },
+  {
+   "file": "f0083.jpg",
+   "clip": "IMG_0192",
+   "t": 77.36
+  },
+  {
+   "file": "f0084.jpg",
+   "clip": "IMG_0192",
+   "t": 78.71
+  },
+  {
+   "file": "f0085.jpg",
+   "clip": "IMG_0192",
+   "t": 80.06
+  },
+  {
+   "file": "f0086.jpg",
+   "clip": "IMG_0192",
+   "t": 81.41
+  },
+  {
+   "file": "f0087.jpg",
+   "clip": "IMG_0192",
+   "t": 82.76
+  },
+  {
+   "file": "f0088.jpg",
+   "clip": "IMG_0192",
+   "t": 84.11
+  },
+  {
+   "file": "f0089.jpg",
+   "clip": "IMG_0192",
+   "t": 85.45
+  },
+  {
+   "file": "f0090.jpg",
+   "clip": "IMG_0192",
+   "t": 86.8
+  },
+  {
+   "file": "f0091.jpg",
+   "clip": "IMG_0192",
+   "t": 88.15
+  },
+  {
+   "file": "f0092.jpg",
+   "clip": "IMG_0192",
+   "t": 89.5
+  },
+  {
+   "file": "f0093.jpg",
+   "clip": "IMG_0192",
+   "t": 90.85
+  },
+  {
+   "file": "f0094.jpg",
+   "clip": "IMG_0192",
+   "t": 92.2
+  },
+  {
+   "file": "f0095.jpg",
+   "clip": "IMG_0192",
+   "t": 93.55
+  },
+  {
+   "file": "f0096.jpg",
+   "clip": "IMG_0192",
+   "t": 94.89
+  },
+  {
+   "file": "f0097.jpg",
+   "clip": "IMG_0192",
+   "t": 96.24
+  },
+  {
+   "file": "f0098.jpg",
+   "clip": "IMG_0192",
+   "t": 97.59
+  },
+  {
+   "file": "f0099.jpg",
+   "clip": "IMG_0192",
+   "t": 98.94
+  },
+  {
+   "file": "f0100.jpg",
+   "clip": "IMG_0192",
+   "t": 100.29
+  },
+  {
+   "file": "f0101.jpg",
+   "clip": "IMG_0192",
+   "t": 101.64
+  },
+  {
+   "file": "f0102.jpg",
+   "clip": "IMG_0192",
+   "t": 102.98
+  },
+  {
+   "file": "f0103.jpg",
+   "clip": "IMG_0192",
+   "t": 104.33
+  },
+  {
+   "file": "f0104.jpg",
+   "clip": "IMG_0192",
+   "t": 105.68
+  },
+  {
+   "file": "f0105.jpg",
+   "clip": "IMG_0192",
+   "t": 107.03
+  },
+  {
+   "file": "f0106.jpg",
+   "clip": "IMG_0192",
+   "t": 108.38
+  },
+  {
+   "file": "f0107.jpg",
+   "clip": "IMG_0192",
+   "t": 109.73
+  },
+  {
+   "file": "f0108.jpg",
+   "clip": "IMG_0192",
+   "t": 111.08
+  },
+  {
+   "file": "f0109.jpg",
+   "clip": "IMG_0192",
+   "t": 112.42
+  },
+  {
+   "file": "f0110.jpg",
+   "clip": "IMG_0192",
+   "t": 113.77
+  },
+  {
+   "file": "f0111.jpg",
+   "clip": "IMG_0192",
+   "t": 115.12
+  },
+  {
+   "file": "f0112.jpg",
+   "clip": "IMG_0192",
+   "t": 116.47
+  },
+  {
+   "file": "f0113.jpg",
+   "clip": "IMG_0192",
+   "t": 117.82
+  },
+  {
+   "file": "f0114.jpg",
+   "clip": "IMG_0192",
+   "t": 119.17
+  },
+  {
+   "file": "f0115.jpg",
+   "clip": "IMG_0192",
+   "t": 120.52
+  },
+  {
+   "file": "f0116.jpg",
+   "clip": "IMG_0192",
+   "t": 121.86
+  },
+  {
+   "file": "f0117.jpg",
+   "clip": "IMG_0192",
+   "t": 123.21
+  },
+  {
+   "file": "f0118.jpg",
+   "clip": "IMG_0192",
+   "t": 124.56
+  },
+  {
+   "file": "f0119.jpg",
+   "clip": "IMG_0192",
+   "t": 125.91
+  },
+  {
+   "file": "f0120.jpg",
+   "clip": "IMG_0192",
+   "t": 127.26
+  },
+  {
+   "file": "f0121.jpg",
+   "clip": "IMG_0192",
+   "t": 128.61
+  },
+  {
+   "file": "f0122.jpg",
+   "clip": "IMG_0192",
+   "t": 129.95
+  },
+  {
+   "file": "f0123.jpg",
+   "clip": "IMG_0192",
+   "t": 131.3
+  },
+  {
+   "file": "f0124.jpg",
+   "clip": "IMG_0192",
+   "t": 132.65
+  },
+  {
+   "file": "f0125.jpg",
+   "clip": "IMG_0192",
+   "t": 134.0
+  }
+ ],
+ "chapters": [
+  {
+   "label": "At the gate",
+   "start": 1,
+   "end": 7
+  },
+  {
+   "label": "Walking onto campus",
+   "start": 8,
+   "end": 15
+  },
+  {
+   "label": "Approaching the Main Block",
+   "start": 16,
+   "end": 25
+  },
+  {
+   "label": "Around the Main Block",
+   "start": 26,
+   "end": 125
+  }
+ ],
+ "count": 125
+}

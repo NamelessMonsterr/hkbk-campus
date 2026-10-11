@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recording 2 walkthrough · HKBK College of Engineering</title>
+<meta name="description" content="Independent Recording 2 preview of HKBK College of Engineering, assembled from 211 sampled frames across 20 source clips.">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/street-view.css">
+<link rel="stylesheet" href="css/recording2-walkthrough.css">
+</head>
+<body class="sv-body recording2-page">
+
+<div id="sv-root" class="sv-root"
+     data-manifest="assets/tour-photos-recording2/manifest.json"
+     data-image-base="assets/tour-photos-recording2/"
+     data-dataset="recording2-aug22"
+     data-hard-cut="clips"
+     role="main" aria-label="HKBK Recording 2 campus photo walkthrough">
+
+  <div id="sv-start" class="sv-start">
+    <div class="sv-start__inner">
+      <span class="sv-start__eyebrow">HKBK · CE · Recording 2 · Aug 22</span>
+      <h1 class="sv-start__title">An independent campus preview</h1>
+      <p class="sv-start__body">
+        This independent preview follows Recording 2 through 211 sampled frames
+        from 20 source clips. It is a sequence of real video frames, not a
+        continuous take or a 3D model.
+      </p>
+
+      <label class="sv-chapter-choice" for="sv-chapter-select">
+        <span>Choose a chapter</span>
+        <select id="sv-chapter-select" disabled>
+          <option>Loading chapters…</option>
+        </select>
+      </label>
+      <button type="button" id="sv-start-btn" class="sv-start__btn" disabled>Start Recording 2</button>
+      <p class="sv-start__note">
+        Every clip change is a hard cut and every sample time is approximate;
+        adjacent frames should not be read as continuous motion.<br>
+        <a href="demo.html">Open the existing demo</a> ·
+        <a href="street-view.html">Open the original walkthrough</a> ·
+        <a href="assets/tour-photos-recording2/contact-sheet.jpg">View the Recording 2 contact sheet</a>
+      </p>
+    </div>
+  </div>
+
+  <div id="sv-stage" class="sv-stage" hidden>
+    <img id="sv-photo" class="sv-photo" alt="">
+    <img id="sv-photo-prev" class="sv-photo sv-photo--prev" alt="" aria-hidden="true">
+
+    <div class="sv-hitzone sv-hitzone--back" id="sv-hit-back" aria-label="Step back"></div>
+    <div class="sv-hitzone sv-hitzone--fwd" id="sv-hit-fwd" aria-label="Step forward"></div>
+
+    <button type="button" id="sv-back" class="sv-chevron sv-chevron--back" aria-label="Step back">&larr;</button>
+    <button type="button" id="sv-fwd" class="sv-chevron sv-chevron--fwd" aria-label="Step forward">&rarr;</button>
+
+    <div class="sv-hud">
+      <a href="demo.html" class="sv-hud__exit">&larr; Return to demo</a>
+      <div class="sv-hud__right">
+        <button type="button" id="sv-restart" class="sv-hud__restart" aria-label="Restart walkthrough">Restart</button>
+        <div class="sv-hud__chapter" aria-live="polite">
+          <span id="sv-chapter-label"></span>
+          <span id="sv-progress" class="sv-hud__progress"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sv-trackbar">
+      <div id="sv-trackbar-fill" class="sv-trackbar__fill"></div>
+      <div id="sv-trackbar-ticks" class="sv-trackbar__ticks"></div>
+    </div>
+
+    <aside id="sv-provenance" class="sv-provenance" aria-live="polite" aria-label="Frame provenance">
+      <span id="sv-source">Source MOV: —</span>
+      <span id="sv-sample-time">Sample t ≈ — s (approx.)</span>
+      <span id="sv-clip">Clip —/20</span>
+      <span class="sv-provenance__discontinuity">Discontinuous preview; this frame is not a continuous-take position.</span>
+      <div id="sv-clip-boundary" class="sv-clip-boundary" hidden>
+        <strong>Clip boundary · hard cut</strong>
+        <span id="sv-clip-boundary-text"></span>
+      </div>
+    </aside>
+
+    <div id="sv-end" class="sv-end" hidden role="status" aria-labelledby="sv-end-title">
+      <p class="sv-end__eyebrow">End of Recording 2 route</p>
+      <h2 id="sv-end-title">You&rsquo;ve reached the final sample.</h2>
+      <p>This independent preview ends here. Replay it from the first clip whenever you&rsquo;re ready.</p>
+      <button type="button" id="sv-end-restart" class="sv-end__btn">Replay walkthrough</button>
+    </div>
+
+    <p class="sv-hint">Click ahead to walk forward · &larr; &rarr; keys also work · swipe on touch</p>
+  </div>
+
+  <div id="sv-loading" class="sv-loading" hidden>Loading…</div>
+</div>
+
+<section class="sv-about" aria-labelledby="recording2-about-title">
+  <h2 id="recording2-about-title">About Recording 2</h2>
+  <p>
+    Recording 2 is an independent Aug 22 preview: 211 still frames sampled
+    from 20 source MOV clips and arranged by the supplied chapters. The frame
+    view identifies its source clip and approximate source time so the preview
+    remains auditable.
+  </p>
+  <p>
+    <strong>Always expect discontinuity.</strong> A new clip can begin inside a
+    presentation chapter, and each such boundary is marked in the viewer with
+    a hard cut rather than a crossfade. The images are ordinary portrait video
+    frames, not panoramic or free-look coverage.
+  </p>
+  <p>
+    <a href="demo.html">&larr; Back to the existing demo</a> ·
+    <a href="street-view.html">Original walkthrough</a> ·
+    <a href="assets/tour-photos-recording2/contact-sheet.jpg">Contact sheet</a>
+  </p>
+</section>
+
+<script src="js/3d/campus/street-view.js"></script>
+</body>
+</html>

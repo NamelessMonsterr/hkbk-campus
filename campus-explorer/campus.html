@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore Campus · HKBK College of Engineering</title>
+<meta name="description" content="Interactive 3D digital twin of the HKBK College of Engineering campus - fly, orbit or walk between buildings, ask the AI guide to take you anywhere.">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/campus.css">
+
+<!--
+	Real ES-module Three.js pipeline, loaded from jsDelivr - this is the
+	deliberate departure from the rest of the site (index.html vendors
+	js/vendor/three.min.js locally so it works from file://). ES module
+	imports and GLTF fetches are blocked by the browser on file://, so this
+	page ONLY works served over http(s) - see README.md for the one-line
+	local server command. If you're offline, or opened this by
+	double-clicking it, campus-app.js will fail to import and you'll see
+	the noscript-style fallback message below instead of a blank page.
+-->
+<script type="importmap">
+{
+	"imports": {
+		"three": "./js/vendor/three/build/three.module.js",
+		"three/addons/": "./js/vendor/three/examples/jsm/"
+	}
+}
+</script>
+</head>
+<body class="campus-body">
+
+<a class="campus-back" href="index.html">&larr; HKBK &middot; CE</a>
+
+<div id="campus-canvas-wrap">
+	<canvas id="campus-canvas" aria-label="Interactive 3D campus of HKBK College of Engineering"></canvas>
+</div>
+
+<div id="campus-boot" class="campus-boot">
+	<p>Loading campus&hellip;</p>
+</div>
+
+<div id="campus-fallback" class="campus-fallback" hidden>
+	<div>
+		<h1>This page needs a real browser 3D pipeline</h1>
+		<p>Either your browser/device doesn't support WebGL2, you have reduced motion enabled, or (most likely if you just double-clicked this file) it was opened as <code>file://</code> - ES module imports and the GLTF loader are blocked there by the browser for security reasons.</p>
+		<p>Serve the project folder locally, e.g. <code>python3 -m http.server 8000</code>, then open <code>http://localhost:8000/campus.html</code>.</p>
+		<p><a href="index.html">Go back to the regular site &rarr;</a></p>
+	</div>
+</div>
+
+<!-- Cinematic intro. The black plate is DOM rather than a WebGL fade
+     because it also has to cover the first frame or two before the
+     renderer has anything to show. `is-clear` lifts the plate, `is-done`
+     removes it from the layer tree entirely so it costs nothing after
+     the sequence. Both classes are applied by campus-app.js. -->
+<div id="campus-intro" class="campus-intro" aria-hidden="true">
+	<div id="campus-intro-brand" class="campus-intro__brand">
+		<span class="campus-intro__mark">HKBK</span>
+		<span class="campus-intro__sub">College of Engineering &middot; Bengaluru</span>
+		<span class="campus-intro__cta">Drag to look &middot; scroll to zoom &middot; ask the guide anything</span>
+	</div>
+	<button type="button" id="campus-intro-skip" class="campus-intro__skip">Skip intro</button>
+	<a href="street-view.html" id="campus-intro-streetview" class="campus-intro__streetview">Or walk it in real photos, gate to Main Block &rarr;</a>
+</div>
+
+<div id="campus-hud" class="campus-hud" hidden>
+	<div class="campus-hud__modes" role="group" aria-label="Camera mode">
+		<button type="button" data-mode="orbit" class="is-active">Orbit</button>
+		<button type="button" data-mode="walk">Walk</button>
+		<button type="button" data-mode="tour">Tour</button>
+	</div>
+	<label class="campus-hud__toggle">
+		<input type="checkbox" id="campus-labels-toggle" checked>
+		Building labels
+	</label>
+</div>
+
+<!-- Guided ground-level tour. Hidden until Tour mode is entered; the whole
+     strip is inert in orbit and walk modes. -->
+<div id="campus-tour" class="campus-tour" hidden>
+	<div class="campus-tour__meta">
+		<span id="campus-tour-count" class="campus-tour__count"></span>
+		<strong id="campus-tour-name" class="campus-tour__name"></strong>
+	</div>
+	<div class="campus-tour__controls">
+		<button type="button" id="campus-tour-prev" aria-label="Previous stop">&larr;</button>
+		<button type="button" id="campus-tour-auto" class="campus-tour__auto" aria-pressed="false">Auto-play</button>
+		<button type="button" id="campus-tour-next" aria-label="Next stop">&rarr;</button>
+		<button type="button" id="campus-tour-exit" class="campus-tour__exit">Exit tour</button>
+	</div>
+	<p class="campus-tour__hint">Drag to look around &middot; arrow keys to move between stops</p>
+</div>
+
+<div id="campus-guide" class="campus-guide" hidden>
+	<div id="campus-guide-log" class="campus-guide__log" aria-live="polite"></div>
+	<form id="campus-guide-form" class="campus-guide__form">
+		<input id="campus-guide-input" type="text" autocomplete="off" placeholder="Ask the AI guide - &quot;take me to the library&quot;, &quot;what's the CET code?&quot;">
+		<button type="submit">Ask</button>
+	</form>
+</div>
+
+<div id="campus-info" class="campus-info" hidden>
+	<button type="button" id="campus-info-close" class="campus-info__close" aria-label="Close">&times;</button>
+	<h2 id="campus-info-title"></h2>
+	<p id="campus-info-body"></p>
+	<!-- Director explainability. Populated by campus-app.js only when the
+	     camera move was a semantic decision rather than a plain click. -->
+	<dl id="campus-why" class="campus-why" hidden></dl>
+	<a id="campus-info-link" href="#">Read more on the main site &rarr;</a>
+</div>
+
+<!-- classic scripts first: they run synchronously in order, so window.HKBK_KB
+     and window.HKBKChat both exist before the module script below runs
+     (module scripts always execute after the document is parsed). -->
+<script src="data/knowledge-base.js"></script>
+<script src="js/chatbot-engine.js"></script>
+<!-- The Semantic Cinematic Director. A classic script on purpose: it has
+     no imports and no Three.js dependency, so it loads here alongside the
+     engine and is equally testable in Node (tests/director-test.js). -->
+<script src="js/3d/campus/director.js"></script>
+<!-- Conversational Spatial Memory. Same deal: no imports, no Three.js,
+     testable in Node (tests/scene-context-test.js). -->
+<script src="js/3d/campus/scene-context.js"></script>
+<!-- Telemetry. Present for evaluation, not for the application: nothing is
+     transmitted anywhere, and window.HKBKTrace.export() is how an operator
+     retrieves a run. Construct with { enabled: false } to switch it off. -->
+<script src="js/3d/campus/telemetry.js"></script>
+
+<script type="module" src="js/3d/campus/campus-app.js"></script>
+
+</body>
+</html>
