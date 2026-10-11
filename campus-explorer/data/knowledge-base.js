@@ -36,20 +36,20 @@ window.HKBK_KB = {
     "kn": "ರೂ. 2.56 ಲಕ್ಷದಿಂದ ರೂ. 3.95 ಲಕ್ಷದ ನಡುವೆ ವರದಿಯಾಗಿದೆ"
    },
    "PLACEMENT_PCT": {
-    "en": "94%",
-    "kn": "ಶೇಕಡಾ 94"
+    "en": "94.3%",
+    "kn": "ಶೇಕಡಾ 94.3"
    },
    "PLACEMENT_HIGHEST": {
-    "en": "Rs 31.4 LPA",
-    "kn": "ವಾರ್ಷಿಕ ರೂ. 31.4 ಲಕ್ಷ"
+    "en": "Rs 32.4 LPA (2023)",
+    "kn": "ವಾರ್ಷಿಕ ರೂ. 32.4 ಲಕ್ಷ (2023)"
    },
    "PLACEMENT_AVERAGE": {
     "en": "approximately Rs 3.5 to 6 LPA",
     "kn": "ವಾರ್ಷಿಕ ಸರಿಸುಮಾರು ರೂ. 3.5 ರಿಂದ 6 ಲಕ್ಷ"
    },
    "RECRUITER_COUNT": {
-    "en": "150+",
-    "kn": "150ಕ್ಕೂ ಹೆಚ್ಚು"
+    "en": "375+",
+    "kn": "375ಕ್ಕೂ ಹೆಚ್ಚು"
    },
    "CUTOFF_KCET_CSE": {
     "en": "around 60,070",
@@ -83,12 +83,13 @@ window.HKBK_KB = {
    },
    "PLACEMENT_PCT": {
     "confidence": "official",
-    "source": "apply.hkbk.edu.in"
+    "source": "hkbk.edu.in/engineering/placements",
+    "note": "Main site states 94.3% placements. apply.hkbk.edu.in states 94%."
    },
    "PLACEMENT_HIGHEST": {
     "confidence": "official",
-    "source": "apply.hkbk.edu.in",
-    "note": "Main hkbk.edu.in site instead says 32.4 lakh for year 2023. Student reviews report 24 LPA. Awaiting a ruling from the placement cell."
+    "source": "hkbk.edu.in/engineering/placements",
+    "note": "Main site states 32.4 LPA and labels it Year 2023. apply.hkbk.edu.in states Rs 31.4 LPA. Student reviews report 24 LPA. Awaiting a ruling from the placement cell."
    },
    "PLACEMENT_AVERAGE": {
     "confidence": "thirdparty",
@@ -97,8 +98,8 @@ window.HKBK_KB = {
    },
    "RECRUITER_COUNT": {
     "confidence": "official",
-    "source": "apply.hkbk.edu.in",
-    "note": "Times of College claims 240-250 companies. 2020 brochure listed 583 total recruiters for class of 2019."
+    "source": "hkbk.edu.in/engineering/placements",
+    "note": "Main site states 375+ recruiters. apply.hkbk.edu.in states 150+. Times of College claims 240-250 companies. 2020 brochure listed 583 total recruiters for class of 2019."
    },
    "CUTOFF_KCET_CSE": {
     "confidence": "thirdparty",
@@ -188,7 +189,8 @@ window.HKBK_KB = {
    "placementRate": [
     "94%",
     "93.3%",
-    "96.3%"
+    "96.3%",
+    "94.3% (main website)"
    ],
    "recruiterCount": [
     "150+",
@@ -1360,6 +1362,254 @@ window.HKBK_KB = {
     "a": "There is a canteen on campus, and the Arogya outlet in it is well known among students. Hostel residents additionally have an in-house mess serving South Indian vegetarian and non-vegetarian food. Menu and prices change through the year, so ask at the counter for current rates."
    },
    "section": "campus"
+  },
+  {
+   "id": "colleges-overview",
+   "category": "courses",
+   "tags": [
+    "colleges",
+    "institutions",
+    "groups",
+    "physiotherapy",
+    "health science",
+    "degree",
+    "pu",
+    "evening",
+    "management"
+   ],
+   "en": {
+    "q": [
+     "what colleges does hkbk have",
+     "which institutions are in hkbk group",
+     "how many colleges are there",
+     "list of hkbk institutions",
+     "what is hkbk group of institutions"
+    ],
+    "a": "The HKBK Group of Institutions lists six colleges on its website: HKBK College of Engineering, HKBK Degree College, HKBK College of Physiotherapy, HKBK College of Health Science, HKBK Pre-University (PUC) and HKBK Evening Degree College. The MBA and the school of business are linked to ONESB. As published on hkbk.edu.in."
+   },
+   "conflicts": [],
+   "section": "courses"
+  },
+  {
+   "id": "physio-health-science",
+   "category": "courses",
+   "tags": [
+    "physiotherapy",
+    "bpt",
+    "health science",
+    "mlt",
+    "mit",
+    "allied health",
+    "medical",
+    "laboratory",
+    "imaging"
+   ],
+   "en": {
+    "q": [
+     "do you have physiotherapy",
+     "is bpt offered",
+     "allied health science courses",
+     "what is mlt",
+     "is there a health science college",
+     "bsc mlt and mit"
+    ],
+    "a": "HKBK College of Physiotherapy offers the Bachelor of Physiotherapy (BPT). HKBK College of Health Science offers allied health programmes: B.Sc in Medical Laboratory Technology (MLT) and B.Sc in Medical Imaging Technology (MIT). The college states the Health Science programmes are affiliated to the Rajiv Gandhi University of Health Sciences, Karnataka and recognised by the Government of Karnataka. As published on hkbk.edu.in."
+   },
+   "conflicts": [],
+   "section": "courses"
+  },
+  {
+   "id": "pu-courses",
+   "category": "courses",
+   "tags": [
+    "puc",
+    "pre university",
+    "pu",
+    "pcmb",
+    "pcmc",
+    "ebac",
+    "heba",
+    "12th",
+    "plus two"
+   ],
+   "en": {
+    "q": [
+     "do you have puc",
+     "pre university courses",
+     "what pu combinations are there",
+     "pcmb pcmc ebac heba",
+     "is there a pu college"
+    ],
+    "a": "HKBK Pre-University College offers four PU combinations listed on the college website: EBAC, PCMC, HEBA and PCMB. As published on hkbk.edu.in."
+   },
+   "conflicts": [],
+   "section": "courses"
+  },
+  {
+   "id": "degree-programmes",
+   "category": "courses",
+   "tags": [
+    "degree",
+    "bca",
+    "bcom",
+    "bba",
+    "aviation",
+    "acca",
+    "logistics",
+    "cyber forensic",
+    "bsc"
+   ],
+   "en": {
+    "q": [
+     "what degree courses are offered",
+     "do you have bca",
+     "is bba aviation available",
+     "bcom with acca",
+     "is there cyber forensics",
+     "non engineering courses"
+    ],
+    "a": "HKBK Degree College lists these programmes: BCA, B.Com, B.Com Integrated with ACCA, B.Com in Logistics and Supply Chain Management, BBA, BBA in Aviation Management, B.Sc in Computer Science and B.Sc in Cyber Forensic. As published on hkbk.edu.in/degree."
+   },
+   "conflicts": [],
+   "section": "courses"
+  },
+  {
+   "id": "dept-intake-history",
+   "category": "courses",
+   "tags": [
+    "intake",
+    "seats",
+    "cse",
+    "ise",
+    "aiml",
+    "department",
+    "established",
+    "history",
+    "growth"
+   ],
+   "en": {
+    "q": [
+     "how many seats in cse",
+     "cse intake history",
+     "when was the ai ml department started",
+     "ise intake",
+     "how did intake grow",
+     "department established"
+    ],
+    "a": "As published on the college website: the Computer Science and Engineering department was established in 1997 with an intake of 45. It rose to 60 in 2000, 90 in 2002, 120 in 2011, 180 in 2016 and 300 in 2024. Artificial Intelligence and Machine Learning was established in 2021-22 with an intake of 60, which the college lists as increased to 120 in 2024-25. Information Science and Engineering lists 45 to 60 in 2001-02, 60 to 120 in 2016-17 and 120 to 180 in 2020-21, with an intake of 120 listed for 2021-22 and 60 for 2026-27. Check with the admissions office for the current intake."
+   },
+   "conflicts": [],
+   "section": "courses"
+  },
+  {
+   "id": "dept-electives",
+   "category": "courses",
+   "tags": [
+    "electives",
+    "specialisation",
+    "iot",
+    "robotics",
+    "data analytics",
+    "cloud",
+    "pytorch",
+    "german",
+    "tvs",
+    "mba certification"
+   ],
+   "en": {
+    "q": [
+     "what electives are offered",
+     "extra electives in cse",
+     "does ece have iot",
+     "are there certification courses in mba",
+     "what extra training does mechanical have",
+     "ai ml electives"
+    ],
+    "a": "Extra electives listed by the college: Computer Science and Engineering - AI and Machine Learning, Data Analytics, Cloud Computing, Mobile Computing, Game Design and AR. Information Science and Engineering - AI and Machine Learning, Data Analytics, Cloud Computing, Mobile Computing, AR. Electronics and Communication - Internet of Things, Artificial Intelligence, Robotics and Wireless Communication, Sensors and Wearable Technology, Nano Electronics. Mechanical - Electric Vehicle Manufacturing with TVS Motors, German Language Training, ISO 22301 Internal Auditor Training. AI and Machine Learning - Python, NLP with spaCy, Keras, PyTorch, Scikit-learn. MBA certifications - Business Management (Analytics), Digital Marketing, Entrepreneurship and Innovation, Indian Labour Law, Logistics. As published on the department pages of hkbk.edu.in."
+   },
+   "conflicts": [],
+   "section": "courses"
+  },
+  {
+   "id": "rankings",
+   "category": "pdf",
+   "tags": [
+    "ranking",
+    "rank",
+    "career360",
+    "csr",
+    "ghrdc",
+    "siliconindia",
+    "times of india",
+    "toi",
+    "best college",
+    "top"
+   ],
+   "en": {
+    "q": [
+     "what is the college ranking",
+     "how is hkbk ranked",
+     "is hkbk in the top colleges",
+     "career 360 rating",
+     "times of india ranking",
+     "siliconindia rank",
+     "csr ghrdc rank"
+    ],
+    "a": "Rankings listed by the college on hkbk.edu.in/engineering/rankings-recognitions: Career 360 placed HKBK College of Engineering in its highest category, AAA. CSR-GHRDC Engineering Colleges Survey: 22nd best engineering college in India. SiliconIndia: 7th best in Karnataka and 30th in India. Times of India All-India Rankings 2025: 44th in the Top 175 Engineering Institutes and 20th among the Top 70 Private Institutes for placement. The college also states it is one of the top 10 engineering colleges in Bangalore for placement. These are the college's own published claims."
+   },
+   "conflicts": [],
+   "section": "about"
+  },
+  {
+   "id": "approvals",
+   "category": "pdf",
+   "tags": [
+    "approval",
+    "aicte",
+    "aiu",
+    "government of karnataka",
+    "vtu",
+    "affiliation",
+    "recognised"
+   ],
+   "en": {
+    "q": [
+     "who approves the college",
+     "is it approved by the government",
+     "aiu approval",
+     "approved by karnataka government"
+    ],
+    "a": "The college's rankings and recognitions page lists approval by the Government of Karnataka, the All India Council for Technical Education (AICTE), New Delhi, and the Association of Indian Universities (AIU), with affiliation to Visvesvaraya Technological University (VTU). As published on hkbk.edu.in."
+   },
+   "conflicts": [],
+   "section": "about"
+  },
+  {
+   "id": "campus-news",
+   "category": "faq",
+   "tags": [
+    "news",
+    "events",
+    "latest",
+    "fdp",
+    "workshop",
+    "yoga day",
+    "abhinandana",
+    "faculty development"
+   ],
+   "en": {
+    "q": [
+     "any recent news",
+     "what events happened lately",
+     "latest campus news",
+     "any workshops recently",
+     "what is abhinandana",
+     "yoga day event"
+    ],
+    "a": "Recent campus news headlines on hkbk.edu.in: 07 Dec 2025 - a six-day offline Faculty Development Program on digital footprints, tracing cyber crime through forensics. 12 Sep 2025 - advancing healthcare clinical analysis through deep learning and generative AI. 10 Jul 2025 - an AICTE sponsored three-day offline Faculty Development Programme, Digital Fortress: Empowering Educators in Cyber Defence (AICTE-VAANI scheme), in Kannada. 24 Jun 2025 - Abhinandana '25, congratulating 300 students from Haveri District on their SSLC and PUC results. 21 Jun 2025 - International Yoga Day 2025."
+   },
+   "conflicts": [],
+   "section": "life"
   }
  ],
  "fallbacks": {
