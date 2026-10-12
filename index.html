@@ -119,9 +119,9 @@ footer{padding:50px 56px;display:flex;justify-content:space-between;font-size:13
 <script>if(location.search.includes('static')){document.body.insertAdjacentHTML('beforeend','<style>.rv{transition:none!important}</style>');}if(location.search.includes('static'))document.querySelectorAll('.rv').forEach(e=>e.classList.add('in'));const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});document.querySelectorAll('.rv').forEach((e,i)=>{e.style.transitionDelay=(i%4)*80+'ms';io.observe(e)})</script>
 <button class="launcher" id="launcher" type="button" data-open-chat><span class="launcher__dot" aria-hidden="true"></span> Ask HKBK</button>
 <div class="chatHost" id="chatHost"></div>
-<script src="campus-explorer/data/knowledge-base.js"></script>
-<script src="campus-explorer/js/chatbot-engine.js"></script>
-<script src="campus-explorer/js/chatbot-ui.js"></script>
+<script src="chatbot/data/knowledge-base.js"></script>
+<script src="chatbot/js/chatbot-engine.js"></script>
+<script src="chatbot/js/chatbot-ui.js"></script>
 <script>
 (function(){var host=document.getElementById("chatHost"),launcher=document.getElementById("launcher");
 var ui=new window.HKBKChatUI.ChatUI({mount:host,onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false}}).init(window.HKBK_KB);

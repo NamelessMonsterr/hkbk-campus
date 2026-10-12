@@ -50,7 +50,7 @@ Where published sources disagree (for example the highest placement package), th
 |---|---|
 | Knowledge base | 41 entries: courses, admissions, fees, scholarships, placements, campus, hostel, contact, colleges, department intake history, rankings, news |
 | Sourcing | Answers carry the wording "as published by the college" and name the page |
-| Engine tests | 49 passing (`node campus-explorer/tests/engine-test.js`) |
+| Engine tests | 49 passing (`node chatbot/tests/engine-test.js`) |
 | Runs on | Any modern browser, offline |
 
 The approach follows the paper *Intelligent Chatbot For College Inquiry And Support: Using Fuzzy Matching And LLM* (Dept. of CSE, HKBK College of Engineering). This build keeps the fuzzy matching and retrieval and leaves out the LLM.
@@ -69,7 +69,7 @@ index.html                    home page, plain HTML + CSS + JS
    |     frames4_1.bin        frames, pack 2
    |     lib/                 Pannellum, for the optional 360 view
    |
-   +-- campus-explorer/       the assistant
+   +-- chatbot/               the assistant
          js/chatbot-engine.js   fuzzy match + TF-IDF retrieval
          js/chatbot-ui.js       chat widget
          data/knowledge-base.js the knowledge base
@@ -94,7 +94,7 @@ Then open http://localhost:8000/ for the home page, or http://localhost:8000/wal
 Run the assistant's tests (Node needed):
 
 ```bash
-cd campus-explorer
+cd chatbot
 node tests/engine-test.js
 ```
 
@@ -107,7 +107,7 @@ node tests/engine-test.js
 | `index.html` | Home page |
 | `assets/` | Home page photos and the chat widget stylesheet |
 | `walk/` | Campus walk (see `walk/README.md`) |
-| `campus-explorer/` | The assistant: engine, UI, knowledge base, tests (see its README) |
+| `chatbot/` | The assistant: engine, UI, knowledge base, tests (see its README) |
 
 ---
 
