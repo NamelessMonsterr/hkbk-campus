@@ -114,14 +114,14 @@ var tt=null;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('
 function ui(){
   var s=chapterOf(cur),atStop=s&&Math.abs(s.step-cur)<=1;
   $('sname').textContent=s?s.name:'';
-  $('ssub').textContent='Step '+(cur+1)+' of '+N;
+  $('ssub').textContent='Step '+ST[cur].n+' of '+N;
   $('cap').textContent='Source: '+ST[cur].c.replace('_',' ')+' \u00b7 sampled still '+(ST[cur].t+1)+(ST[cur].cut?' \u00b7 discontinuous from previous frame':'');
   $('fill').style.width=(cur/(N-1)*100)+'%';
   $('cf').classList.toggle('off',cur>=N-1);$('pr').classList.toggle('off',cur>=N-1);$('pl').classList.toggle('off',cur<=0);
   document.querySelectorAll('.tick').forEach(function(e){e.classList.toggle('on',s&&e.dataset.id===s.id)});
   var p=posAt(cur);$('me').style.left=p.x+'%';$('me').style.top=p.y+'%';recenter(p);
   var b=$('b360');b.style.display=(atStop&&s.pano)?'inline-block':'none';
-  if(started)history.replaceState(null,'','#'+(cur+1));
+  if(started)history.replaceState(null,'','#'+ST[cur].n);
 }
 function endOfWalk(){stop();toast('End of walk - tap Walk to replay')}
 function fwd(){if(cur<N-1)setStep(cur+1,1);else endOfWalk()}
@@ -164,7 +164,7 @@ function begin(i){started=true;$('intro').style.display='none';ensure(i).then(fu
 $('go').onclick=function(){begin(parseInt(chap.value,10)||0)};
 $('back').onclick=function(){stop();started=false;$('intro').style.display='flex'};
 var q=new URLSearchParams(location.search),h=parseInt(location.hash.slice(1),10);
-var s0=0;if(h>0&&h<=N)s0=h-1;var st=parseInt(q.get('start'),10);if(st>0&&st<=N)s0=st-1;
+var s0=0;if(h>0&&h<=N){for(var qi=0;qi<N;qi++)if(ST[qi].n===h){s0=qi;break}}var st=parseInt(q.get('start'),10);if(st>0&&st<=N){for(var qj=0;qj<N;qj++)if(ST[qj].n===st){s0=qj;break}}
 if(q.get('stop')){var ss=stops.filter(function(s){return s.id===q.get('stop')})[0];if(ss&&ss.step!=null)s0=ss.step}
 loadBin(ST[0].b).then(function(){$('loading').style.opacity='0';setTimeout(function(){$('loading').style.display='none'},400);
   if(!q.get('intro')){chap.value=s0;begin(s0)}
