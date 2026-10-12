@@ -157,7 +157,7 @@ $('b360').onclick=function(){var s=chapterOf(cur);if(!s||!s.pano)return;$('p360'
 function close360(){$('p360').style.display='none';if(pv){pv.destroy();pv=null}}
 $('x360').onclick=close360;
 // intro
-var chap=$('chap');anch.forEach(function(s){var o=document.createElement('option');o.value=s.step;o.textContent=s.n+'. '+s.name;chap.appendChild(o)});
+var chap=$('chap');anch.slice().sort(function(a,b){return a.n-b.n}).forEach(function(s){var o=document.createElement('option');o.value=s.step;o.textContent=s.n+'. '+s.name;chap.appendChild(o)});
 var miss=stops.filter(function(s){return s.step==null}).map(function(s){return s.name});
 $('note').textContent=miss.length?miss.join(', ')+': no footage yet.':'';
 function begin(i){started=true;$('intro').style.display='none';ensure(i).then(function(u){L[0].onload=function(){L[0].classList.add('show');$('bg').style.backgroundImage='url('+u+')'};L[0].src=u;cur=i;top=0;ui();pre(i)})}
