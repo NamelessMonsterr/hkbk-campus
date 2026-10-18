@@ -44,6 +44,8 @@
 	ChatUI.prototype.build = function () {
 		var self = this;
 		var root = el("div", "chat");
+		/* non-modal dialog by design: an overlay chat, not a modal - the page
+		 * behind stays interactive, so no aria-modal and no focus trap */
 		root.setAttribute("role", "dialog");
 		root.setAttribute("aria-label", "Ask HKBK assistant");
 		root.setAttribute("aria-hidden", "true");
@@ -446,6 +448,16 @@
 			wrap.appendChild(b);
 		});
 		body.appendChild(wrap);
+		/* the "export or delete any time" promise needs a visible path:
+		 * link straight to the admin view that does both */
+		if (this.options.privacyHref) {
+			var link = el("a", null, "Export or delete your data");
+			link.href = this.options.privacyHref;
+			link.target = "_blank";
+			link.rel = "noopener";
+			link.style.cssText = "display:inline-block;margin-top:8px;font-size:12px";
+			body.appendChild(link);
+		}
 		row.appendChild(body);
 		this.log.appendChild(row);
 		this.scroll();

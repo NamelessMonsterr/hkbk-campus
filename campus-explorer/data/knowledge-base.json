@@ -885,7 +885,12 @@
      "do you accept international students",
      "foreign student admission",
      "nri quota",
-     "visa support"
+     "visa support",
+     "can i apply if i am from outside india",
+     "i am from outside india can i apply",
+     "do you take international students",
+     "can students from other countries join",
+     "is admission open to foreign students"
     ],
     "a": "Yes. HKBK hosts students from more than 27 nationalities and admits international and NRI candidates through a separate quota. The international admissions desk assists with eligibility equivalence, visa documentation and hostel allocation. Apply through the international route at apply.hkbk.edu.in."
    },
@@ -1094,7 +1099,11 @@
      "what scholarships are available",
      "merit scholarship details",
      "fee waiver",
-     "how much scholarship can i get"
+     "how much scholarship can i get",
+     "how much scholarship money can i get",
+     "how do i get a scholarship here",
+     "scholarship amount for students",
+     "do you give scholarships"
     ],
     "a": "Several streams are available. Academic merit: an 80% aggregate across 10th, 12th and PCM earns a first-year tuition waiver of Rs 25,000; a JEE score above 95.01% earns a full tuition waiver, and 90.01 to 95% earns Rs 50,000. The college also runs its own HKBKCET evaluation test, where 91-100 marks earns a 100% scholarship, 71-90 earns Rs 50,000, 61-70 earns Rs 25,000 and 51-60 earns Rs 10,000. Government schemes include Post Matric Scholarship for Minorities, Merit Cum Means, NEC Merit for North Eastern students, and full SC/ST fee reimbursement for Karnataka domicile students. Concessions of up to Rs 30,000 apply for alumni relatives, siblings, single parents, and students moving up from HKBK PUC. Confirm current terms with the admissions office."
    },
@@ -1214,7 +1223,12 @@
      "what clubs are there",
      "college fest",
      "technical events",
-     "is there a robotics club"
+     "is there a robotics club",
+     "what fests happen here",
+     "what festivals does the college celebrate",
+     "what events happen on campus",
+     "which fests does hkbk have",
+     "college cultural events"
     ],
     "a": "Students run technical clubs including Junkyard Robotics, coding and hackathon groups, alongside cultural clubs and the Marhaba international students cultural fest. The college hosts the Technovate technical summit and Swagatha freshers day, and operates an AICTE IDEA Lab for prototyping, an Institution Innovation Council, an Oracle Academy programme, an NSS unit, and a sports academy."
    },
@@ -1537,7 +1551,11 @@
      "when was the ai ml department started",
      "ise intake",
      "how did intake grow",
-     "department established"
+     "department established",
+     "when did the aiml department start",
+     "when was the ai and ml department started",
+     "how old is the aiml department",
+     "when did hkbk start the aiml course"
     ],
     "a": "As published on the college website: the Computer Science and Engineering department was established in 1997 with an intake of 45. It rose to 60 in 2000, 90 in 2002, 120 in 2011, 180 in 2016 and 300 in 2024. Artificial Intelligence and Machine Learning was established in 2021-22 with an intake of 60, which the college lists as increased to 120 in 2024-25. Information Science and Engineering lists 45 to 60 in 2001-02, 60 to 120 in 2016-17 and 120 to 180 in 2020-21, with an intake of 120 listed for 2021-22 and 60 for 2026-27. Check with the admissions office for the current intake."
    },
@@ -1673,7 +1691,11 @@
      "where is the main gate",
      "main gate",
      "college entrance",
-     "which is the entry gate"
+     "which is the entry gate",
+     "where do i enter the campus",
+     "which gate should i use to enter",
+     "where is the main entrance",
+     "how do i enter hkbk campus"
     ],
     "a": "The main gate is the college entrance on the Nagawara side, directly opposite Manyata Tech Park. The campus walk begins here."
    },

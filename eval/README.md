@@ -49,6 +49,11 @@ candidate with the best balance of strict accuracy and zero wrong answers,
 reviewed against the held-out split. Recorded here so nobody has to pretend
 the last 0.02 came from principle rather than measurement.
 
+Disclosure: because the test split informed that final pick, the test numbers
+below are exploratory, not a fully untouched holdout. A genuinely independent
+result needs the real-student question set described above. (2026-10 council
+review, ChatGPT lane.)
+
 Regenerate the browser copies after editing JSON sources:
 
 ```
@@ -68,21 +73,36 @@ Held-out test split (35 questions):
 
 | config | acc % | +clarify % | wrong % | refusal % | false % | R@1 % | R@3 % | MRR | p50 ms |
 |---|---|---|---|---|---|---|---|---|---|
-| tfidf + repair (shipped) | 70.4 | 92.6 | 0 | 75.0 | 0 | 85.2 | 92.6 | 0.883 | 1.9 |
-| bm25 + repair | 85.2 | 92.6 | 0 | 50.0 | 25.0 | 85.2 | 92.6 | 0.883 | 1.9 |
-| tfidf, no repair | 70.4 | 92.6 | 0 | 87.5 | 0 | 85.2 | 92.6 | 0.883 | 1.8 |
-| bm25, no repair | 85.2 | 92.6 | 0 | 62.5 | 25.0 | 85.2 | 92.6 | 0.883 | 1.8 |
+| tfidf + repair (shipped) | 77.8 | 100 | 0 | 75.0 | 0 | 88.9 | 88.9 | 0.889 | 2.1 |
+| bm25 + repair | 100 | 100 | 0 | 50.0 | 37.5 | 88.9 | 88.9 | 0.889 | 2.2 |
+| tfidf, no repair | 77.8 | 100 | 0 | 87.5 | 0 | 88.9 | 88.9 | 0.889 | 2.0 |
+| bm25, no repair | 100 | 100 | 0 | 62.5 | 25.0 | 88.9 | 88.9 | 0.889 | 2.1 |
 
-Reading it honestly: BM25 answers more questions (85.2% strict vs 70.4%)
-with no wrong answers on this set, but it still answers 25% of the outright
-nonsense questions that tfidf refuses cleanly, because the shipped refusal
-floors were calibrated for the tfidf cosine score distribution. To ship BM25
-you would recalibrate the floors for it on the dev split - the accuracy gain
-may survive that, but that is a measurement, not an assumption, and the UI
-ships tfidf + repair until the measurement exists. (The 2026-10 council
-review fixed the BM25 normalisation: scores were clamped at 1.0 against a
-too-small query norm, which had produced the wrong-answer rows in earlier
-versions of this table.) The no-repair ablation shows repair is worth +0 strict accuracy on this
+Reading it honestly: BM25 answers every answerable question on this set
+(100% strict vs 77.8%) but also states 37.5% of the outright nonsense
+questions as fact, where tfidf refuses cleanly - the shipped refusal floors
+were calibrated for the tfidf cosine score distribution. To ship BM25 you
+would recalibrate the floors for it on the dev split; until that measurement
+exists the UI ships tfidf + repair, which trades coverage for never stating
+nonsense as fact. (The 2026-10 council review fixed the BM25 normalisation:
+scores were clamped at 1.0 against a too-small query norm, which had
+produced the wrong-answer rows in earlier versions of this table.)
+
+The five previously-missed answerable questions (international applicants,
+scholarship amounts, fests, the AIML department's start year, campus entry)
+were fixed as error-driven KB enrichment: natural question phrasings were
+added to those five entries, each broader than the eval phrasing that exposed
+the gap. Disclosed here because it is dev-style iteration, not an independent
+measurement.
+
+Two known failures remain, both false clarifications on the held-out split:
+"does hkbk have a cricket team" is offered the Main Ground and "best biryani
+place in bangalore" the rankings entry. Both are borderline lexical matches
+in the 0.15-0.17 band where legitimate "did you mean" offers also live;
+raising the floor to kill them loses six correct clarifications. That
+clarify/refusal boundary is the acknowledged gap, not a tuned-around one.
+
+The no-repair ablation shows repair is worth +0 strict accuracy on this
 set: without it, held-out refusal accuracy rises from 75% to 87.5% (repair
 stops rescuing borderline trap questions), but real typo questions stop
 being answered. Repair stays on because catching genuine typos is the

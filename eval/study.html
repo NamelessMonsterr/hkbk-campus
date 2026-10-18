@@ -184,7 +184,7 @@
 				stage.appendChild(el("p", "sub", "Ask the chatbot below. Click \u201CFound it\u201D as soon as you have the answer."));
 				var host = el("div"); host.id = "chatHost";
 				stage.appendChild(host);
-				var studyUi = new window.HKBKChatUI.ChatUI({ mount: host }).init(window.HKBK_KB);
+				var studyUi = new window.HKBKChatUI.ChatUI({ mount: host, privacyHref: "admin.html" }).init(window.HKBK_KB);
 				studyUi.open(); /* init alone leaves aria-hidden=true on a visible chat */
 			} else {
 				var a = el("a", null, "Open the college website in a new tab");

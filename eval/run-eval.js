@@ -65,6 +65,15 @@ function failures(results) {
 function printFailures(results) {
 	var bad = failures(results);
 	if (!bad.length) { console.log("\nno failing questions"); return; }
+	/* failures are not equal: a wrong answer or a nonsense question answered
+	 * as fact is dangerous, a missed answer is a recall gap, a false clarify
+	 * is a boundary annoyance. Say which is which. */
+	var byClass = {};
+	bad.forEach(function (b) { byClass[b.outcome] = (byClass[b.outcome] || 0) + 1; });
+	console.log("\nfailure classes: " + Object.keys(byClass).sort().map(function (k) {
+		return k + "=" + byClass[k];
+	}).join(" ") +
+		((byClass.wrong_answer || byClass.false_answer) ? "  <-- RELEASE BLOCKER" : "  (no wrong/false answers: not a release blocker)"));
 	console.log("\n== failing questions (" + bad.length + ") " + "=".repeat(42));
 	bad.forEach(function (r) {
 		console.log("  [" + r.outcome + "] " + r.q +

@@ -322,6 +322,19 @@ section("Directions stops mirror the filmed walk");
 		JSON.stringify(kb) === JSON.stringify(kbInFilmOrder));
 })();
 
+section("Generated knowledge-base.js matches knowledge-base.json");
+
+(function () {
+	/* the .js is generated from the .json (README one-liner); a hand edit on
+	 * either side makes the site and the tests measure different KBs */
+	var fs2 = require("fs");
+	var path2 = require("path");
+	var j = fs2.readFileSync(path2.join(__dirname, "..", "data", "knowledge-base.json"), "utf8");
+	var js = fs2.readFileSync(path2.join(__dirname, "..", "data", "knowledge-base.js"), "utf8");
+	var payload = js.replace(/^\/\* GENERATED[\s\S]*?\*\/\s*window\.HKBK_KB = /, "").replace(/;\s*$/, "");
+	check("knowledge-base.js is in sync with knowledge-base.json", payload === j);
+})();
+
 section("Result");
 console.log("  " + pass + " passed, " + fail + " failed");
 process.exit(fail === 0 ? 0 : 1);
