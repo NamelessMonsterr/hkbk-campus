@@ -41,6 +41,13 @@
 	timed with performance.now(). No server, no network, no external model - the whole pipeline
 	(tokenise, fuzzy repair, TF-IDF retrieval, calibrated refusal) runs in the page.</p>
 
+	<h2>Knowledge base freshness</h2>
+	<table id="freshTable"></table>
+	<p class="note">Dates are when each entry was last changed in the project repository,
+	as stated in the KB itself - not a re-verification with the college. Entries whose
+	figures have conflicting published values are listed with every published value;
+	the chatbot answers them as a sourced range, never as one confident number.</p>
+
 	<h2>The whole system, in files</h2>
 	<table id="fileTable"></table>
 	<p class="note">Retrieval engine, UI, and the full knowledge base. There is no backend
@@ -114,6 +121,26 @@
 		if (/knowledge-base\.js/.test(r.name)) kbSize = r.decodedBodySize || 0;
 		if (/chatbot-engine\.js/.test(r.name)) engSize = r.decodedBodySize || 0;
 	});
+	/* ---- KB freshness: version, date spread, conflict report ---- */
+	var kbd = window.HKBK_KB;
+	var dates = {};
+	kbd.entries.forEach(function (e) { dates[e.updated || "?"] = (dates[e.updated || "?"] || 0) + 1; });
+	row("freshTable", ["measure", "value"], true);
+	row("freshTable", ["KB version", "v" + kbd.meta.version]);
+	Object.keys(dates).sort().forEach(function (d) {
+		row("freshTable", ["entries last changed " + d, String(dates[d])]);
+	});
+	var registry = (kbd.meta && kbd.meta.conflicts) || {};
+	kbd.entries.forEach(function (e) {
+		if (!e.conflicts || !e.conflicts.length) return;
+		row("freshTable", ["conflict: " + e.id, e.conflicts.map(function (k) {
+			var vals = (registry[k] || []).map(function (v) {
+				return typeof v === "string" ? v : (v.value + (v.source ? " (" + v.source + ")" : ""));
+			});
+			return k.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase() + ": " + vals.join(" vs ");
+		}).join("; ")]);
+	});
+
 	row("fileTable", ["file", "uncompressed"], true);
 	row("fileTable", ["knowledge base (v" + window.HKBK_KB.meta.version + ", " + st.entries + " entries)", kb(kbSize)]);
 	row("fileTable", ["retrieval engine (chatbot-engine.js)", kb(engSize)]);
