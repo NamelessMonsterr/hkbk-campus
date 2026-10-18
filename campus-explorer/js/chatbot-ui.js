@@ -243,6 +243,58 @@
 		this.scroll();
 	};
 
+	/* Provenance line under every answer: which KB record answered, when that
+	 * record was last changed, and the KB version. The date is the repository
+	 * change date of the entry, not a re-verification with the college - the
+	 * KB meta says so, and the freshness page (item 10) explains it. */
+	ChatUI.prototype.addSource = function (row, source) {
+		if (!source) return;
+		var bits = ["Source: " + labelise(source.category || "knowledge base")];
+		if (source.updated) bits.push("updated " + source.updated);
+		if (source.kbVersion) bits.push("KB v" + source.kbVersion);
+		row.appendChild(el("div", "msg__source", bits.join(" \u00B7 ")));
+		this.scroll();
+	};
+
+	/* Thumbs up/down on answers. Ratings stay on this device (localStorage
+	 * key hkbk_ratings): entry id, category and outcome only - never the raw
+	 * question text. The export/admin view is the usage-log work (item 8). */
+	ChatUI.prototype.addRating = function (row, res) {
+		var self = this;
+		var wrap = el("div", "msg__rate");
+		wrap.appendChild(el("span", "msg__rateLabel", "Was this answer helpful?"));
+		var done = false;
+		function rate(value, btn) {
+			if (done) return;
+			done = true;
+			try {
+				var all = JSON.parse(global.localStorage.getItem("hkbk_ratings") || "[]");
+				all.push({
+					ts: new Date().toISOString(),
+					type: "rating",
+					rating: value,
+					entryId: res.entryId || null,
+					category: res.category || null,
+					outcome: res.type
+				});
+				global.localStorage.setItem("hkbk_ratings", JSON.stringify(all));
+			} catch (e) { /* storage full or blocked: rating is lost, chat is not */ }
+			wrap.innerHTML = "";
+			wrap.appendChild(el("span", "msg__rateThanks",
+				value === "up" ? "Thanks - noted as helpful." : "Thanks - noted as not helpful."));
+		}
+		[["up", "\uD83D\uDC4D", "Rate this answer helpful"],
+		 ["down", "\uD83D\uDC4E", "Rate this answer not helpful"]].forEach(function (spec) {
+			var b = el("button", "msg__rateBtn", spec[1]);
+			b.type = "button";
+			b.setAttribute("aria-label", spec[2]);
+			b.addEventListener("click", function () { rate(spec[0], b); });
+			wrap.appendChild(b);
+		});
+		row.appendChild(wrap);
+		this.scroll();
+	};
+
 	ChatUI.prototype.renderChips = function () {
 		var self = this;
 		this.chips.innerHTML = "";
@@ -311,6 +363,10 @@
 			}
 			if (res.type === "answer" && res.walkStop) {
 				self.addWalk(row, res.walkStop, res.walkStopName);
+			}
+			if (res.type === "answer" && res.source) {
+				self.addSource(row, res.source);
+				self.addRating(row, res);
 			}
 
 			self.lastTrace = {

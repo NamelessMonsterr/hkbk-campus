@@ -851,6 +851,14 @@
 			conflict: conflict,
 			sources: sources,
 			ranking: ranking,
+			// provenance for the UI's source line: which KB record answered,
+			// when that record was last changed, and the KB version
+			source: {
+				entryId: entry.id,
+				category: entry.category,
+				updated: entry.updated || null,
+				kbVersion: (this.kb.meta && this.kb.meta.version) || null
+			},
 			trace: trace
 		};
 	};

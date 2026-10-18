@@ -237,6 +237,12 @@ check("hook is settable", (function () {
 	var r5 = df.ask("tell me about hostel rooms");
 	check("answer exposes retrieval ranking for rank metrics",
 		Array.isArray(r5.ranking) && r5.ranking.length > 0 && r5.ranking[0] === r5.entryId);
+
+	check("answer exposes source provenance (2026-10)",
+		r5.source && r5.source.entryId === r5.entryId && r5.source.category === "fees" &&
+		/^\d{4}-\d{2}-\d{2}$/.test(r5.source.updated) && r5.source.kbVersion === kb.meta.version);
+	check("every KB entry carries an updated date",
+		kb.entries.every(function (e) { return /^\d{4}-\d{2}-\d{2}$/.test(e.updated || ""); }));
 })();
 
 section("Result");

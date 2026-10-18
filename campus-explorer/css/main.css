@@ -784,3 +784,43 @@ a { color: inherit; }
 	text-decoration: none; background: transparent;
 }
 .msg__walk:hover { background: var(--fg); color: var(--bg); }
+
+
+/* provenance line under answers (2026-10) */
+.msg__source {
+	font-size: 0.72rem;
+	color: #6b7280;
+	margin-top: 6px;
+	letter-spacing: 0.01em;
+}
+
+/* thumbs up/down rating (2026-10) */
+.msg__rate {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 4px;
+}
+.msg__rateLabel {
+	font-size: 0.72rem;
+	color: #6b7280;
+}
+.msg__rateBtn {
+	border: 1px solid #d1d5db;
+	background: #ffffff;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	line-height: 1;
+	padding: 4px 7px;
+	cursor: pointer;
+}
+.msg__rateBtn:hover, .msg__rateBtn:focus-visible {
+	background: #eef2ff;
+	border-color: #6366f1;
+	outline: none;
+}
+.msg__rateThanks {
+	font-size: 0.72rem;
+	color: #15803d;
+}
+

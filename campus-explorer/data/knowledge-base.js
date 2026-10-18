@@ -361,7 +361,8 @@ window.HKBK_KB = {
     "anchor": "contact",
     "label": "Contact"
    }
-  }
+  },
+  "updatedNote": "Per-entry 'updated' dates are the dates the entry was added or last changed in the project repository (2026-10-12 first upload, 2026-10-18 location + refusal work). They describe the KB record, not a re-verification with the college."
  },
  "categories": {
   "website": "Website URLs",
@@ -421,7 +422,8 @@ window.HKBK_KB = {
     "campusArea",
     "established"
    ],
-   "section": "about"
+   "section": "about",
+   "updated": "2026-10-12"
   },
   {
    "id": "courses-offered",
@@ -464,7 +466,8 @@ window.HKBK_KB = {
    "conflicts": [
     "branchesCurrentlyRunning"
    ],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-18"
   },
   {
    "id": "fees-btech",
@@ -514,7 +517,8 @@ window.HKBK_KB = {
     "btechTotalFee",
     "btechFirstYearFee"
    ],
-   "section": "fees"
+   "section": "fees",
+   "updated": "2026-10-12"
   },
   {
    "id": "fees-hostel",
@@ -551,7 +555,8 @@ window.HKBK_KB = {
    "conflicts": [
     "hostelFee"
    ],
-   "section": "hostel"
+   "section": "hostel",
+   "updated": "2026-10-18"
   },
   {
    "id": "admission-process",
@@ -590,7 +595,8 @@ window.HKBK_KB = {
     ],
     "a": "बी.ई. में प्रवेश कर्नाटक के उम्मीदवारों के लिए KCET या COMEDK से और अन्य के लिए मैनेजमेंट कोटा से होता है। apply.hkbk.edu.in पर ऑनलाइन आवेदन करें, अंकपत्र और रैंक कार्ड जमा करें, दस्तावेज़ सत्यापन कराएं और फीस देकर सीट पक्की करें।"
    },
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-12"
   },
   {
    "id": "eligibility",
@@ -623,7 +629,8 @@ window.HKBK_KB = {
     ],
     "a": "ಬಿ.ಇ. ಪ್ರವೇಶಕ್ಕೆ ಭೌತಶಾಸ್ತ್ರ ಮತ್ತು ಗಣಿತ ಕಡ್ಡಾಯ ವಿಷಯಗಳಾಗಿ 10+2 ಉತ್ತೀರ್ಣರಾಗಿರಬೇಕು, ಜೊತೆಗೆ ರಸಾಯನಶಾಸ್ತ್ರ, ಜೀವಶಾಸ್ತ್ರ, ಜೈವಿಕ ತಂತ್ರಜ್ಞಾನ, ಕಂಪ್ಯೂಟರ್ ಸೈನ್ಸ್ ಅಥವಾ ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್ ಒಂದು ವಿಷಯ. ಸಾಮಾನ್ಯ ವರ್ಗಕ್ಕೆ ಕನಿಷ್ಠ 45% ಮತ್ತು ಮೀಸಲು ವರ್ಗಕ್ಕೆ 40% ಅಂಕ ಬೇಕು."
    },
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-18"
   },
   {
    "id": "placements",
@@ -661,7 +668,8 @@ window.HKBK_KB = {
     "recruiterCount",
     "averagePackage"
    ],
-   "section": "placements"
+   "section": "placements",
+   "updated": "2026-10-12"
   },
   {
    "id": "cutoff",
@@ -694,7 +702,8 @@ window.HKBK_KB = {
     "kcetCutoffCSE",
     "kcetCutoffRangeCSE"
    ],
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-12"
   },
   {
    "id": "scholarships",
@@ -731,7 +740,8 @@ window.HKBK_KB = {
     ],
     "a": "ವಿದ್ಯಾರ್ಥಿಗಳು ಕರ್ನಾಟಕ ಸರ್ಕಾರದ ವಿದ್ಯಾರ್ಥಿ ವೇತನ, ಕೇಂದ್ರ ಸರ್ಕಾರದ ಯೋಜನೆಗಳು, ಅಲ್ಪಸಂಖ್ಯಾತ ವಿದ್ಯಾರ್ಥಿ ವೇತನ ಮತ್ತು ಸಂಸ್ಥೆಯ ಪ್ರತಿಭಾ ಪುರಸ್ಕಾರಗಳಿಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಬಹುದು. ಶಿಕ್ಷಣ ಸಾಲದ ದಾಖಲೆಗಳಿಗೂ ಕಚೇರಿ ಸಹಾಯ ಮಾಡುತ್ತದೆ."
    },
-   "section": "scholarships"
+   "section": "scholarships",
+   "updated": "2026-10-12"
   },
   {
    "id": "campus-facilities",
@@ -770,7 +780,8 @@ window.HKBK_KB = {
    "conflicts": [
     "campusArea"
    ],
-   "section": "campus"
+   "section": "campus",
+   "updated": "2026-10-18"
   },
   {
    "id": "contact",
@@ -819,7 +830,8 @@ window.HKBK_KB = {
    "conflicts": [
     "generalPhone"
    ],
-   "section": "contact"
+   "section": "contact",
+   "updated": "2026-10-12"
   },
   {
    "id": "accreditation",
@@ -855,7 +867,8 @@ window.HKBK_KB = {
    "conflicts": [
     "naacGrade"
    ],
-   "section": "about"
+   "section": "about",
+   "updated": "2026-10-12"
   },
   {
    "id": "international-students",
@@ -884,7 +897,8 @@ window.HKBK_KB = {
     ],
     "a": "ಹೌದು. ಎಚ್‌ಕೆಬಿಕೆಯಲ್ಲಿ 27ಕ್ಕೂ ಹೆಚ್ಚು ರಾಷ್ಟ್ರೀಯತೆಗಳ ವಿದ್ಯಾರ್ಥಿಗಳಿದ್ದಾರೆ ಮತ್ತು ಅಂತರರಾಷ್ಟ್ರೀಯ ಹಾಗೂ ಎನ್‌ಆರ್‌ಐ ಅಭ್ಯರ್ಥಿಗಳಿಗೆ ಪ್ರತ್ಯೇಕ ಕೋಟಾ ಇದೆ. ವೀಸಾ ದಾಖಲೆ ಮತ್ತು ವಸತಿ ವ್ಯವಸ್ಥೆಗೆ ಸಹಾಯ ಸಿಗುತ್ತದೆ."
    },
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-12"
   },
   {
    "id": "cse-department",
@@ -912,7 +926,8 @@ window.HKBK_KB = {
     ],
     "a": "ಕಂಪ್ಯೂಟರ್ ಸೈನ್ಸ್ ಮತ್ತು ಎಂಜಿನಿಯರಿಂಗ್‌ನಲ್ಲಿ ಪ್ರೋಗ್ರಾಮಿಂಗ್, ದತ್ತ ರಚನೆಗಳು, ಅಲ್ಗಾರಿದಂಗಳು, ಕಾರ್ಯಾಚರಣಾ ವ್ಯವಸ್ಥೆಗಳು, ದತ್ತಸಂಚಯ, ಜಾಲಬಂಧ, ತಂತ್ರಾಂಶ ಎಂಜಿನಿಯರಿಂಗ್ ಮತ್ತು ಯಂತ್ರ ಕಲಿಕೆ ಕಲಿಸಲಾಗುತ್ತದೆ. ಇದು ಕಾಲೇಜಿನ ಅತಿ ಹೆಚ್ಚು ಬೇಡಿಕೆಯ ವಿಭಾಗ."
    },
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "aiml-department",
@@ -940,7 +955,8 @@ window.HKBK_KB = {
     ],
     "a": "ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆ ಮತ್ತು ಯಂತ್ರ ಕಲಿಕೆ ವಿಭಾಗದಲ್ಲಿ ಯಂತ್ರ ಕಲಿಕೆ, ಆಳ ಕಲಿಕೆ, ಸ್ವಾಭಾವಿಕ ಭಾಷಾ ಸಂಸ್ಕರಣೆ, ಗಣಕ ದೃಷ್ಟಿ ಮತ್ತು ದತ್ತ ಎಂಜಿನಿಯರಿಂಗ್ ಕಲಿಸಲಾಗುತ್ತದೆ."
    },
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "documents-required",
@@ -968,7 +984,8 @@ window.HKBK_KB = {
     ],
     "a": "10ನೇ ಮತ್ತು 12ನೇ ತರಗತಿ ಅಂಕಪಟ್ಟಿ, ವರ್ಗಾವಣೆ ಪ್ರಮಾಣಪತ್ರ, ವಲಸೆ ಪ್ರಮಾಣಪತ್ರ, ಪ್ರವೇಶ ಪರೀಕ್ಷೆಯ ರ್‍ಯಾಂಕ್ ಕಾರ್ಡ್, ಜಾತಿ ಪ್ರಮಾಣಪತ್ರ, ಆಧಾರ್, ಭಾವಚಿತ್ರಗಳು ಮತ್ತು ಅಧ್ಯಯನ ಪ್ರಮಾಣಪತ್ರ ಬೇಕಾಗುತ್ತದೆ."
    },
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-12"
   },
   {
    "id": "student-life",
@@ -999,7 +1016,8 @@ window.HKBK_KB = {
     ],
     "a": "ವಿದ್ಯಾರ್ಥಿಗಳು ತಾಂತ್ರಿಕ ಮತ್ತು ಸಾಂಸ್ಕೃತಿಕ ಕ್ಲಬ್‌ಗಳು, ಕೋಡಿಂಗ್ ಮತ್ತು ರೊಬೊಟಿಕ್ಸ್ ತಂಡಗಳು, ಉದ್ಯಮಶೀಲತಾ ಘಟಕ, ಎನ್‌ಎಸ್‌ಎಸ್ ಮತ್ತು ಎನ್‌ಸಿಸಿ ಘಟಕಗಳನ್ನು ನಡೆಸುತ್ತಾರೆ. ವಾರ್ಷಿಕ ತಾಂತ್ರಿಕ ಸಮ್ಮೇಳನ ಮತ್ತು ಸಾಂಸ್ಕೃತಿಕ ಉತ್ಸವ ನಡೆಯುತ್ತದೆ."
    },
-   "section": "life"
+   "section": "life",
+   "updated": "2026-10-12"
   },
   {
    "id": "mba",
@@ -1030,7 +1048,8 @@ window.HKBK_KB = {
    "conflicts": [
     "mbaTotalFee"
    ],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "cet-code",
@@ -1056,7 +1075,8 @@ window.HKBK_KB = {
     ],
     "a": "HKBK ಕಾಲೇಜ್ ಆಫ್ ಎಂಜಿನಿಯರಿಂಗ್ ಕೆಲಸಿನ KCET ಕೋಡ್ E083."
    },
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-12"
   },
   {
    "id": "scholarships-detail",
@@ -1079,7 +1099,8 @@ window.HKBK_KB = {
     ],
     "a": "Several streams are available. Academic merit: an 80% aggregate across 10th, 12th and PCM earns a first-year tuition waiver of Rs 25,000; a JEE score above 95.01% earns a full tuition waiver, and 90.01 to 95% earns Rs 50,000. The college also runs its own HKBKCET evaluation test, where 91-100 marks earns a 100% scholarship, 71-90 earns Rs 50,000, 61-70 earns Rs 25,000 and 51-60 earns Rs 10,000. Government schemes include Post Matric Scholarship for Minorities, Merit Cum Means, NEC Merit for North Eastern students, and full SC/ST fee reimbursement for Karnataka domicile students. Concessions of up to Rs 30,000 apply for alumni relatives, siblings, single parents, and students moving up from HKBK PUC. Confirm current terms with the admissions office."
    },
-   "section": "scholarships"
+   "section": "scholarships",
+   "updated": "2026-10-12"
   },
   {
    "id": "quota-fee-difference",
@@ -1101,7 +1122,8 @@ window.HKBK_KB = {
     ],
     "a": "Fees depend heavily on the admission route. Reported indicative figures put a KCET-quota seat at roughly Rs 60,000 to Rs 1,00,000 per year, COMEDK noticeably higher, and a management-quota Computer Science seat at roughly Rs 2.83 to 3.25 lakh per year. These are third-party estimates and the published totals disagree with one another substantially, so treat them as a rough guide and confirm the current fee sheet with the admissions office before making any decision."
    },
-   "section": "fees"
+   "section": "fees",
+   "updated": "2026-10-12"
   },
   {
    "id": "transport",
@@ -1126,7 +1148,8 @@ window.HKBK_KB = {
     "airportDistance",
     "railwayDistance"
    ],
-   "section": "campus"
+   "section": "campus",
+   "updated": "2026-10-12"
   },
   {
    "id": "pg-research",
@@ -1151,7 +1174,8 @@ window.HKBK_KB = {
    "conflicts": [
     "mtechAndPhdFee"
    ],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "lateral-entry",
@@ -1170,7 +1194,8 @@ window.HKBK_KB = {
     ],
     "a": "Diploma holders are eligible for lateral entry directly into the second year of the B.E. programme, subject to Karnataka DCET counselling and seat availability. Contact admissions for the current lateral entry process."
    },
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-12"
   },
   {
    "id": "clubs-events",
@@ -1194,7 +1219,8 @@ window.HKBK_KB = {
     ],
     "a": "Students run technical clubs including Junkyard Robotics, coding and hackathon groups, alongside cultural clubs and the Marhaba international students cultural fest. The college hosts the Technovate technical summit and Swagatha freshers day, and operates an AICTE IDEA Lab for prototyping, an Institution Innovation Council, an Oracle Academy programme, an NSS unit, and a sports academy."
    },
-   "section": "life"
+   "section": "life",
+   "updated": "2026-10-12"
   },
   {
    "id": "leadership",
@@ -1219,7 +1245,8 @@ window.HKBK_KB = {
    "conflicts": [
     "principal"
    ],
-   "section": "about"
+   "section": "about",
+   "updated": "2026-10-12"
   },
   {
    "id": "student-reviews",
@@ -1241,7 +1268,8 @@ window.HKBK_KB = {
     ],
     "a": "Student reviews on public platforms are broadly positive about faculty, campus Wi-Fi and infrastructure, and placement support in CSE and ECE. Recurring criticisms are worth knowing too: some non-technical recruiters offer packages around Rs 2.6 to 2.8 LPA, the campus is compact with limited open playground space, there are fewer large-scale fests than at some peers, and placement outcomes in Mechanical and Civil are noticeably more competitive than in the computing branches. These are third-party opinions, not college statements."
    },
-   "section": "life"
+   "section": "life",
+   "updated": "2026-10-12"
   },
   {
    "id": "metro-connectivity",
@@ -1266,7 +1294,8 @@ window.HKBK_KB = {
     ],
     "a": "There is no operational metro station at Nagawara yet. The Namma Metro Pink Line, which includes a Nagawara station, is still under construction. For now the campus is reached by college bus, city bus, or road; it sits opposite Manyata Tech Park, about 7 km from Vidhana Soudha."
    },
-   "section": "campus"
+   "section": "campus",
+   "updated": "2026-10-12"
   },
   {
    "id": "external-scholarships",
@@ -1300,7 +1329,8 @@ window.HKBK_KB = {
     ],
     "a": "Alongside college scholarships, students commonly apply for AICTE Pragati for girl students, AICTE Saksham for specially-abled students, the FAEA scholarship, Karnataka Vidyasiri, Post-Matric scholarships for SC, ST, OBC and minority candidates, the Reliance Foundation undergraduate scholarship, and HDFC Parivartan educational crisis support. Eligibility and deadlines are set by each scheme, not by the college; the office assists with documentation."
    },
-   "section": "scholarships"
+   "section": "scholarships",
+   "updated": "2026-10-12"
   },
   {
    "id": "seats-intake",
@@ -1319,7 +1349,8 @@ window.HKBK_KB = {
     ],
     "a": "CSE and AI and ML each carry about 120 sanctioned seats. Total undergraduate engineering intake is reported at roughly 840 seats across branches, with postgraduate intake near 102. Sanctioned intake is revised by AICTE and VTU each year, so confirm the current figure with admissions."
    },
-   "section": "admissions"
+   "section": "admissions",
+   "updated": "2026-10-12"
   },
   {
    "id": "faculty-strength",
@@ -1341,7 +1372,8 @@ window.HKBK_KB = {
    "conflicts": [
     "facultyCount"
    ],
-   "section": "about"
+   "section": "about",
+   "updated": "2026-10-12"
   },
   {
    "id": "canteen-food",
@@ -1368,7 +1400,8 @@ window.HKBK_KB = {
     ],
     "a": "There is a canteen on campus, and the Arogya outlet in it is well known among students. Hostel residents additionally have an in-house mess serving South Indian vegetarian and non-vegetarian food. Menu and prices change through the year, so ask at the counter for current rates."
    },
-   "section": "campus"
+   "section": "campus",
+   "updated": "2026-10-12"
   },
   {
    "id": "colleges-overview",
@@ -1395,7 +1428,8 @@ window.HKBK_KB = {
     "a": "The HKBK Group of Institutions lists six colleges on its website: HKBK College of Engineering, HKBK Degree College, HKBK College of Physiotherapy, HKBK College of Health Science, HKBK Pre-University (PUC) and HKBK Evening Degree College. The MBA and the school of business are linked to ONESB. As published on hkbk.edu.in."
    },
    "conflicts": [],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "physio-health-science",
@@ -1423,7 +1457,8 @@ window.HKBK_KB = {
     "a": "HKBK College of Physiotherapy offers the Bachelor of Physiotherapy (BPT). HKBK College of Health Science offers allied health programmes: B.Sc in Medical Laboratory Technology (MLT) and B.Sc in Medical Imaging Technology (MIT). The college states the Health Science programmes are affiliated to the Rajiv Gandhi University of Health Sciences, Karnataka and recognised by the Government of Karnataka. As published on hkbk.edu.in."
    },
    "conflicts": [],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "pu-courses",
@@ -1450,7 +1485,8 @@ window.HKBK_KB = {
     "a": "HKBK Pre-University College offers four PU combinations listed on the college website: EBAC, PCMC, HEBA and PCMB. As published on hkbk.edu.in."
    },
    "conflicts": [],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "degree-programmes",
@@ -1478,7 +1514,8 @@ window.HKBK_KB = {
     "a": "HKBK Degree College lists these programmes: BCA, B.Com, B.Com Integrated with ACCA, B.Com in Logistics and Supply Chain Management, BBA, BBA in Aviation Management, B.Sc in Computer Science and B.Sc in Cyber Forensic. As published on hkbk.edu.in/degree."
    },
    "conflicts": [],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "dept-intake-history",
@@ -1506,7 +1543,8 @@ window.HKBK_KB = {
     "a": "As published on the college website: the Computer Science and Engineering department was established in 1997 with an intake of 45. It rose to 60 in 2000, 90 in 2002, 120 in 2011, 180 in 2016 and 300 in 2024. Artificial Intelligence and Machine Learning was established in 2021-22 with an intake of 60, which the college lists as increased to 120 in 2024-25. Information Science and Engineering lists 45 to 60 in 2001-02, 60 to 120 in 2016-17 and 120 to 180 in 2020-21, with an intake of 120 listed for 2021-22 and 60 for 2026-27. Check with the admissions office for the current intake."
    },
    "conflicts": [],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "dept-electives",
@@ -1535,7 +1573,8 @@ window.HKBK_KB = {
     "a": "Extra electives listed by the college: Computer Science and Engineering - AI and Machine Learning, Data Analytics, Cloud Computing, Mobile Computing, Game Design and AR. Information Science and Engineering - AI and Machine Learning, Data Analytics, Cloud Computing, Mobile Computing, AR. Electronics and Communication - Internet of Things, Artificial Intelligence, Robotics and Wireless Communication, Sensors and Wearable Technology, Nano Electronics. Mechanical - Electric Vehicle Manufacturing with TVS Motors, German Language Training, ISO 22301 Internal Auditor Training. AI and Machine Learning - Python, NLP with spaCy, Keras, PyTorch, Scikit-learn. MBA certifications - Business Management (Analytics), Digital Marketing, Entrepreneurship and Innovation, Indian Labour Law, Logistics. As published on the department pages of hkbk.edu.in."
    },
    "conflicts": [],
-   "section": "courses"
+   "section": "courses",
+   "updated": "2026-10-12"
   },
   {
    "id": "rankings",
@@ -1565,7 +1604,8 @@ window.HKBK_KB = {
     "a": "Rankings listed by the college on hkbk.edu.in/engineering/rankings-recognitions: Career 360 placed HKBK College of Engineering in its highest category, AAA. CSR-GHRDC Engineering Colleges Survey: 22nd best engineering college in India. SiliconIndia: 7th best in Karnataka and 30th in India. Times of India All-India Rankings 2025: 44th in the Top 175 Engineering Institutes and 20th among the Top 70 Private Institutes for placement. The college also states it is one of the top 10 engineering colleges in Bangalore for placement. These are the college's own published claims."
    },
    "conflicts": [],
-   "section": "about"
+   "section": "about",
+   "updated": "2026-10-12"
   },
   {
    "id": "approvals",
@@ -1589,7 +1629,8 @@ window.HKBK_KB = {
     "a": "The college's rankings and recognitions page lists approval by the Government of Karnataka, the All India Council for Technical Education (AICTE), New Delhi, and the Association of Indian Universities (AIU), with affiliation to Visvesvaraya Technological University (VTU). As published on hkbk.edu.in."
    },
    "conflicts": [],
-   "section": "about"
+   "section": "about",
+   "updated": "2026-10-12"
   },
   {
    "id": "campus-news",
@@ -1616,7 +1657,8 @@ window.HKBK_KB = {
     "a": "Recent campus news headlines on hkbk.edu.in: 07 Dec 2025 - a six-day offline Faculty Development Program on digital footprints, tracing cyber crime through forensics. 12 Sep 2025 - advancing healthcare clinical analysis through deep learning and generative AI. 10 Jul 2025 - an AICTE sponsored three-day offline Faculty Development Programme, Digital Fortress: Empowering Educators in Cyber Defence (AICTE-VAANI scheme), in Kannada. 24 Jun 2025 - Abhinandana '25, congratulating 300 students from Haveri District on their SSLC and PUC results. 21 Jun 2025 - International Yoga Day 2025."
    },
    "conflicts": [],
-   "section": "life"
+   "section": "life",
+   "updated": "2026-10-12"
   },
   {
    "id": "loc-main-gate",
@@ -1638,7 +1680,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "gate",
-   "walkStopName": "Main Gate"
+   "walkStopName": "Main Gate",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-football-ground",
@@ -1659,7 +1702,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "football",
-   "walkStopName": "Football Ground"
+   "walkStopName": "Football Ground",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-onesb",
@@ -1680,7 +1724,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "onesb",
-   "walkStopName": "ONESB"
+   "walkStopName": "ONESB",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-b-block",
@@ -1701,7 +1746,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "b",
-   "walkStopName": "B Block"
+   "walkStopName": "B Block",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-girls-hostel",
@@ -1720,7 +1766,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "girls",
-   "walkStopName": "Girls Hostel"
+   "walkStopName": "Girls Hostel",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-admin-block",
@@ -1741,7 +1788,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "aiml",
-   "walkStopName": "Admin Block"
+   "walkStopName": "Admin Block",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-pu-block",
@@ -1762,7 +1810,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "pu",
-   "walkStopName": "PU Block"
+   "walkStopName": "PU Block",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-a-block",
@@ -1781,7 +1830,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "a",
-   "walkStopName": "A Block"
+   "walkStopName": "A Block",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-food-court",
@@ -1804,7 +1854,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "canteen",
-   "walkStopName": "Food Court"
+   "walkStopName": "Food Court",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-boys-hostel",
@@ -1823,7 +1874,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "boys",
-   "walkStopName": "Boys Hostel"
+   "walkStopName": "Boys Hostel",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-main-ground",
@@ -1845,7 +1897,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "maingr",
-   "walkStopName": "Main Ground"
+   "walkStopName": "Main Ground",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-namaz-room",
@@ -1869,7 +1922,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "namaz",
-   "walkStopName": "Namaz Room"
+   "walkStopName": "Namaz Room",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-xerox",
@@ -1894,7 +1948,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "xerox",
-   "walkStopName": "Xerox"
+   "walkStopName": "Xerox",
+   "updated": "2026-10-18"
   },
   {
    "id": "loc-exam-section",
@@ -1917,7 +1972,8 @@ window.HKBK_KB = {
    },
    "section": "campus",
    "walkStop": "exam",
-   "walkStopName": "Exam Section"
+   "walkStopName": "Exam Section",
+   "updated": "2026-10-18"
   }
  ],
  "fallbacks": {
