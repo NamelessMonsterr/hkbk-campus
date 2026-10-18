@@ -68,6 +68,28 @@
 		});
 		head.appendChild(dbg);
 
+		var speakB = el("button", "chat__speak", "Speak");
+		speakB.type = "button";
+		speakB.setAttribute("aria-pressed", "false");
+		speakB.title = "Read answers aloud (browser speech)";
+		speakB.addEventListener("click", function () {
+			self.speakOn = !self.speakOn;
+			speakB.setAttribute("aria-pressed", String(self.speakOn));
+			speakB.classList.toggle("chat__speak--on", self.speakOn);
+			if (!self.speakOn && global.HKBKVoice) global.HKBKVoice.cancel();
+			if (!self.speakOn && self.handsFree) self._setHandsFree(false);
+		});
+		head.appendChild(speakB);
+		this._speakBtn = speakB;
+
+		var hfB = el("button", "chat__hf", "Hands-free");
+		hfB.type = "button";
+		hfB.setAttribute("aria-pressed", "false");
+		hfB.title = "Hands-free: ask by voice, hear the answer, ask again";
+		hfB.addEventListener("click", function () { self._setHandsFree(!self.handsFree); });
+		head.appendChild(hfB);
+		this._hfBtn = hfB;
+
 		var close = el("button", "chat__close", "\u00D7");
 		close.type = "button";
 		close.setAttribute("aria-label", "Close chat and end session");
@@ -100,47 +122,28 @@
 		send.type = "submit";
 		form.appendChild(this.input);
 
-		/* Voice input - uses the browser's built-in speech recognition when
-		 * available (Chrome/Edge). No audio leaves the page anywhere else;
-		 * where unsupported, the button simply never appears. */
+		/* Voice-first row: one big mic button when speech recognition exists,
+		 * a plain note when it does not. Typing stays first-class either way. */
 		var SR = global.SpeechRecognition || global.webkitSpeechRecognition;
+		var voiceRow = el("div", "chat__voicerow");
 		if (SR) {
-			var mic = el("button", "chat__mic", "Mic");
+			var mic = el("button", "chat__bigmic", "\u25CF");
 			mic.type = "button";
-			mic.title = "Voice input (browser speech recognition)";
-			mic.setAttribute("aria-label", "Voice input");
-			var rec = null, listening = false;
-			var LANGLIB = { en: "en-IN", kn: "kn-IN", hi: "hi-IN", ur: "ur-PK" };
-			var resetMic = function () {
-				listening = false;
-				mic.classList.remove("chat__mic--on");
-				mic.textContent = "Mic";
-			};
+			mic.title = "Tap to speak your question";
+			mic.setAttribute("aria-label", "Speak your question");
+			var micCap = el("span", "chat__bigmic__cap", "Tap to speak");
 			mic.addEventListener("click", function () {
-				if (listening) { if (rec) rec.stop(); return; }
-				rec = new SR();
-				rec.lang = LANGLIB[self._lastLang] || "en-IN";
-				rec.interimResults = true;
-				rec.continuous = false;
-				listening = true;
-				mic.classList.add("chat__mic--on");
-				mic.textContent = "Listening\u2026";
-				rec.onresult = function (ev) {
-					var txt = "";
-					for (var i = 0; i < ev.results.length; i++) { txt += ev.results[i][0].transcript; }
-					self.input.value = txt;
-					if (ev.results[ev.results.length - 1].isFinal) {
-						var q = txt.trim();
-						rec.stop();
-						if (q) { self.input.value = ""; self.submit(q); }
-					}
-				};
-				rec.onend = resetMic;
-				rec.onerror = resetMic;
-				try { rec.start(); } catch (e2) { resetMic(); }
+				if (self._listening) { self._stopListening(); return; }
+				self._listenOnce();
 			});
-			form.appendChild(mic);
+			this._micBtn = mic;
+			this._micCap = micCap;
+			voiceRow.appendChild(mic);
+			voiceRow.appendChild(micCap);
+		} else {
+			voiceRow.appendChild(el("span", "chat__voicerow__note", "Voice input is not supported in this browser - typing works the same."));
 		}
+		form.insertBefore(voiceRow, self.input);
 		form.appendChild(send);
 		form.addEventListener("submit", function (e) {
 			e.preventDefault();
@@ -415,6 +418,14 @@
 			var kind = res.type === "out_of_scope" ? "refusal" : (res.type === "clarify" ? "clarify" : null);
 			var row = self.addBot(res.answer, kind);
 
+			if (self.speakOn && global.HKBKVoice) {
+				global.HKBKVoice.speak(res.answer, res.lang || "en", {
+					onend: function () { if (self.handsFree) self._listenOnce(); }
+				});
+			} else if (self.handsFree) {
+				self._listenOnce();
+			}
+
 			if (res.conflict) {
 				self.addConflicts(row, res.conflict);
 			}
@@ -515,7 +526,88 @@
 		this.maybeAskUsageConsent();
 	};
 
+	ChatUI.prototype._setHandsFree = function (on) {
+		this.handsFree = on;
+		if (this._hfBtn) {
+			this._hfBtn.setAttribute("aria-pressed", String(on));
+			this._hfBtn.classList.toggle("chat__hf--on", on);
+			this._hfBtn.textContent = on ? "Hands-free on" : "Hands-free";
+		}
+		if (on) {
+			this.speakOn = true;
+			if (this._speakBtn) {
+				this._speakBtn.setAttribute("aria-pressed", "true");
+				this._speakBtn.classList.add("chat__speak--on");
+			}
+			if (!this.busy) this._listenOnce();
+		} else {
+			this._stopListening();
+			if (global.HKBKVoice) global.HKBKVoice.cancel();
+		}
+	};
+
+	ChatUI.prototype._listenOnce = function () {
+		var self = this;
+		var SR = global.SpeechRecognition || global.webkitSpeechRecognition;
+		if (!SR) {
+			if (self.handsFree) {
+				self._setHandsFree(false);
+				self.addBot("This browser has no speech recognition, so hands-free is not available here. Typing works everywhere.");
+			}
+			return;
+		}
+		if (global.HKBKVoice) global.HKBKVoice.cancel();
+		var LANGLIB = { en: "en-IN", kn: "kn-IN", hi: "hi-IN", ur: "ur-PK" };
+		var rec = new SR();
+		self._rec = rec;
+		rec.lang = LANGLIB[self._lastLang] || "en-IN";
+		rec.interimResults = true;
+		rec.continuous = false;
+		self._listening = true;
+		if (self._micBtn) self._micBtn.classList.add("chat__bigmic--on");
+		if (self._micCap) self._micCap.textContent = "Listening\u2026 tap to stop";
+		var reset = function () {
+			self._listening = false;
+			if (self._micBtn) self._micBtn.classList.remove("chat__bigmic--on");
+			if (self._micCap) self._micCap.textContent = "Tap to speak";
+		};
+		rec.onresult = function (ev) {
+			var txt = "";
+			for (var i = 0; i < ev.results.length; i++) { txt += ev.results[i][0].transcript; }
+			self.input.value = txt;
+			if (ev.results[ev.results.length - 1].isFinal) {
+				var q = txt.trim();
+				rec.stop();
+				if (q) { self.input.value = ""; self.submit(q); }
+			}
+		};
+		rec.onend = reset;
+		rec.onerror = function (ev) {
+			reset();
+			if (ev && (ev.error === "not-allowed" || ev.error === "service-not-allowed")) {
+				if (self.handsFree) self._setHandsFree(false);
+				self.addBot("Microphone permission was denied, so I cannot hear you here. Typing your question works the same.");
+				return;
+			}
+			/* in hands-free, a silence timeout just means: keep listening */
+			if (self.handsFree && ev && ev.error === "no-speech") {
+				global.setTimeout(function () { if (self.handsFree && !self._listening) self._listenOnce(); }, 600);
+			}
+		};
+		try { rec.start(); } catch (e2) { reset(); }
+	};
+
+	ChatUI.prototype._stopListening = function () {
+		if (this._rec) { try { this._rec.stop(); } catch (e) {} }
+		this._listening = false;
+		if (this._micBtn) this._micBtn.classList.remove("chat__bigmic--on");
+		if (this._micCap) this._micCap.textContent = "Tap to speak";
+	};
+
 	ChatUI.prototype.close = function () {
+		this._stopListening();
+		this.handsFree = false;
+		if (global.HKBKVoice) global.HKBKVoice.cancel();
 		if (!this.root.classList.contains("chat--open")) return;
 		// Matches the paper: memory is per session and is discarded, not stored.
 		if (this.engine && this.engine.endSession) this.engine.endSession();

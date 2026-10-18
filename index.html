@@ -130,6 +130,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 <div class="chatHost" id="chatHost"></div>
 <script src="campus-explorer/data/knowledge-base.js"></script>
 <script src="campus-explorer/js/usage-log.js"></script>
+<script src="campus-explorer/js/voice-guide.js"></script>
 <script src="campus-explorer/js/chatbot-engine.js"></script>
 <script src="campus-explorer/js/chatbot-ui.js"></script>
 <script>
@@ -139,5 +140,61 @@ function openChat(q){ui.open();launcher.hidden=true;launcher.setAttribute("aria-
 document.querySelectorAll("[data-open-chat]").forEach(function(b){b.addEventListener("click",function(){openChat()})});
 window.hkbkAsk=openChat;
 var cq=new URLSearchParams(location.search).get("chatq");if(cq)openChat(cq);})();
+</script>
+
+<script>
+(function(){
+var V=window.HKBKVoice;if(!V)return;
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+var player=null;
+function stopTour(){V.cancel();if(player){player.remove();player=null}}
+function playTour(lang){
+ stopTour();
+ var segs=V.SCRIPT[lang]||V.SCRIPT.en,i=0;
+ player=el('div','vg-player');
+ player.setAttribute('role','status');
+ var txt=el('div','vg-player__text','');
+ var stopB=el('button','vg-player__btn','Stop');
+ stopB.type='button';stopB.addEventListener('click',stopTour);
+ player.appendChild(txt);player.appendChild(stopB);document.body.appendChild(player);
+ (function next(){
+  if(!player)return;
+  if(i>=segs.length){stopTour();return}
+  var seg=segs[i];i++;
+  txt.textContent=seg; /* captions always on: this is the no-voice fallback too */
+  var done=function(){setTimeout(next,350)};
+  if(V.getMuted()){done();return}
+  var started=V.speak(seg,lang,{onend:done,onmissing:function(){}});
+  if(!started)done();
+ })();
+}
+function showPrompt(){
+ var ov=el('div','vg-overlay');
+ var card=el('div','vg-modal');
+ card.setAttribute('role','dialog');card.setAttribute('aria-label','Choose your language');
+ card.appendChild(el('div','eye','Voice guide'));
+ card.appendChild(el('h2',null,'Choose your language'));
+ card.appendChild(el('p',null,'The site introduces itself out loud - about a minute. Your choice is remembered, and everything is also written on the page.'));
+ var row=el('div','vg-langs');
+ var first=null;
+ V.LANGS.forEach(function(l){var b=el('button','vg-lang',l.label);b.type='button';b.addEventListener('click',function(){V.setChoice(l.code);ov.remove();playTour(l.code)});if(!first)first=b;row.appendChild(b)});
+ card.appendChild(row);
+ var skip=el('button','vg-skip','Skip - read at my own pace');
+ skip.type='button';skip.addEventListener('click',function(){V.setChoice('skip');ov.remove()});
+ card.appendChild(skip);
+ ov.appendChild(card);document.body.appendChild(ov);
+ ov.addEventListener('keydown',function(e){if(e.key==='Escape'){V.setChoice('skip');ov.remove()}});
+ if(first)first.focus();
+}
+var fab=el('div','vg-fab');
+var listenB=el('button','vg-fab__btn','Listen');
+listenB.type='button';listenB.title='Play the spoken site guide';
+listenB.addEventListener('click',function(){var c=V.getChoice();if(!c||c==='skip'){showPrompt();return}playTour(c)});
+var muteB=el('button','vg-fab__btn',V.getMuted()?'Unmute':'Mute');
+muteB.type='button';
+muteB.addEventListener('click',function(){var m=!V.getMuted();V.setMuted(m);muteB.textContent=m?'Unmute':'Mute'});
+fab.appendChild(listenB);fab.appendChild(muteB);document.body.appendChild(fab);
+if(location.search.indexOf('novoice')!==-1){V.setChoice('skip')}else if(!V.getChoice()&&window.speechSynthesis){showPrompt()}
+})();
 </script>
 </body></html>

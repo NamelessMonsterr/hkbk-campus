@@ -342,3 +342,33 @@
   animation: chatMicPulse 1s infinite;
 }
 @keyframes chatMicPulse { 50% { opacity: .55; } }
+
+/* voice guide modal + player + floating control */
+.vg-overlay{position:fixed;inset:0;background:#0b1030cc;z-index:60;display:grid;place-items:center;padding:20px}
+.vg-modal{background:var(--paper,#f4f0e6);border:2px solid var(--ink,#0b1030);box-shadow:12px 12px 0 var(--sun,#ffc21a);padding:38px;max-width:480px;width:100%}
+.vg-modal h2{font-family:Fraunces,serif;font-weight:400;font-size:34px;margin:10px 0 12px;color:var(--ink,#0b1030)}
+.vg-modal p{color:var(--mut,#4b5270);line-height:1.55;margin:0 0 22px;font-size:15px}
+.vg-langs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vg-lang{padding:18px;font-size:18px;font-weight:600;border:2px solid var(--ink,#0b1030);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink,#0b1030)}
+.vg-lang:hover,.vg-lang:focus-visible{background:var(--blue,#1b3dff);color:#fff;outline:3px solid var(--sun,#ffc21a);outline-offset:2px}
+.vg-skip{margin-top:16px;background:none;border:none;color:var(--mut,#4b5270);text-decoration:underline;cursor:pointer;font-size:14px;font-family:inherit}
+.vg-skip:focus-visible{outline:3px solid var(--sun,#ffc21a)}
+.vg-player{position:fixed;left:22px;bottom:96px;z-index:55;max-width:440px;background:var(--ink,#0b1030);color:#fff;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;box-shadow:8px 8px 0 var(--sun,#ffc21a)}
+.vg-player__text{font-size:14px;line-height:1.5}
+.vg-player__btn{background:var(--sun,#ffc21a);color:var(--ink,#0b1030);border:none;padding:8px 14px;font-weight:700;cursor:pointer;flex:none;font-family:inherit}
+.vg-fab{position:fixed;left:22px;bottom:22px;z-index:54;display:flex;gap:8px}
+.vg-fab__btn{background:var(--ink,#0b1030);color:#fff;border:none;padding:11px 18px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit}
+.vg-fab__btn:hover{background:var(--blue,#1b3dff)}
+.vg-fab__btn:focus-visible,.vg-player__btn:focus-visible{outline:3px solid var(--sun,#ffc21a)}
+
+/* assistant voice controls */
+.chat__speak,.chat__hf{font:inherit;font-size:12px;font-weight:600;border:1.5px solid currentColor;background:transparent;color:inherit;padding:4px 10px;cursor:pointer}
+.chat__speak--on,.chat__hf--on{background:var(--sun,#ffc21a);color:var(--ink,#0b1030)}
+.chat__voicerow{display:flex;align-items:center;gap:14px;padding:10px 4px 4px}
+.chat__bigmic{width:58px;height:58px;border-radius:50%;background:var(--blue,#1b3dff);color:#fff;border:none;font-size:26px;cursor:pointer;flex:none;display:grid;place-items:center;transition:transform .15s}
+.chat__bigmic:hover{transform:scale(1.07)}
+.chat__bigmic:focus-visible{outline:3px solid var(--sun,#ffc21a);outline-offset:2px}
+.chat__bigmic--on{background:#d21f3c;animation:chatMicPulse 1s infinite}
+.chat__bigmic__cap{font-size:13px;color:var(--mut,#4b5270);font-weight:600}
+.chat__voicerow__note{font-size:13px;color:var(--mut,#4b5270)}
+@keyframes chatMicPulse{50%{opacity:.55}}
