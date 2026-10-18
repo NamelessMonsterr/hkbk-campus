@@ -80,8 +80,12 @@ cases.forEach(function (c) {
 section("Fuzzy recovery (the paper's ~11% rescue)");
 var typo = engine.ask("wat is the hostal fes");
 console.log("  answer: " + String(typo.answer).slice(0, 110) + "...");
+// Calibrated refusal (2026-10): a three-typo query is no longer stated as
+// fact on guessed tokens alone - it is answered, or offered back as a
+// "did you mean". Either way the user must land on the hostel fee entry.
 check("typo query still resolves to hostel fees",
-	typo.type === "answer" && typo.entryId === "fees-hostel",
+	(typo.type === "answer" && typo.entryId === "fees-hostel") ||
+	(typo.type === "clarify" && (typo.suggestions || []).some(function (s2) { return s2.entryId === "fees-hostel"; })),
 	"got " + typo.type + "/" + typo.entryId);
 var repairStep = (typo.trace ? typo.trace.steps : []).filter(function (s) { return s.step === "fuzzy_repair"; })[0];
 check("repair step recorded in trace", !!repairStep,
@@ -116,7 +120,11 @@ var junk = [
 ];
 junk.forEach(function (q) {
 	var r = engine.ask(q);
-	check('"' + q + '" is refused', r.type === "out_of_scope",
+	// Calibrated refusal (2026-10): junk is never stated as fact. Most is
+	// refused outright; a borderline case may instead come back as a "did you
+	// mean" - still never a confident wrong answer.
+	check('"' + q + '" is refused or clarified, never answered',
+		r.type === "out_of_scope" || r.type === "clarify",
 		"got " + r.type + " entry=" + r.entryId + " conf=" + r.confidence);
 });
 var refusal = engine.ask("who won the football world cup");
@@ -187,8 +195,11 @@ engine.endSession();
 var first = engine.ask("tell me about the hostel");
 var follow = engine.ask("what about the fee for it");
 console.log("  first -> " + first.entryId + ", follow-up -> " + follow.entryId);
+// Calibrated refusal (2026-10): the follow-up may come back as a "did you
+// mean" when two hostel entries tie, as long as the options stay on topic.
 check("follow-up stays on a hostel-related entry",
-	follow.type === "answer" && /hostel/.test(follow.entryId || ""),
+	(follow.type === "answer" && /hostel/.test(follow.entryId || "")) ||
+	(follow.type === "clarify" && (follow.suggestions || []).some(function (s2) { return /hostel/.test(s2.entryId); })),
 	"got " + follow.type + "/" + follow.entryId);
 
 section("LLM hook is absent by default");

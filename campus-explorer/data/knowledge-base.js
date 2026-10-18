@@ -2,7 +2,7 @@
 window.HKBK_KB = {
  "meta": {
   "institution": "HKBK College of Engineering",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "languages": [
    "en"
   ],
@@ -369,7 +369,8 @@ window.HKBK_KB = {
   "pdf": "Uploaded PDFs",
   "admission": "Admission Data",
   "fees": "Fee Structure",
-  "courses": "Course Catalogue"
+  "courses": "Course Catalogue",
+  "location": "Campus Locations"
  },
  "entries": [
   {
@@ -440,7 +441,8 @@ window.HKBK_KB = {
      "which branches are available",
      "list of departments",
      "what programs do you have",
-     "engineering branches"
+     "engineering branches",
+     "what can i study"
     ],
     "a": "HKBK offers B.E. programmes in Computer Science and Engineering, Artificial Intelligence and Machine Learning, Information Science and Engineering, Electronics and Communication Engineering, Mechanical Engineering, and Civil Engineering. A two-year MBA is offered at the postgraduate level."
    },
@@ -528,11 +530,13 @@ window.HKBK_KB = {
    ],
    "en": {
     "q": [
+     "hostel fee",
      "hostel fees",
      "hostel facilities",
      "is accommodation available",
      "hostel charges",
-     "where do students stay"
+     "where do students stay",
+     "do i have to pay for the hostel"
     ],
     "a": "Separate hostel accommodation is available for men and women, with mess facilities, Wi-Fi, and 24-hour security. Hostel charges are currently {{FEE_HOSTEL_YEAR}}. Rooms are allotted in order of application, so applying early is advisable."
    },
@@ -606,7 +610,8 @@ window.HKBK_KB = {
      "what is the eligibility criteria",
      "minimum marks required",
      "qualification needed",
-     "eligibility for be"
+     "eligibility for be",
+     "how much percentage is needed"
     ],
     "a": "For B.E. admission you need to have passed 10+2 or equivalent with Physics and Mathematics as compulsory subjects, plus one of Chemistry, Biology, Biotechnology, Computer Science or Electronics. General category candidates need at least 45% aggregate; reserved category candidates need 40%. A valid KCET or COMEDK score is required for those quotas. You can also use the eligibility checker on this page."
    },
@@ -748,7 +753,9 @@ window.HKBK_KB = {
      "campus facilities",
      "library timings",
      "is there transport",
-     "sports facilities"
+     "sports facilities",
+     "is there a gym",
+     "gymnasium timings"
     ],
     "a": "The campus includes departmental laboratories, a central library with digital resources, computing labs, seminar halls, a canteen, sports grounds, a gymnasium, and campus-wide Wi-Fi. College buses run on routes across Bengaluru. The campus is directly opposite Manyata Tech Park in Nagawara."
    },
@@ -1610,6 +1617,307 @@ window.HKBK_KB = {
    },
    "conflicts": [],
    "section": "life"
+  },
+  {
+   "id": "loc-main-gate",
+   "category": "location",
+   "tags": [
+    "main gate",
+    "entrance",
+    "nagawara",
+    "manyata"
+   ],
+   "en": {
+    "q": [
+     "where is the main gate",
+     "main gate",
+     "college entrance",
+     "which is the entry gate"
+    ],
+    "a": "The main gate is the college entrance on the Nagawara side, directly opposite Manyata Tech Park. The campus walk begins here."
+   },
+   "section": "campus",
+   "walkStop": "gate",
+   "walkStopName": "Main Gate"
+  },
+  {
+   "id": "loc-football-ground",
+   "category": "location",
+   "tags": [
+    "football",
+    "ground",
+    "sports"
+   ],
+   "en": {
+    "q": [
+     "where is the football ground",
+     "football ground",
+     "football field",
+     "sports ground where"
+    ],
+    "a": "The football ground is the open ground just inside the main gate, on your left as you walk in."
+   },
+   "section": "campus",
+   "walkStop": "football",
+   "walkStopName": "Football Ground"
+  },
+  {
+   "id": "loc-onesb",
+   "category": "location",
+   "tags": [
+    "onesb",
+    "business school",
+    "glass building"
+   ],
+   "en": {
+    "q": [
+     "where is onesb",
+     "onesb building",
+     "one school of business",
+     "what is the onesb building"
+    ],
+    "a": "ONESB (One School of Business) is the glass-fronted building near the main gate. It is a separate institution that shares the campus; it is not part of HKBK."
+   },
+   "section": "campus",
+   "walkStop": "onesb",
+   "walkStopName": "ONESB"
+  },
+  {
+   "id": "loc-b-block",
+   "category": "location",
+   "tags": [
+    "b block",
+    "white building",
+    "arches"
+   ],
+   "en": {
+    "q": [
+     "where is b block",
+     "b block",
+     "white building",
+     "arched building"
+    ],
+    "a": "B Block is the white building with arched balconies, a short walk past the ONESB building."
+   },
+   "section": "campus",
+   "walkStop": "b",
+   "walkStopName": "B Block"
+  },
+  {
+   "id": "loc-girls-hostel",
+   "category": "location",
+   "tags": [
+    "girls hostel",
+    "ladies hostel"
+   ],
+   "en": {
+    "q": [
+     "where is the girls hostel",
+     "girls hostel",
+     "ladies hostel"
+    ],
+    "a": "The girls hostel is the cream-coloured building behind the shed, near B Block and the Food Court."
+   },
+   "section": "campus",
+   "walkStop": "girls",
+   "walkStopName": "Girls Hostel"
+  },
+  {
+   "id": "loc-admin-block",
+   "category": "location",
+   "tags": [
+    "admin",
+    "office",
+    "administration"
+   ],
+   "en": {
+    "q": [
+     "where is the admin block",
+     "admin block",
+     "administrative offices",
+     "college office where"
+    ],
+    "a": "The Admin Block houses the main administrative offices, about halfway along the walk between the girls hostel and the PU Block."
+   },
+   "section": "campus",
+   "walkStop": "aiml",
+   "walkStopName": "Admin Block"
+  },
+  {
+   "id": "loc-pu-block",
+   "category": "location",
+   "tags": [
+    "pu",
+    "puc",
+    "pre university"
+   ],
+   "en": {
+    "q": [
+     "where is the pu block",
+     "pu block",
+     "pre university block",
+     "puc block"
+    ],
+    "a": "The PU Block is the pre-university college block, east of the main ground, just before A Block on the walk."
+   },
+   "section": "campus",
+   "walkStop": "pu",
+   "walkStopName": "PU Block"
+  },
+  {
+   "id": "loc-a-block",
+   "category": "location",
+   "tags": [
+    "a block",
+    "porch"
+   ],
+   "en": {
+    "q": [
+     "where is a block",
+     "a block",
+     "a block porch"
+    ],
+    "a": "A Block has the arched porch and sits just past the PU Block, before the Food Court."
+   },
+   "section": "campus",
+   "walkStop": "a",
+   "walkStopName": "A Block"
+  },
+  {
+   "id": "loc-food-court",
+   "category": "location",
+   "tags": [
+    "food court",
+    "canteen",
+    "food",
+    "eating"
+   ],
+   "en": {
+    "q": [
+     "where is the food court",
+     "food court",
+     "main canteen where",
+     "big canteen",
+     "where is the canteen"
+    ],
+    "a": "The Food Court is the main canteen area, past A Block at roughly the halfway point of the campus."
+   },
+   "section": "campus",
+   "walkStop": "canteen",
+   "walkStopName": "Food Court"
+  },
+  {
+   "id": "loc-boys-hostel",
+   "category": "location",
+   "tags": [
+    "boys hostel",
+    "gents hostel"
+   ],
+   "en": {
+    "q": [
+     "where is the boys hostel",
+     "boys hostel",
+     "gents hostel"
+    ],
+    "a": "The boys hostel is on the far side of the campus, past the Food Court and next to the Main Ground."
+   },
+   "section": "campus",
+   "walkStop": "boys",
+   "walkStopName": "Boys Hostel"
+  },
+  {
+   "id": "loc-main-ground",
+   "category": "location",
+   "tags": [
+    "main ground",
+    "ground",
+    "cricket",
+    "open ground"
+   ],
+   "en": {
+    "q": [
+     "where is the main ground",
+     "main ground",
+     "big ground",
+     "open ground where"
+    ],
+    "a": "The Main Ground is the large open ground between B Block and G Block, beside the boys hostel."
+   },
+   "section": "campus",
+   "walkStop": "maingr",
+   "walkStopName": "Main Ground"
+  },
+  {
+   "id": "loc-namaz-room",
+   "category": "location",
+   "tags": [
+    "namaz",
+    "prayer",
+    "salah",
+    "masjid"
+   ],
+   "en": {
+    "q": [
+     "where is the namaz room",
+     "namaz room",
+     "prayer room",
+     "where can i pray",
+     "masjid on campus",
+     "prayer hall"
+    ],
+    "a": "The Namaz Room is at the far end of the campus, just past the boys hostel and next to the Exam Section."
+   },
+   "section": "campus",
+   "walkStop": "namaz",
+   "walkStopName": "Namaz Room"
+  },
+  {
+   "id": "loc-xerox",
+   "category": "location",
+   "tags": [
+    "xerox",
+    "photocopy",
+    "printing",
+    "printout",
+    "photocopies"
+   ],
+   "en": {
+    "q": [
+     "where is the xerox shop",
+     "xerox shop",
+     "photocopy",
+     "printing shop",
+     "where can i take printouts",
+     "printout"
+    ],
+    "a": "The Xerox shop is at the far end of the campus, beside the Exam Section - the last stop on the campus walk."
+   },
+   "section": "campus",
+   "walkStop": "xerox",
+   "walkStopName": "Xerox"
+  },
+  {
+   "id": "loc-exam-section",
+   "category": "location",
+   "tags": [
+    "exam",
+    "examination",
+    "hall ticket",
+    "exam cell"
+   ],
+   "en": {
+    "q": [
+     "where is the exam section",
+     "exam section",
+     "exam office",
+     "where do i get hall tickets",
+     "exam cell"
+    ],
+    "a": "The Exam Section is at the far end of the campus, next to the Namaz Room and the Xerox shop."
+   },
+   "section": "campus",
+   "walkStop": "exam",
+   "walkStopName": "Exam Section"
   }
  ],
  "fallbacks": {

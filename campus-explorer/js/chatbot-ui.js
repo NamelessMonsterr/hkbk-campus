@@ -216,6 +216,33 @@
 		this.scroll();
 	};
 
+	/* Calibrated refusal, middle band: offer the suspect entries as one-tap
+	 * questions instead of a dead-end or a guess. */
+	ChatUI.prototype.addSuggestions = function (row, suggestions) {
+		var self = this;
+		var wrap = el("div", "msg__suggest");
+		suggestions.forEach(function (sg) {
+			var b = el("button", "msg__suggestBtn", sg.question);
+			b.type = "button";
+			b.addEventListener("click", function () { self.submit(sg.question); });
+			wrap.appendChild(b);
+		});
+		row.appendChild(wrap);
+		this.scroll();
+	};
+
+	/* Location answers bridge to the campus walk at exactly that stop. */
+	ChatUI.prototype.addWalk = function (row, stopId, stopName) {
+		var base = (global.location && /\/campus-explorer\//.test(global.location.pathname)) ? "../walk/" : "walk/";
+		var a = el("a", "msg__walk", "See it on the campus walk \u2192");
+		a.href = base + "?stop=" + encodeURIComponent(stopId);
+		a.target = "_blank";
+		a.rel = "noopener";
+		if (stopName) a.title = stopName + " on the campus walk";
+		row.appendChild(a);
+		this.scroll();
+	};
+
 	ChatUI.prototype.renderChips = function () {
 		var self = this;
 		this.chips.innerHTML = "";
@@ -262,7 +289,7 @@
 			var ms = ((global.performance && performance.now) ? performance.now() : Date.now()) - t0;
 
 			thinking.remove();
-			var kind = res.type === "out_of_scope" ? "refusal" : null;
+			var kind = res.type === "out_of_scope" ? "refusal" : (res.type === "clarify" ? "clarify" : null);
 			var row = self.addBot(res.answer, kind);
 
 			if (res.conflict) {
@@ -276,8 +303,14 @@
 				// to paper over with an invented number.
 				self.addNote(row, "missing figure", res.unresolvedTokens.join(", "));
 			}
+			if (res.type === "clarify" && res.suggestions && res.suggestions.length) {
+				self.addSuggestions(row, res.suggestions);
+			}
 			if (res.type === "answer" && res.section) {
 				self.addJump(row, res.section);
+			}
+			if (res.type === "answer" && res.walkStop) {
+				self.addWalk(row, res.walkStop, res.walkStopName);
 			}
 
 			self.lastTrace = {

@@ -29,10 +29,21 @@
 		chunkSize: 512,         // paper's chunk width, measured here in word tokens
 		chunkOverlap: 64,       // paper's overlap
 		memoryTurns: 10,        // paper's conversation buffer depth
-		confidenceFloor: 0.17,  // NOT in the paper - see docs. This is the gap the
-		                        // paper admits it never implemented.
+		confidenceFloor: 0.17,  // NOT in the paper - see docs. Kept as the legacy
+		                        // name; acts as clarifyFloor when set directly.
 		strongMatch: 0.55,      // above this we answer without hedging
-		maxFuzzyLen: 60         // don't Levenshtein whole paragraphs
+		maxFuzzyLen: 60,        // don't Levenshtein whole paragraphs
+		answerFloor: 0.22,      // calibrated refusal, NOT in the paper. At or above
+		                        // this: answer. Tuned on the dev split of
+		                        // eval/questions.json - see eval/README.md.
+		clarifyFloor: 0.15,     // between this and answerFloor: ask "did you mean"
+		                        // instead of guessing or dead-ending. Below: refuse.
+		ambiguityMargin: 0.02,  // runner-up this close (and not a strong match):
+		                        // offer both entries instead of picking one
+		coveragePenalty: true   // scale confidence by the share of the query's
+		                        // content tokens the KB vocabulary actually covers.
+		                        // "hack the exam portal" scores on "exam" alone;
+		                        // coverage 1/3 pulls it under the refusal floor.
 	};
 
 	/* ----------------------------------------------------------------
@@ -67,7 +78,7 @@
 			" by with from about into it its this that these those i me my we our you" +
 			" your and or but if then so as what which who whom how when where why" +
 			" can could will would shall should may might must there here have has had" +
-			" get got tell give please kindly want need know").split(" ")
+			" get got tell give please kindly want need know am much many done just really also any some happen happens run runs").split(" ")
 	};
 
 	var STOPSET = {};
@@ -350,7 +361,15 @@
 				var s = similarity(tok, cand);
 				if (s > bestScore) { bestScore = s; best = cand; }
 			}
-			if (best && bestScore >= CONFIG.fuzzyThreshold) {
+			// 0.78 is unreachable for short tokens, so a token of up to 5
+			// letters is also repaired on a single INSERT or DELETE (length
+			// differs by one). Substitutions are refused: one letter swapped
+			// in a 3-letter word is anyone's guess ("won" is not "non"),
+			// while a dropped letter is the classic typo ("fes" -> "fees").
+			var shortOk = tok.length <= 5 && best &&
+				levenshtein(tok, best) === 1 &&
+				Math.abs(best.length - tok.length) === 1 && bestScore >= 0.6;
+			if (best && (bestScore >= CONFIG.fuzzyThreshold || shortOk)) {
 				out.push(best);
 				repairs.push({ from: tok, to: best, score: Number(bestScore.toFixed(3)) });
 			} else {
@@ -443,10 +462,16 @@
 				if (Object.prototype.hasOwnProperty.call(options, o)) this.config[o] = options[o];
 			}
 		}
+		// Backwards compatibility: a caller that sets the old single
+		// confidenceFloor is really setting the clarify floor.
+		if (options && Object.prototype.hasOwnProperty.call(options, "confidenceFloor") &&
+				!Object.prototype.hasOwnProperty.call(options, "clarifyFloor")) {
+			this.config.clarifyFloor = options.confidenceFloor;
+		}
 		this.index = new Index(kb);
 		this.memory = new Memory(this.config.memoryTurns);
 		this.llmHook = null;
-		this.counters = { asked: 0, answered: 0, outOfScope: 0, fuzzyRecovered: 0 };
+		this.counters = { asked: 0, answered: 0, clarified: 0, outOfScope: 0, fuzzyRecovered: 0 };
 	}
 
 	// The documented swap point. Give it an async function and the engine will
@@ -501,6 +526,34 @@
 		};
 	};
 
+	// The middle band: confident enough to have a suspect, not confident enough
+	// to state it as fact. Offers the canonical phrasing of the best entry (and
+	// of the runner-up when the margin check fired) so the user can pick with
+	// one tap. fallbacks.<lang>.clarify carries the wording.
+	Engine.prototype.clarify = function (lang, query, suggestions, sources) {
+		var fb = (this.kb.fallbacks && (this.kb.fallbacks[lang] || this.kb.fallbacks.en)) || {};
+		var raw = fb.clarify || "I am not certain I understood that. Did you mean one of these?";
+		var resolved = resolveTokens(raw, this.kb.meta && this.kb.meta.tokens, lang);
+		return {
+			type: "clarify",
+			answer: resolved.text,
+			lang: lang,
+			confidence: Number(suggestions[0].confidence.toFixed(3)),
+			query: query,
+			suggestions: suggestions.map(function (s) {
+				var block = (s.entry[lang] && s.entry[lang].a ? s.entry[lang] : s.entry.en) || { q: [] };
+				return {
+					entryId: s.entry.id,
+					category: s.entry.category,
+					question: (block.q && block.q[0]) || s.entry.id,
+					confidence: Number(s.confidence.toFixed(3)),
+					walkStop: s.entry.walkStop || null
+				};
+			}),
+			sources: sources || []
+		};
+	};
+
 	/**
 	 * Run TF-IDF retrieval and reduce the top-K chunks to a single entry.
 	 * Chunks vote: an entry matched by several chunks beats one lucky chunk,
@@ -525,15 +578,18 @@
 			else { cur.rest += h.score; }
 			agg[h.doc.entryId] = cur;
 		}
-		var winner = null, winnerScore = -1;
+		var ranked = [];
 		for (var id in agg) {
 			if (!Object.prototype.hasOwnProperty.call(agg, id)) continue;
-			var combined = agg[id].best + (0.15 * agg[id].rest);
-			if (combined > winnerScore) { winnerScore = combined; winner = id; }
+			ranked.push({ id: id, best: agg[id].best, combined: agg[id].best + (0.15 * agg[id].rest) });
 		}
+		ranked.sort(function (a, b) { return b.combined - a.combined; });
+		var winner = ranked[0];
+		var runner = ranked.length > 1 ? ranked[1] : null;
 		return {
-			entry: this.index.entryById[winner],
-			confidence: agg[winner].best,
+			entry: this.index.entryById[winner.id],
+			confidence: winner.best,
+			runnerUp: runner ? { entry: this.index.entryById[runner.id], confidence: runner.best } : null,
 			sources: res.hits.map(function (h) {
 				return { entryId: h.doc.entryId, category: h.doc.category, score: Number(h.score.toFixed(3)) };
 			})
@@ -566,10 +622,44 @@
 		}
 		tokens = repaired.tokens;
 
+		// Content-token coverage: the share of query tokens the KB vocabulary
+		// covers after fuzzy repair. A confident score built on one shared word
+		// ("code" in "dress code" -> "cet code") is a coincidence, not a match,
+		// so confidence is scaled by it. Tuned on the dev split like the floors.
+		// Coverage: the share of the query's content tokens the KB vocabulary
+		// covers after fuzzy repair. It scales retrieval confidence SQUARED:
+		// one shared word in a four-word query ("exam" in "hack the exam
+		// portal") is weak evidence twice over - the match is thin and most of
+		// the question is unknown. Tuned on the dev split like the floors.
+		var coverage = 1;
+		var repairedSet = Object.create(null);
+		repaired.repairs.forEach(function (r) { repairedSet[r.to] = true; });
+		if (this.config.coveragePenalty) {
+			var covered = 0;
+			for (var ci = 0; ci < tokens.length; ci++) {
+				if (this.index.vocab[tokens[ci]]) covered++;
+			}
+			coverage = tokens.length ? covered / tokens.length : 0;
+			if (coverage < 1) {
+				trace.steps.push({ step: "coverage", covered: covered, total: tokens.length, value: Number(coverage.toFixed(3)) });
+			}
+		}
+
 		// 4. whole-question fuzzy match short-circuits retrieval
 		var direct = this.index.fuzzyQuestion(query, lang);
-		var entry = null, confidence = 0, sources = [];
+		var entry = null, confidence = 0, sources = [], runnerUp = null;
 
+		// The whole-question shortcut is for typos of STORED questions. A
+		// near-identical string (>= 0.90) is a typo and always fires; a merely
+		// similar one (0.78-0.90) fires only when every content word is known
+		// to the KB exactly as typed. "Dress code" shares "code" with the
+		// stored "what is the cet code" - 0.82 similar, unknown word "dress",
+		// and still not that question. Direct confidence is the string
+		// similarity itself, so it is not coverage-scaled.
+		if (direct && direct.score < 0.9 && coverage < 1) {
+			trace.steps.push({ step: "fuzzy_question_match", entry: direct.entry.id, score: Number(direct.score.toFixed(3)), skipped: "oov_tokens" });
+			direct = null;
+		}
 		if (direct) {
 			entry = direct.entry;
 			confidence = direct.score;
@@ -580,6 +670,7 @@
 			entry = primary.entry;
 			confidence = primary.confidence;
 			sources = primary.sources;
+			runnerUp = primary.runnerUp;
 
 			// Only if that was weak do we consider the previous topic. Conversation
 			// context is a rescue for genuinely elliptical questions ("what about
@@ -594,20 +685,80 @@
 						entry = withContext.entry;
 						confidence = withContext.confidence;
 						sources = withContext.sources;
+						runnerUp = withContext.runnerUp;
 						trace.steps.push({ step: "followup_context", from: prev.entryId, adopted: true });
 					}
 				}
 			}
 		}
 
-		// 6. confidence floor - the paper's acknowledged gap
-		if (!entry || confidence < this.config.confidenceFloor) {
+		// Coverage scales retrieval confidence only. A direct whole-question
+		// match is string-level evidence and already passed its own gate.
+		if (!direct) confidence = confidence * coverage;
+
+		// Half or more of the question's content words unknown: the system
+		// cannot know what the question is about, so it refuses rather than
+		// guess from the one word it recognised. "Who won the football world
+		// cup" shares only "football" with anything on campus.
+		var starved = !direct && this.config.coveragePenalty && coverage <= 0.5;
+
+		// A repaired token is a guess. When the winning entry is supported ONLY
+		// by guessed tokens - no word the user actually typed appears in it -
+		// the answer is demoted out of the answer band: it may be offered as a
+		// "did you mean", never stated as fact. "Write my python assignment"
+		// repairs to "white" and would otherwise state B Block with a straight
+		// face.
+		if (!direct && entry) {
+			var winnerDocs = this.index.docs.filter(function (d) { return d.entryId === entry.id; });
+			var exactHit = false;
+			for (var ti = 0; ti < tokens.length && !exactHit; ti++) {
+				if (repairedSet[tokens[ti]] || !this.index.vocab[tokens[ti]]) continue;
+				for (var di = 0; di < winnerDocs.length; di++) {
+					if (winnerDocs[di].tf[tokens[ti]]) { exactHit = true; break; }
+				}
+			}
+			if (!exactHit && tokens.length) {
+				confidence = Math.min(confidence, this.config.answerFloor - 0.005);
+				trace.steps.push({ step: "repaired_only_support", entry: entry.id, capped: Number(confidence.toFixed(3)) });
+			}
+		}
+
+		// 6. calibrated refusal - the paper's acknowledged gap, as three bands.
+		//    Below clarifyFloor: refuse with a human handoff. Between the floors:
+		//    ask "did you mean" instead of guessing. At or above answerFloor:
+		//    answer. A runner-up inside ambiguityMargin (and not a strong match)
+		//    turns any band into a two-option clarify.
+		if (!entry || starved || confidence < this.config.clarifyFloor) {
 			this.counters.outOfScope++;
-			trace.steps.push({ step: "confidence_floor", confidence: Number(confidence.toFixed(3)), floor: this.config.confidenceFloor, outcome: "refused" });
+			trace.steps.push({ step: "confidence_floor", confidence: Number(confidence.toFixed(3)), floor: this.config.clarifyFloor, outcome: "refused" });
 			var refusal = this.outOfScope(lang, rawQuery);
 			refusal.trace = trace;
 			this.memory.push({ query: rawQuery, lang: lang, entryId: null, outOfScope: true });
 			return refusal;
+		}
+
+		var offered = [{ entry: entry, confidence: confidence }];
+		var ambiguous = runnerUp && runnerUp.entry &&
+			(confidence - runnerUp.confidence) < this.config.ambiguityMargin &&
+			confidence < this.config.strongMatch;
+		if (ambiguous) offered.push({ entry: runnerUp.entry, confidence: runnerUp.confidence });
+
+		if (confidence < this.config.answerFloor || ambiguous) {
+			this.counters.clarified++;
+			trace.steps.push({
+				step: "clarify_band",
+				confidence: Number(confidence.toFixed(3)),
+				answerFloor: this.config.answerFloor,
+				clarifyFloor: this.config.clarifyFloor,
+				ambiguous: !!ambiguous,
+				offered: offered.map(function (o) { return o.entry.id; })
+			});
+			var clarifyRes = this.clarify(lang, rawQuery, offered, sources);
+			clarifyRes.trace = trace;
+			// The top suggestion becomes the tentative topic, so a follow-up
+			// ("what about the fee for it") still resolves against it.
+			this.memory.push({ query: rawQuery, lang: lang, entryId: entry.id, clarified: true });
+			return clarifyRes;
 		}
 
 		var picked = this.pickBlock(entry, lang);
@@ -627,6 +778,9 @@
 			category: entry.category,
 			// which landing-page section answers this, so the UI can navigate there
 			section: entry.section || null,
+			// which campus-walk stop shows this place, if the entry has one
+			walkStop: entry.walkStop || null,
+			walkStopName: entry.walkStopName || null,
 			answer: answer,
 			unresolvedTokens: resolvedAnswer.unresolved,
 			lang: picked.lang,

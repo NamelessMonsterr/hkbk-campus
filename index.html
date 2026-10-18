@@ -127,6 +127,7 @@ footer{padding:50px 56px;display:flex;justify-content:space-between;font-size:13
 var ui=new window.HKBKChatUI.ChatUI({mount:host,onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false}}).init(window.HKBK_KB);
 function openChat(q){ui.open();launcher.hidden=true;if(q)ui.submit(q)}
 document.querySelectorAll("[data-open-chat]").forEach(function(b){b.addEventListener("click",function(){openChat()})});
-window.hkbkAsk=openChat;})();
+window.hkbkAsk=openChat;
+var cq=new URLSearchParams(location.search).get("chatq");if(cq)openChat(cq);})();
 </script>
 </body></html>
