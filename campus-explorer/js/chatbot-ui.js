@@ -261,7 +261,7 @@
 	ChatUI.prototype.addSource = function (row, source) {
 		if (!source) return;
 		var bits = ["Source: " + labelise(source.category || "knowledge base")];
-		if (source.updated) bits.push("updated " + source.updated);
+		if (source.updated) bits.push("entry edited " + source.updated);
 		if (source.kbVersion) bits.push("KB v" + source.kbVersion);
 		row.appendChild(el("div", "msg__source", bits.join(" \u00B7 ")));
 		this.scroll();
@@ -278,6 +278,17 @@
 		function rate(value, btn) {
 			if (done) return;
 			done = true;
+			/* Ratings are usage data: without the opt-in nothing is stored,
+			 * and the button says so instead of pretending to count. */
+			if (global.HKBKUsage && !global.HKBKUsage.enabled()) {
+				wrap.innerHTML = "";
+				var off = el("span", "msg__rateThanks",
+					"Usage sharing is off, so this rating was not stored.");
+				off.tabIndex = -1;
+				wrap.appendChild(off);
+				off.focus();
+				return;
+			}
 			try {
 				var all = JSON.parse(global.localStorage.getItem("hkbk_ratings") || "[]");
 				all.push({
@@ -288,11 +299,15 @@
 					category: res.category || null,
 					outcome: res.type
 				});
+				if (all.length > 500) all = all.slice(all.length - 500);
 				global.localStorage.setItem("hkbk_ratings", JSON.stringify(all));
 			} catch (e) { /* storage full or blocked: rating is lost, chat is not */ }
 			wrap.innerHTML = "";
-			wrap.appendChild(el("span", "msg__rateThanks",
-				value === "up" ? "Thanks - noted as helpful." : "Thanks - noted as not helpful."));
+			var thanks = el("span", "msg__rateThanks",
+				value === "up" ? "Thanks - noted as helpful." : "Thanks - noted as not helpful.");
+			thanks.tabIndex = -1;
+			wrap.appendChild(thanks);
+			thanks.focus();
 		}
 		[["up", "\uD83D\uDC4D", "Rate this answer helpful"],
 		 ["down", "\uD83D\uDC4E", "Rate this answer not helpful"]].forEach(function (spec) {
@@ -377,6 +392,8 @@
 			}
 			if (res.type === "answer" && res.source) {
 				self.addSource(row, res.source);
+			}
+			if (res.source || res.type === "clarify" || res.type === "out_of_scope") {
 				self.addRating(row, res);
 			}
 
@@ -411,9 +428,10 @@
 	ChatUI.prototype.maybeAskUsageConsent = function () {
 		var self = this;
 		if (!global.HKBKUsage || global.HKBKUsage.choice() !== null) return;
+		if (this.log.querySelector(".msg--consent")) return; // already asked this session
 		var row = el("div", "msg msg--bot msg--consent");
 		var body = el("div", "msg__body");
-		body.appendChild(el("div", null, "Help improve this bot? Share anonymous usage: what was answered or refused, never your question text. Stays on this device; you can export or delete it any time."));
+		body.appendChild(el("div", null, "Help improve this bot? Share anonymous usage: what was answered or refused, thumbs ratings, and walk visits - never your question text. Stays on this device; saying No deletes all of it, and you can export or delete it any time."));
 		var wrap = el("div", "msg__consentBtns");
 		[["Yes, share anonymous usage", "yes"], ["No thanks", "no"]].forEach(function (spec) {
 			var b = el("button", "msg__suggestBtn", spec[0]);
@@ -434,6 +452,7 @@
 	};
 
 	ChatUI.prototype.open = function () {
+		if (this.root.classList.contains("chat--open")) return;
 		this.returnFocusTo = document.activeElement;
 		this.root.classList.add("chat--open");
 		this.root.setAttribute("aria-hidden", "false");

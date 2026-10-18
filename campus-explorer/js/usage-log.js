@@ -19,7 +19,13 @@
 	function setChoice(v) {
 		try {
 			localStorage.setItem(OPTIN, v);
-			if (v !== "yes") localStorage.removeItem(LOG);
+			/* "No" means nothing is kept: every device-local log goes, not
+			 * just the usage events - ratings and walk visits too. */
+			if (v !== "yes") {
+				localStorage.removeItem(LOG);
+				localStorage.removeItem("hkbk_ratings");
+				localStorage.removeItem("hkbk_walk");
+			}
 		} catch (e) {}
 	}
 	function enabled() { return choice() === "yes"; }

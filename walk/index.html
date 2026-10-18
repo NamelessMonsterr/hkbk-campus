@@ -173,8 +173,9 @@ var s0=0;if(h>0&&h<=N){for(var qi=0;qi<N;qi++)if(ST[qi].n===h){s0=qi;break}}var 
 if(q.get('stop')){var ss=stops.filter(function(s){return s.id===q.get('stop')})[0];if(ss&&ss.step!=null)s0=ss.step}
 loadBin(ST[0].b).then(function(){$('loading').style.opacity='0';setTimeout(function(){$('loading').style.display='none'},400);
   if(!q.get('intro')){chap.value=s0;begin(s0)}
-  if(q.get('play'))play()});
+  if(q.get('play')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)play()});
 recenter(posAt(0));
 })();
-</script><script src="walk-instrument.js"></script>
+</script><script src="../campus-explorer/js/usage-log.js"></script>
+<script src="walk-instrument.js"></script>
 </body></html>

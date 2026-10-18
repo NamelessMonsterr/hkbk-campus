@@ -268,10 +268,14 @@
 	padding: 4px 7px;
 	cursor: pointer;
 }
-.msg__rateBtn:hover, .msg__rateBtn:focus-visible {
+.msg__rateBtn:hover {
 	background: #eef2ff;
 	border-color: #6366f1;
-	outline: none;
+}
+.msg__rateBtn:focus-visible {
+	background: #eef2ff;
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
 }
 .msg__rateThanks {
 	font-size: 0.72rem;

@@ -9,7 +9,15 @@
 	var KEY = "hkbk_walk";
 	function read() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
 	function write(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
-	function log(ev) { var v = read(); ev.ts = new Date().toISOString(); v.push(ev); write(v); }
+	/* instrumentation shares the chat's usage opt-in: without consent,
+	 * nothing is recorded at all */
+	function consented() { return !!(window.HKBKUsage && window.HKBKUsage.enabled()); }
+	function log(ev) {
+		if (!consented()) return;
+		var v = read(); ev.ts = new Date().toISOString(); v.push(ev);
+		if (v.length > 500) v = v.slice(v.length - 500);
+		write(v);
+	}
 
 	var sessionStart = Date.now();
 	var current = null;      // current chapter stop id
@@ -39,7 +47,7 @@
 	}
 
 	function checkComplete() {
-		if (asked) return;
+		if (asked || !consented()) return;
 		var anchors = (window.WALK && window.WALK.stops || []).filter(function (s) { return s.step != null; });
 		var seen = anchors.filter(function (s) { return visited[s.id] != null; }).length;
 		if (anchors.length && seen >= anchors.length) {
@@ -52,6 +60,9 @@
 	/* two short presence questions, once per walk completion, dismissible */
 	function presenceQuestions() {
 		var box = document.createElement("div");
+		box.setAttribute("role", "dialog");
+		box.setAttribute("aria-live", "polite");
+		box.setAttribute("aria-label", "Walk feedback questions");
 		box.style.cssText = "position:fixed;left:50%;bottom:76px;transform:translateX(-50%);" +
 			"background:#0b1030;color:#f4f0e6;border-radius:12px;padding:14px 18px;z-index:60;" +
 			"font:14px/1.5 system-ui,sans-serif;max-width:320px;box-shadow:0 8px 30px rgba(0,0,0,.35)";
@@ -90,15 +101,22 @@
 		}
 		ask();
 		document.body.appendChild(box);
+	var firstBtn = box.querySelector("button");
+	if (firstBtn) firstBtn.focus();
 	}
 
 	/* the walk renders via requestAnimationFrame already; a light poll is
 	 * simpler and safer than wrapping its internals */
 	setInterval(tick, 500);
-	window.addEventListener("beforeunload", function () {
+	function flush() {
 		if (current && enteredAt != null) {
 			var dwell = Date.now() - enteredAt;
 			if (dwell > 0) log({ type: "stop", id: current, dwellMs: dwell });
+			enteredAt = Date.now();
 		}
+	}
+	window.addEventListener("pagehide", flush);
+	document.addEventListener("visibilitychange", function () {
+		if (document.visibilityState === "hidden") flush();
 	});
 })();
