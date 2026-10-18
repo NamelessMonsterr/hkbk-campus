@@ -11,9 +11,9 @@ A website for HKBK Group of Institutions, Nagawara, Bengaluru, with a first-pers
 
 **Campus directions** (in the assistant). Ask "how do I get to the Food Court from the Main Gate" and it answers with the filmed walk route between the two stops, in order, with a distance estimate from the stop coordinates. Routes are offered only between stops the footage connects; a place with no footage (like the Library) gets an honest "cannot verify" answer, never an invented route.
 
-**Campus walk** (`walk/`). A guided tour that starts at the Main Gate and ends at the Exam Section: 65 steps across 14 stops.
+**Campus walk** (`walk/`). A guided tour that starts at the Main Gate and ends at the Xerox shop: 65 steps across 14 stops.
 
-Main Gate, Football Ground, ONESB, B Block, Girls Hostel, Admin Block, PU Block, A Block, Food Court, Boys Hostel, Main Ground, Namaz Room, Xerox, Exam Section.
+Main Gate, Football Ground, ONESB, B Block, Girls Hostel, Admin Block, PU Block, A Block, Food Court, Boys Hostel, Main Ground, Namaz Room, Exam Section, Xerox.
 
 Every frame is a still taken from real walkthrough video of the campus. There are no renders or stock images. A small round map shows where you are on the route. Controls: arrow buttons, arrow keys, scroll, swipe, or the Walk button for autoplay.
 

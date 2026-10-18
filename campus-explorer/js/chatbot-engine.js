@@ -893,7 +893,16 @@
 				var dres = this.directionsAnswer(lang, dirq, trace);
 				if (dres) {
 					this.counters.answered++;
-					this.memory.push({ query: rawQuery, lang: lang, entryId: null, directions: true });
+					/* remember the destination's KB entry so a follow-up like
+					 * "what about the timings" resolves against the place the
+					 * route led to */
+					var destEntry = null;
+					if (dres.walkStop) {
+						for (var ei = 0; ei < this.kb.entries.length; ei++) {
+							if (this.kb.entries[ei].walkStop === dres.walkStop) { destEntry = this.kb.entries[ei].id; break; }
+						}
+					}
+					this.memory.push({ query: rawQuery, lang: lang, entryId: destEntry, directions: true });
 					return dres;
 				}
 			}

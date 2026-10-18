@@ -1,6 +1,6 @@
 # HKBK Campus Walk
 
-A first-person walk through the HKBK campus, from the Main Gate to the Exam Section: 65 steps across 14 stops. Every frame is a still from real campus video.
+A first-person walk through the HKBK campus, from the Main Gate to the Xerox shop: 65 steps across 14 stops. Every frame is a still from real campus video.
 
 Live: https://namelessmonsterr.github.io/hkbk-campus/walk/
 

@@ -152,8 +152,9 @@
 	card(st.chunks, "retrieval chunks at load");
 	card(buildMs.toFixed(0) + " ms", "index build time");
 	}
-	if (document.readyState === "complete") measure();
-	else window.addEventListener("load", measure);
+	/* loadEventEnd is still 0 while the load handler runs; defer a tick */
+	if (document.readyState === "complete") setTimeout(measure, 0);
+	else window.addEventListener("load", function () { setTimeout(measure, 0); });
 })();
 </script>
 </body>

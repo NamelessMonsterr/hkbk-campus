@@ -1,3 +1,4 @@
+/* GENERATED from knowledge-base.json - do not edit by hand. */
 window.HKBK_KB = {
  "meta": {
   "institution": "HKBK College of Engineering",
@@ -2176,6 +2177,19 @@ window.HKBK_KB = {
     ]
    },
    {
+    "id": "exam",
+    "name": "Exam Section",
+    "lat": 13.03475,
+    "lon": 77.6197,
+    "aliases": [
+     "exam section",
+     "examination section",
+     "exam office",
+     "exam cell",
+     "exam"
+    ]
+   },
+   {
     "id": "xerox",
     "name": "Xerox",
     "lat": 13.0347,
@@ -2188,19 +2202,6 @@ window.HKBK_KB = {
      "printing shop",
      "print shop",
      "copy shop"
-    ]
-   },
-   {
-    "id": "exam",
-    "name": "Exam Section",
-    "lat": 13.03475,
-    "lon": 77.6197,
-    "aliases": [
-     "exam section",
-     "examination section",
-     "exam office",
-     "exam cell",
-     "exam"
     ]
    }
   ],

@@ -454,6 +454,14 @@
 	var host = document.getElementById("chatHost");
 	var launcher = document.getElementById("launcher");
 
+	/* ?nochat hides the assistant entirely - the usability study's website
+	 * condition must measure browsing without the bot available */
+	var nochat = /[?&]nochat\b/.test(window.location.search);
+	if (nochat) {
+		if (host) host.style.display = "none";
+		if (launcher) launcher.style.display = "none";
+	}
+
 	var ui = new window.HKBKChatUI.ChatUI({
 		mount: host,
 		// The bot navigates the page: scroll to the section and flash it.
@@ -471,9 +479,11 @@
 			}, 1700);
 		},
 		onClose: function () { launcher.hidden = false; }
-	}).init(window.HKBK_KB);
+	});
+	if (!nochat) ui.init(window.HKBK_KB);
 
 	function openChat(question) {
+		if (nochat) return;
 		ui.open();
 		launcher.hidden = true;
 		if (question) ui.submit(question);

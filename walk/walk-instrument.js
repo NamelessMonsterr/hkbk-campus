@@ -36,12 +36,15 @@
 		if (id !== current) {
 			if (current && enteredAt != null) {
 				var dwell = now - enteredAt;
-				visited[current] = (visited[current] || 0) + dwell;
-				log({ type: "stop", id: current, dwellMs: dwell });
+				/* a stop only counts as visited after a real pause, so
+				 * scrubbing the progress bar cannot complete the walk */
+				if (dwell >= 1500) {
+					visited[current] = (visited[current] || 0) + dwell;
+					log({ type: "stop", id: current, dwellMs: dwell });
+				}
 			}
 			current = id;
 			enteredAt = now;
-			if (id && !visited[id]) visited[id] = 0;
 			checkComplete();
 		}
 	}
@@ -111,7 +114,10 @@
 	function flush() {
 		if (current && enteredAt != null) {
 			var dwell = Date.now() - enteredAt;
-			if (dwell > 0) log({ type: "stop", id: current, dwellMs: dwell });
+			if (dwell >= 1500) {
+				visited[current] = (visited[current] || 0) + dwell;
+				log({ type: "stop", id: current, dwellMs: dwell });
+			}
 			enteredAt = Date.now();
 		}
 	}

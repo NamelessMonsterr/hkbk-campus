@@ -2176,6 +2176,19 @@
     ]
    },
    {
+    "id": "exam",
+    "name": "Exam Section",
+    "lat": 13.03475,
+    "lon": 77.6197,
+    "aliases": [
+     "exam section",
+     "examination section",
+     "exam office",
+     "exam cell",
+     "exam"
+    ]
+   },
+   {
     "id": "xerox",
     "name": "Xerox",
     "lat": 13.0347,
@@ -2188,19 +2201,6 @@
      "printing shop",
      "print shop",
      "copy shop"
-    ]
-   },
-   {
-    "id": "exam",
-    "name": "Exam Section",
-    "lat": 13.03475,
-    "lon": 77.6197,
-    "aliases": [
-     "exam section",
-     "examination section",
-     "exam office",
-     "exam cell",
-     "exam"
     ]
    }
   ],

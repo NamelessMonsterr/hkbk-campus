@@ -300,6 +300,28 @@ check("hook is settable", (function () {
 	check("directions: no fabricated confidence score", r13.confidence === null);
 })();
 
+section("Directions stops mirror the filmed walk");
+
+(function () {
+	/* The directions order must match the footage order (walk-data.js steps),
+	 * or a spoken route can contradict the walk page. Calibrated after the
+	 * 2026-10 council review found xerox listed before exam. */
+	var fs = require("fs");
+	global.window = global.window || {};
+	new Function(fs.readFileSync(__dirname + "/../../walk/walk-data.js", "utf8"))();
+	var walk = global.window.WALK;
+	var filmed = walk.stops.filter(function (s) { return s.step != null; })
+		.sort(function (a, b) { return a.step - b.step; })
+		.map(function (s) { return s.id; });
+	var KBJ = require("../data/knowledge-base.json");
+	var kb = (KBJ.directions && KBJ.directions.stops || []).map(function (s) { return s.id; });
+	check("directions: KB stop list covers exactly the filmed stops",
+		kb.length === filmed.length && kb.every(function (id) { return filmed.indexOf(id) !== -1; }));
+	var kbInFilmOrder = kb.slice().sort(function (a, b) { return filmed.indexOf(a) - filmed.indexOf(b); });
+	check("directions: KB stop order matches footage order",
+		JSON.stringify(kb) === JSON.stringify(kbInFilmOrder));
+})();
+
 section("Result");
 console.log("  " + pass + " passed, " + fail + " failed");
 process.exit(fail === 0 ? 0 : 1);

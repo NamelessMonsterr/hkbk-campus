@@ -184,10 +184,11 @@
 				stage.appendChild(el("p", "sub", "Ask the chatbot below. Click \u201CFound it\u201D as soon as you have the answer."));
 				var host = el("div"); host.id = "chatHost";
 				stage.appendChild(host);
-				new window.HKBKChatUI.ChatUI({ mount: host }).init(window.HKBK_KB);
+				var studyUi = new window.HKBKChatUI.ChatUI({ mount: host }).init(window.HKBK_KB);
+				studyUi.open(); /* init alone leaves aria-hidden=true on a visible chat */
 			} else {
 				var a = el("a", null, "Open the college website in a new tab");
-				a.href = "../index.html"; a.target = "_blank"; a.rel = "noopener";
+				a.href = "../campus-explorer/index.html?nochat"; a.target = "_blank"; a.rel = "noopener";
 				a.style.cssText = "display:inline-block;margin:10px 0;padding:10px 18px;background:#1b3dff;color:#fff;border-radius:8px;text-decoration:none";
 				stage.appendChild(a);
 				stage.appendChild(el("p", "sub", "Find the answer on the website, come back here, and click \u201CFound it\u201D."));
@@ -209,11 +210,22 @@
 				var note = el("textarea");
 				note.setAttribute("aria-label", "Optional note about this task");
 				stage.appendChild(note);
+				/* self-reported "Found it" is not an answer check; the proctor
+				 * marks whether the answer the participant found is right */
+				var verdictRow = el("p", "sub");
+				verdictRow.appendChild(document.createTextNode("Proctor check: "));
+				var verdict = el("select");
+				verdict.setAttribute("aria-label", "Proctor answer check");
+				[["unmarked", "not checked"], ["correct", "answer correct"], ["wrong", "answer wrong"]].forEach(function (o) {
+					var opt = el("option", null, o[1]); opt.value = o[0]; verdict.appendChild(opt);
+				});
+				verdictRow.appendChild(verdict);
+				stage.appendChild(verdictRow);
 				var next = el("button", null, i + 1 >= state.plan.length ? "Continue to the questionnaire" : "Next task");
 				next.style.marginTop = "10px";
 				next.addEventListener("click", function () {
 					state.tasks.push({ condition: task.condition, id: task.id, text: task.text,
-						ms: ms, success: ok, note: note.value.trim() });
+						ms: ms, success: ok, verdict: verdict.value, note: note.value.trim() });
 					save();
 					screenTask(i + 1);
 				});
@@ -239,7 +251,7 @@
 			for (var v = 1; v <= 5; v++) {
 				var cell = el("div"); cell.style.textAlign = "center";
 				var r = el("input"); r.type = "radio"; r.name = "sus" + qi; r.value = v;
-				r.setAttribute("aria-label", "Question " + (qi + 1) + ", " + v + " of 5");
+				r.setAttribute("aria-label", "Statement " + (qi + 1) + ": " + s + " - " + v + " of 5");
 				cell.appendChild(r); grid.appendChild(cell);
 				inputs.push(r);
 			}
@@ -293,11 +305,11 @@
 				if (/^[=+\-@]/.test(v)) v = "'" + v; /* spreadsheet formula guard */
 				return '"' + v.replace(/"/g, '""') + '"';
 			};
-			var lines = ["participant,order,started,finished,task_id,condition,time_ms,success,note,sus_1,sus_2,sus_3,sus_4,sus_5,sus_6,sus_7,sus_8,sus_9,sus_10,sus_score"];
+			var lines = ["participant,order,started,finished,task_id,condition,time_ms,success,verdict,note,sus_1,sus_2,sus_3,sus_4,sus_5,sus_6,sus_7,sus_8,sus_9,sus_10,sus_score"];
 			state.tasks.forEach(function (t) {
 				lines.push([q(state.participant), q(state.order), q(state.started), q(state.finished),
-					q(t.id), q(t.condition), t.ms, t.success ? 1 : 0, q(t.note),
-					state.sus.join(",").split(",").map(function (x) { return x; }).join(","), ""].slice(0, 9)
+					q(t.id), q(t.condition), t.ms, t.success ? 1 : 0, q(t.verdict || "unmarked"), q(t.note),
+					state.sus.join(",").split(",").map(function (x) { return x; }).join(","), ""].slice(0, 10)
 					.concat(state.sus).concat([susScore(state.sus)]).join(","));
 			});
 			var blob = new Blob([lines.join("\n")], { type: "text/csv" });
