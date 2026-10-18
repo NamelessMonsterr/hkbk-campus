@@ -1778,7 +1778,7 @@ window.HKBK_KB = {
      "where is b block",
      "b block"
     ],
-    "a": "B Block is one of the academic blocks on the campus walk."
+    "a": "B Block is the blue and white building with an arched entrance; the sign above the entrance reads 'B Block'."
    },
    "section": "campus",
    "walkStop": "b",
