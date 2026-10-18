@@ -1,0 +1,78 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Department explorer - HKBK Group of Institutions</title>
+<style>
+@import url('assets/fonts/fonts.css');
+:root{--blue:#1b3dff;--paper:#f4f0e6;--sun:#ffc21a;--ink:#0b1030;--mut:#4b5270}
+*{margin:0;box-sizing:border-box}body{background:var(--paper);color:var(--ink);font-family:Inter,sans-serif}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:9;background:var(--paper);display:flex;align-items:center;justify-content:space-between;padding:18px 56px;border-bottom:1px solid #0b103018}
+.logo{display:flex;gap:14px;align-items:center}.mark{width:46px;height:46px;background:var(--blue);color:#fff;display:grid;place-items:center;font-family:Fraunces,serif;font-size:25px}
+.logo b{font-family:Fraunces,serif;font-size:19px;font-weight:500;color:var(--blue);line-height:1.05}
+nav{display:flex;gap:30px;font-size:15px;font-weight:500}nav a:hover{color:var(--blue)}
+.apply{background:var(--blue);color:#fff;padding:13px 24px;font-weight:600;font-size:14px}
+.wrap{padding:64px 56px 80px;max-width:1200px}
+.eye{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);font-weight:600}
+h1{font-family:Fraunces,serif;font-weight:400;font-size:clamp(44px,5.5vw,76px);line-height:1;letter-spacing:-.03em;color:var(--blue);margin:14px 0 18px}
+h1 i{color:var(--ink)}
+.lede{font-size:19px;line-height:1.6;max-width:640px}
+.stats{display:flex;gap:56px;margin:44px 0 8px;flex-wrap:wrap}
+.stats b{font-family:Fraunces,serif;font-weight:400;font-size:56px;color:var(--blue);display:block;line-height:1}
+.stats span{font-size:14px;color:var(--mut)}
+.dept{border:2px solid var(--ink);background:#fff;margin-top:22px;cursor:pointer;transition:box-shadow .15s}
+.dept:hover{box-shadow:8px 8px 0 var(--sun)}
+.dept .hd{display:grid;grid-template-columns:70px 1fr auto;gap:20px;align-items:center;padding:24px 28px}
+.dept .no{font-family:Fraunces,serif;font-size:30px;color:var(--blue)}
+.dept h2{font-family:Fraunces,serif;font-weight:500;font-size:clamp(22px,2.6vw,32px);margin:0}
+.dept .meta{font-size:13px;color:var(--mut);margin-top:4px}
+.dept .plus{font-size:30px;font-family:Fraunces,serif;color:var(--ink);transition:transform .2s}
+.dept.open .plus{transform:rotate(45deg)}
+.dept .bd{display:none;padding:0 28px 28px;border-top:1px solid #0b103015}
+.dept.open .bd{display:grid;grid-template-columns:1.2fr 1fr;gap:36px;padding-top:24px}
+.dept h4{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+.dept p{font-size:15px;line-height:1.6;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{border:1.5px solid var(--ink);padding:6px 12px;font-size:13px;font-weight:600}
+.bars{display:flex;align-items:flex-end;gap:10px;height:110px;margin-top:8px}
+.bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;text-align:center}
+.bars .b i{display:block;background:var(--blue);min-height:4px}
+.bars .b em{font-style:normal;font-size:11px;color:var(--mut)}
+.bars .b b{font-size:12px}
+.note{margin-top:28px;font-size:14px;line-height:1.6;color:var(--mut);max-width:760px}
+footer{display:flex;justify-content:space-between;gap:20px;padding:44px 56px;border-top:1px solid #0b103018;font-size:14px;color:var(--mut);line-height:1.6;margin-top:64px}
+@media(max-width:900px){.dept .bd{grid-template-columns:1fr}header,.wrap,footer{padding-left:22px;padding-right:22px}nav{display:none}}
+</style></head><body>
+<header><a class=logo href="index.html"><span class=mark>H</span><b>HKBK Group<br>of Institutions</b></a><nav><a href="index.html#programmes">Colleges</a><a href="index.html#departments">Departments</a><a href="index.html#placements">Placements</a><a href="index.html#campus">Campus</a><a href="index.html#news">News</a><a href="walk/index.html">Walk</a></nav><a class=apply href="admissions.html">Apply now</a></header>
+<main class=wrap>
+<div class=eye>Department explorer</div>
+<h1>Six departments. <i>Tap one open.</i></h1>
+<p class=lede>Intake history, electives and what each department actually teaches — as published on the department pages of hkbk.edu.in.</p>
+<div class=stats><div><b>~840</b><span>UG engineering seats</span></div><div><b>~102</b><span>PG seats</span></div><div><b>1997</b><span>oldest department</span></div></div>
+
+<div class=dept><div class=hd><span class=no>01</span><div><h2>Computer Science &amp; Engineering</h2><div class=meta>B.E. and Ph.D. &middot; established 1997 &middot; the most subscribed branch</div></div><span class=plus>+</span></div>
+<div class=bd><div><h4>What you study</h4><p>Programming, data structures and algorithms, operating systems, databases, computer networks, software engineering and machine learning, following the VTU scheme. Project work, internships and coding clubs run alongside.</p><h4 style="margin-top:18px">Intake history</h4><div class=bars><div class=b><b>45</b><i style="height:6px"></i><em>1997</em></div><div class=b><b>60</b><i style="height:9px"></i><em>2000</em></div><div class=b><b>90</b><i style="height:14px"></i><em>2002</em></div><div class=b><b>120</b><i style="height:19px"></i><em>2011</em></div><div class=b><b>180</b><i style="height:30px"></i><em>2016</em></div><div class=b><b>300</b><i style="height:64px"></i><em>2024</em></div></div></div>
+<div><h4>Extra electives</h4><div class=chips><span>AI &amp; ML</span><span>Data Analytics</span><span>Cloud Computing</span><span>Mobile Computing</span><span>Game Design</span><span>AR</span></div></div></div></div>
+
+<div class=dept><div class=hd><span class=no>02</span><div><h2>Artificial Intelligence &amp; Machine Learning</h2><div class=meta>B.E. &middot; established 2021-22 &middot; the newest branch</div></div><span class=plus>+</span></div>
+<div class=bd><div><h4>What you study</h4><p>Machine learning, deep learning, natural language processing, computer vision and data engineering, alongside the core computing subjects. Graduates commonly move into AI engineer, data analyst and ML engineer roles.</p><h4 style="margin-top:18px">Intake history</h4><div class=bars><div class=b><b>60</b><i style="height:24px"></i><em>2021-22</em></div><div class=b><b>120</b><i style="height:52px"></i><em>2024-25</em></div></div></div>
+<div><h4>Extra electives</h4><div class=chips><span>Python</span><span>NLP with spaCy</span><span>Keras</span><span>PyTorch</span><span>Scikit-learn</span></div></div></div></div>
+
+<div class=dept><div class=hd><span class=no>03</span><div><h2>Information Science &amp; Engineering</h2><div class=meta>B.E. &middot; intake revised several times since 2001-02</div></div><span class=plus>+</span></div>
+<div class=bd><div><h4>Intake history</h4><div class=bars><div class=b><b>45&ndash;60</b><i style="height:10px"></i><em>2001-02</em></div><div class=b><b>60&ndash;120</b><i style="height:22px"></i><em>2016-17</em></div><div class=b><b>120&ndash;180</b><i style="height:34px"></i><em>2020-21</em></div><div class=b><b>120</b><i style="height:22px"></i><em>2021-22</em></div><div class=b><b>60</b><i style="height:10px"></i><em>2026-27</em></div></div><p style="margin-top:12px">Figures as listed by the college; confirm the current intake with admissions.</p></div>
+<div><h4>Extra electives</h4><div class=chips><span>AI &amp; ML</span><span>Data Analytics</span><span>Cloud Computing</span><span>Mobile Computing</span><span>AR</span></div></div></div></div>
+
+<div class=dept><div class=hd><span class=no>04</span><div><h2>Electronics &amp; Communication</h2><div class=meta>B.E., M.Tech, M.Sc. (Engg.) by Research &amp; Ph.D.</div></div><span class=plus>+</span></div>
+<div class=bd><div><h4>What you study</h4><p>Electronics and communication engineering under the VTU scheme, with research pathways up to the doctorate.</p></div>
+<div><h4>Extra electives</h4><div class=chips><span>Internet of Things</span><span>Artificial Intelligence</span><span>Robotics &amp; Wireless Communication</span><span>Sensors &amp; Wearable Technology</span><span>Nano Electronics</span></div></div></div></div>
+
+<div class=dept><div class=hd><span class=no>05</span><div><h2>Mechanical Engineering</h2><div class=meta>B.E.</div></div><span class=plus>+</span></div>
+<div class=bd><div><h4>What you study</h4><p>Core mechanical engineering under the VTU scheme, with industry-linked certification options.</p></div>
+<div><h4>Extra electives</h4><div class=chips><span>EV Manufacturing with TVS Motors</span><span>German Language Training</span><span>ISO 22301 Internal Auditor Training</span></div></div></div></div>
+
+<div class=dept><div class=hd><span class=no>06</span><div><h2>MBA</h2><div class=meta>Post graduation and Ph.D. &middot; 2 years</div></div><span class=plus>+</span></div>
+<div class=bd><div><h4>What you study</h4><p>A two-year MBA with specialisations in areas such as marketing, finance, human resources and business analytics. Admission through PGCET or the management quota; eligibility is a bachelor's degree with at least 50% aggregate.</p></div>
+<div><h4>Certifications</h4><div class=chips><span>Business Management (Analytics)</span><span>Digital Marketing</span><span>Entrepreneurship &amp; Innovation</span><span>Indian Labour Law</span><span>Logistics</span></div></div></div></div>
+
+<p class=note>Sanctioned intake is revised by AICTE and VTU each year, and CSE and AI&amp;ML each carry about 120 sanctioned seats at the UG level. Figures above are as published on the college website — confirm the current numbers with the admissions office.</p>
+</main>
+<footer><span>HKBK Group of Institutions<br>22/1, Opp. Manyata Tech Park, Nagawara, Bengaluru 560045</span><span>Unofficial student concept. Not the college's official website.</span></footer>
+<script>document.querySelectorAll('.dept').forEach(d=>d.querySelector('.hd').addEventListener('click',()=>d.classList.toggle('open')));if(location.hash==='#open-all')document.querySelectorAll('.dept').forEach(d=>d.classList.add('open'))</script>
+</body></html>

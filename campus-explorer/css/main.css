@@ -827,3 +827,20 @@ a { color: inherit; }
 	color: #15803d;
 }
 
+
+.chat__mic {
+  border: 2px solid var(--ink, #0b1030);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 14px;
+  cursor: pointer;
+  border-radius: 0;
+}
+.chat__mic--on {
+  background: var(--sun, #ffc21a);
+  animation: chatMicPulse 1s infinite;
+}
+@keyframes chatMicPulse { 50% { opacity: .55; } }

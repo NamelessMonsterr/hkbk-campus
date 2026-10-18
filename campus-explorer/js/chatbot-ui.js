@@ -99,6 +99,48 @@
 		var send = el("button", "chat__send", "Ask");
 		send.type = "submit";
 		form.appendChild(this.input);
+
+		/* Voice input - uses the browser's built-in speech recognition when
+		 * available (Chrome/Edge). No audio leaves the page anywhere else;
+		 * where unsupported, the button simply never appears. */
+		var SR = global.SpeechRecognition || global.webkitSpeechRecognition;
+		if (SR) {
+			var mic = el("button", "chat__mic", "Mic");
+			mic.type = "button";
+			mic.title = "Voice input (browser speech recognition)";
+			mic.setAttribute("aria-label", "Voice input");
+			var rec = null, listening = false;
+			var LANGLIB = { en: "en-IN", kn: "kn-IN", hi: "hi-IN", ur: "ur-PK" };
+			var resetMic = function () {
+				listening = false;
+				mic.classList.remove("chat__mic--on");
+				mic.textContent = "Mic";
+			};
+			mic.addEventListener("click", function () {
+				if (listening) { if (rec) rec.stop(); return; }
+				rec = new SR();
+				rec.lang = LANGLIB[self._lastLang] || "en-IN";
+				rec.interimResults = true;
+				rec.continuous = false;
+				listening = true;
+				mic.classList.add("chat__mic--on");
+				mic.textContent = "Listening\u2026";
+				rec.onresult = function (ev) {
+					var txt = "";
+					for (var i = 0; i < ev.results.length; i++) { txt += ev.results[i][0].transcript; }
+					self.input.value = txt;
+					if (ev.results[ev.results.length - 1].isFinal) {
+						var q = txt.trim();
+						rec.stop();
+						if (q) { self.input.value = ""; self.submit(q); }
+					}
+				};
+				rec.onend = resetMic;
+				rec.onerror = resetMic;
+				try { rec.start(); } catch (e2) { resetMic(); }
+			});
+			form.appendChild(mic);
+		}
 		form.appendChild(send);
 		form.addEventListener("submit", function (e) {
 			e.preventDefault();
@@ -360,6 +402,7 @@
 			var res;
 			try {
 				res = self.engine.ask(question);
+				if (res && res.lang) { self._lastLang = res.lang; }
 			} catch (err) {
 				thinking.remove();
 				self.addBot("Something broke while looking that up. Please try rephrasing.", "error");

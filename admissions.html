@@ -1,0 +1,123 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Admissions guide - HKBK Group of Institutions</title>
+<style>
+@import url('assets/fonts/fonts.css');
+:root{--blue:#1b3dff;--paper:#f4f0e6;--sun:#ffc21a;--ink:#0b1030;--mut:#4b5270}
+*{margin:0;box-sizing:border-box}body{background:var(--paper);color:var(--ink);font-family:Inter,sans-serif}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:9;background:var(--paper);display:flex;align-items:center;justify-content:space-between;padding:18px 56px;border-bottom:1px solid #0b103018}
+.logo{display:flex;gap:14px;align-items:center}.mark{width:46px;height:46px;background:var(--blue);color:#fff;display:grid;place-items:center;font-family:Fraunces,serif;font-size:25px}
+.logo b{font-family:Fraunces,serif;font-size:19px;font-weight:500;color:var(--blue);line-height:1.05}
+nav{display:flex;gap:30px;font-size:15px;font-weight:500}nav a:hover{color:var(--blue)}
+.apply{background:var(--blue);color:#fff;padding:13px 24px;font-weight:600;font-size:14px}
+.wrap{padding:64px 56px 80px;max-width:1200px}
+.eye{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);font-weight:600}
+h1{font-family:Fraunces,serif;font-weight:400;font-size:clamp(44px,5.5vw,76px);line-height:1;letter-spacing:-.03em;color:var(--blue);margin:14px 0 18px}
+h1 i{color:var(--ink)}
+.lede{font-size:19px;line-height:1.6;max-width:640px;color:var(--ink)}
+h2{font-family:Fraunces,serif;font-weight:400;font-size:clamp(30px,3.4vw,44px);letter-spacing:-.02em;margin:0 0 26px}
+h2 i{color:var(--blue)}
+section{margin-top:72px}
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.route{border:2px solid var(--ink);padding:28px 26px;background:#fff}
+.route>b{font-family:Fraunces,serif;font-size:24px;font-weight:500;display:block;margin-bottom:10px}.route p b{display:inline;font-weight:700}
+.route .tag{display:inline-block;background:var(--sun);color:var(--ink);font-size:12px;font-weight:700;letter-spacing:.08em;padding:4px 10px;margin-bottom:14px}
+.route p{font-size:15px;line-height:1.6;color:var(--mut)}
+.route .fee{margin-top:14px;font-size:14px;font-weight:600;color:var(--ink)}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.step{background:var(--ink);color:#fff;padding:26px 24px;position:relative}
+.step::before{counter-increment:s;content:"0" counter(s);font-family:Fraunces,serif;font-size:44px;color:var(--sun);display:block;margin-bottom:12px}
+.step b{display:block;margin-bottom:8px;font-size:16px}
+.step p{font-size:14px;line-height:1.55;color:#ffffffbb}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.panel{border-top:3px solid var(--blue);padding-top:22px}
+.panel h3{font-family:Fraunces,serif;font-weight:500;font-size:24px;margin:0 0 16px}
+ul.tick{list-style:none;padding:0}
+ul.tick li{padding:9px 0 9px 30px;position:relative;font-size:15px;line-height:1.5;border-bottom:1px solid #0b103012}
+ul.tick li::before{content:"";position:absolute;left:2px;top:14px;width:12px;height:12px;background:var(--sun);border:2px solid var(--ink)}
+.note{margin-top:16px;font-size:14px;line-height:1.6;color:var(--mut)}
+.cta{background:var(--blue);color:#fff;padding:56px;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center}
+.cta h2{color:#fff;margin:0 0 14px}.cta h2 i{color:var(--sun)}
+.cta p{line-height:1.6;font-size:16px;max-width:520px}
+.cta .cards{display:grid;gap:12px}
+.cta .card{background:#ffffff14;border:1px solid #ffffff30;padding:16px 20px;font-size:15px}
+.cta .card b{color:var(--sun);display:block;font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.btn{display:inline-block;padding:17px 28px;font-weight:600;font-size:15px}.b1{background:#fff;color:var(--blue)}.b1:hover{background:var(--sun);color:var(--ink)}
+footer{display:flex;justify-content:space-between;gap:20px;padding:44px 56px;border-top:1px solid #0b103018;font-size:14px;color:var(--mut);line-height:1.6}
+@media(max-width:900px){.routes,.steps,.cols,.cta{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}header,.wrap,footer{padding-left:22px;padding-right:22px}nav{display:none}.cta{padding:36px 22px}}
+</style></head><body>
+<header><a class=logo href="index.html"><span class=mark>H</span><b>HKBK Group<br>of Institutions</b></a><nav><a href="index.html#programmes">Colleges</a><a href="index.html#departments">Departments</a><a href="index.html#placements">Placements</a><a href="index.html#campus">Campus</a><a href="index.html#news">News</a><a href="walk/index.html">Walk</a></nav><a class=apply href="https://apply.hkbk.edu.in">Apply now</a></header>
+<main class=wrap>
+<div class=eye>Admissions guide</div>
+<h1>Three gates in. <i>One campus.</i></h1>
+<p class=lede>Every B.E. seat at HKBK comes through one of three routes: KCET, COMEDK, or the management quota. Here is the whole path, eligibility to enrolment, in one place.</p>
+
+<section>
+<h2>The <i>routes</i>.</h2>
+<div class=routes>
+<div class=route><span class=tag>Karnataka quota</span><b>KCET</b><p>State counselling through KEA. HKBK's KCET code is <b>E083</b> — use it during option entry. Indicative fee: roughly Rs 60,000 to Rs 1,00,000 per year.*</p><p class=fee>Lowest-fee route</p></div>
+<div class=route><span class=tag>All-India quota</span><b>COMEDK</b><p>Private-college consortium counselling, open to candidates from any state. Fees sit noticeably above KCET and below most management seats.*</p><p class=fee>Open nationwide</p></div>
+<div class=route><span class=tag>Direct</span><b>Management quota</b><p>Apply straight to the college. Indicative figures put a Computer Science seat around Rs 2.83 to 3.25 lakh per year.* Confirm the current structure with the admissions office.</p><p class=fee>Fastest route</p></div>
+</div>
+<p class=note>* Fee figures are third-party estimates and published totals disagree with one another. Treat them as a rough guide — the admissions office has the exact current structure and payment schedule.</p>
+</section>
+
+<section>
+<h2>Apply in <i>four steps</i>.</h2>
+<div class=steps>
+<div class=step><b>Apply online</b><p>Submit the application at apply.hkbk.edu.in.</p></div>
+<div class=step><b>Send your records</b><p>Marksheets and your entrance rank card (KCET / COMEDK, where applicable).</p></div>
+<div class=step><b>Verify documents</b><p>Attend document verification with the originals listed below.</p></div>
+<div class=step><b>Confirm the seat</b><p>Pay the fee to lock your seat. Ask admissions for the current deadline.</p></div>
+</div>
+</section>
+
+<section>
+<div class=cols>
+<div class=panel>
+<h3>Eligibility — B.E.</h3>
+<ul class=tick>
+<li>10+2 or equivalent, with Physics and Mathematics compulsory</li>
+<li>Plus one of Chemistry, Biology, Biotechnology, Computer Science or Electronics</li>
+<li>At least 45% aggregate (40% for reserved categories)</li>
+<li>Valid KCET or COMEDK score for those quotas</li>
+<li>Diploma holders: lateral entry straight into second year, via Karnataka DCET counselling</li>
+</ul>
+<h3 style="margin-top:34px">Eligibility — MBA</h3>
+<ul class=tick>
+<li>Bachelor's degree with at least 50% aggregate</li>
+<li>Admission through PGCET or the management quota</li>
+</ul>
+</div>
+<div class=panel>
+<h3>Documents you will need</h3>
+<ul class=tick>
+<li>10th and 12th marksheets</li>
+<li>Transfer certificate</li>
+<li>Migration certificate, where applicable</li>
+<li>Entrance rank card</li>
+<li>Caste or category certificate, if claiming reservation</li>
+<li>Aadhaar</li>
+<li>Passport-size photographs</li>
+<li>Study certificate</li>
+</ul>
+<p class=note>International applicants additionally need passport and visa documents plus an equivalence certificate.</p>
+</div>
+</div>
+</section>
+
+<section class=cta>
+<div>
+<h2>Talk to a <i>human</i>.</h2>
+<p>The admissions office answers eligibility, fees and entrance-route questions directly. Cutoffs move every year with the applicant pool, so for the latest closing ranks and deadlines, ask them — or ask our campus assistant on the home page.</p>
+<p style="margin-top:22px"><a class="btn b1" href="tel:+919035522311">Call +91 90355 22311</a></p>
+</div>
+<div class=cards>
+<div class=card><b>Email</b>admissions@hkbk.edu.in</div>
+<div class=card><b>Campus operator</b>(080) 25441722</div>
+<div class=card><b>Apply</b>apply.hkbk.edu.in</div>
+<div class=card><b>Address</b>22/1, opposite Manyata Tech Park, Nagawara, Bengaluru 560045</div>
+</div>
+</section>
+</main>
+<footer><span>HKBK Group of Institutions<br>22/1, Opp. Manyata Tech Park, Nagawara, Bengaluru 560045</span><span>Unofficial student concept. Not the college's official website.</span></footer>
+</body></html>

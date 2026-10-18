@@ -1,0 +1,73 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Campus map &amp; block directory - HKBK Group of Institutions</title>
+<style>
+@import url('assets/fonts/fonts.css');
+:root{--blue:#1b3dff;--paper:#f4f0e6;--sun:#ffc21a;--ink:#0b1030;--mut:#4b5270}
+*{margin:0;box-sizing:border-box}body{background:var(--paper);color:var(--ink);font-family:Inter,sans-serif}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:9;background:var(--paper);display:flex;align-items:center;justify-content:space-between;padding:18px 56px;border-bottom:1px solid #0b103018}
+.logo{display:flex;gap:14px;align-items:center}.mark{width:46px;height:46px;background:var(--blue);color:#fff;display:grid;place-items:center;font-family:Fraunces,serif;font-size:25px}
+.logo b{font-family:Fraunces,serif;font-size:19px;font-weight:500;color:var(--blue);line-height:1.05}
+nav{display:flex;gap:30px;font-size:15px;font-weight:500}nav a:hover{color:var(--blue)}
+.apply{background:var(--blue);color:#fff;padding:13px 24px;font-weight:600;font-size:14px}
+.wrap{padding:64px 56px 80px;max-width:1280px}
+.eye{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);font-weight:600}
+h1{font-family:Fraunces,serif;font-weight:400;font-size:clamp(44px,5.5vw,76px);line-height:1;letter-spacing:-.03em;color:var(--blue);margin:14px 0 18px}
+h1 i{color:var(--ink)}
+.lede{font-size:19px;line-height:1.6;max-width:660px}
+.duo{display:grid;grid-template-columns:1.15fr 1fr;gap:36px;margin-top:44px;align-items:start}
+.mapbox{position:relative;border:2px solid var(--ink);box-shadow:12px 12px 0 var(--sun)}
+.mapbox img{display:block;width:100%;height:auto}
+.mapbox svg{position:absolute;inset:0;width:100%;height:100%}
+.pin{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;cursor:pointer;border:2px solid #fff;transition:transform .15s,background .15s}
+.pin:hover,.pin.on{background:var(--blue);transform:scale(1.25)}
+.dir{max-height:none}
+.stop{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:13px 16px;border:2px solid transparent;border-bottom:1px solid #0b103012;cursor:pointer;background:#fff}
+.stop:hover,.stop.on{border:2px solid var(--ink);box-shadow:6px 6px 0 var(--sun)}
+.stop .n{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.stop.on .n{background:var(--blue)}
+.stop b{font-size:16px}
+.stop p{font-size:13.5px;line-height:1.5;color:var(--mut);margin-top:3px}
+.note{margin-top:24px;font-size:14px;color:var(--mut);line-height:1.6}
+.btn{display:inline-block;padding:17px 28px;font-weight:600;font-size:15px}.b1{background:var(--ink);color:#fff}.b1:hover{background:var(--blue)}
+footer{display:flex;justify-content:space-between;gap:20px;padding:44px 56px;border-top:1px solid #0b103018;font-size:14px;color:var(--mut);line-height:1.6;margin-top:64px}
+@media(max-width:900px){.duo{grid-template-columns:1fr}header,.wrap,footer{padding-left:22px;padding-right:22px}nav{display:none}}
+</style></head><body>
+<header><a class=logo href="index.html"><span class=mark>H</span><b>HKBK Group<br>of Institutions</b></a><nav><a href="index.html#programmes">Colleges</a><a href="index.html#departments">Departments</a><a href="index.html#placements">Placements</a><a href="index.html#campus">Campus</a><a href="index.html#news">News</a><a href="walk/index.html">Walk</a></nav><a class=apply href="admissions.html">Apply now</a></header>
+<main class=wrap>
+<div class=eye>Campus map &amp; block directory</div>
+<h1>Fourteen stops. <i>One straight walk.</i></h1>
+<p class=lede>Every stop on the campus walk, pinned where it actually sits. Tap a pin or a list entry to match them up — then take the walk itself.</p>
+<div class=duo>
+<div class=mapbox><img src="walk/assets/campus_map.jpg" alt="Map of the HKBK campus"><svg viewBox="0 0 100 100" preserveAspectRatio=none id=route><polyline fill=none stroke="#1b3dff" stroke-width=.8 stroke-dasharray="1.6 1.2" points=""/></svg></div>
+<div class=dir id=dir></div>
+</div>
+<p class=note>Positions come from the campus walk's own map coordinates. Stops are numbered in walk order, main gate to the far end of campus.</p>
+<p style="margin-top:22px"><a class="btn b1" href="walk/index.html">Start the walk &rarr;</a></p>
+</main>
+<footer><span>HKBK Group of Institutions<br>22/1, Opp. Manyata Tech Park, Nagawara, Bengaluru 560045</span><span>Unofficial student concept. Not the college's official website.</span></footer>
+<script>
+const STOPS=[
+[1,"gate","Main Gate",24.701,14.537,"The college entrance on the Nagawara side, directly opposite Manyata Tech Park. The walk begins here."],
+[2,"football","Football Ground",31.092,18.364,"The open ground just inside the main gate, on your left as you walk in."],
+[3,"onesb","ONESB",58.522,20.405,"The glass-fronted building near the main gate. A separate institution that shares the campus."],
+[4,"b","B Block",51.598,36.733,"The blue and white building with an arched entrance; the sign above the porch reads 'B Block'."],
+[5,"girls","Girls Hostel",38.815,35.968,"The cream-coloured building behind the shed, near B Block and the Food Court."],
+[6,"aiml","Admin Block",47.071,22.191,"The main administrative offices, about halfway along the walk."],
+[7,"pu","PU Block",64.647,43.877,"The pre-university college block, east of the main ground, just before A Block."],
+[8,"a","A Block",50.266,63.777,"The white building with arched balconies; its arched porch sits just past the PU Block."],
+[9,"canteen","Food Court",51.332,79.85,"The main canteen area, past A Block at roughly the halfway point of the campus."],
+[10,"boys","Boys Hostel",38.815,92.606,"On the far side of the campus, past the Food Court and next to the Main Ground."],
+[11,"maingr","Main Ground",57.989,37.244,"The large open ground between B Block and G Block, beside the boys hostel."],
+[12,"namaz","Namaz Room",40.5,90.0,"At the far end of the campus, just past the boys hostel, next to the Exam Section."],
+[13,"exam","Exam Section",45.5,90.5,"At the far end of the campus, next to the Namaz Room and the Xerox shop."],
+[14,"xerox","Xerox",43.0,93.0,"Beside the Exam Section - the last stop on the campus walk."]];
+const map=document.querySelector('.mapbox'),dir=document.getElementById('dir'),poly=document.querySelector('#route polyline');
+poly.setAttribute('points',STOPS.map(s=>s[3]+','+s[4]).join(' '));
+STOPS.forEach(s=>{
+ const p=document.createElement('div');p.className='pin';p.textContent=s[0];p.style.left=s[3]+'%';p.style.top=s[4]+'%';p.dataset.id=s[1];map.appendChild(p);
+ const d=document.createElement('div');d.className='stop';d.dataset.id=s[1];d.innerHTML='<span class=n>'+s[0]+'</span><span><b>'+s[2]+'</b><p>'+s[5]+'</p></span>';dir.appendChild(d);
+});
+function on(id){document.querySelectorAll('.pin,.stop').forEach(e=>e.classList.toggle('on',e.dataset.id===id));const st=dir.querySelector('.stop.on');if(st&&window.innerWidth>900)st.scrollIntoView({block:'nearest'})}
+document.querySelectorAll('.pin,.stop').forEach(e=>{e.addEventListener('mouseenter',()=>on(e.dataset.id));e.addEventListener('click',()=>on(e.dataset.id))});
+</script>
+</body></html>
