@@ -653,6 +653,170 @@
 		};
 	};
 
+
+	/* Straight-line metres between two coordinates. Used for direction
+	 * estimates; the answer labels the figure as an estimate. */
+	function haversineM(a, b) {
+		var R = 6371000, rad = Math.PI / 180;
+		var dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+		var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.cos(a.lat * rad) * Math.cos(b.lat * rad) *
+			Math.sin(dLon / 2) * Math.sin(dLon / 2);
+		return 2 * R * Math.asin(Math.sqrt(h));
+	}
+
+	/* Campus directions (2026-10). Routes are offered ONLY along the filmed
+	 * campus walk, between stops the footage connects, in walk order. A place
+	 * with no footage gets an honest "cannot verify" answer, never an invented
+	 * route. Data lives in kb.directions and mirrors walk/walk-data.js. */
+	Engine.prototype.directionGazetteer = function () {
+		if (this._gazetteer) return this._gazetteer;
+		var dirs = (this.kb && this.kb.directions) || null;
+		var g = { stops: [], noFootage: [], updated: dirs ? dirs.updated : null };
+		if (dirs) {
+			g.stops = dirs.stops || [];
+			g.noFootage = dirs.noFootage || [];
+		}
+		this._gazetteer = g;
+		return g;
+	};
+
+	/* Longest-alias match of a free-text place fragment against the gazetteer.
+	 * Returns { name, stopId|null, footage, lat, lon } or null. */
+	Engine.prototype.resolvePlace = function (fragment) {
+		if (!fragment) return null;
+		var text = " " + normalise(fragment).replace(/^the\s+/, "") + " ";
+		var g = this.directionGazetteer();
+		var best = null, bestLen = 0;
+		function consider(place, stopId, footage) {
+			var aliases = [place.name].concat(place.aliases || []);
+			for (var i = 0; i < aliases.length; i++) {
+				var a = normalise(aliases[i]);
+				if (!a) continue;
+				if ((text === " " + a + " " || text.indexOf(" " + a + " ") !== -1) && a.length > bestLen) {
+					best = { name: place.name, stopId: stopId, footage: footage, lat: place.lat, lon: place.lon };
+					bestLen = a.length;
+				}
+			}
+		}
+		g.stops.forEach(function (st) { consider(st, st.id, true); });
+		g.noFootage.forEach(function (pl) { consider(pl, null, false); });
+		return best;
+	};
+
+	/* Detect a directions request and split out origin/destination fragments.
+	 * Returns { origin: string|null, dest: string } or null when the query is
+	 * not a directions request. Only fires on an explicit direction cue, so
+	 * plain location questions ("where is the library") stay with retrieval. */
+	Engine.prototype.parseDirections = function (query) {
+		var cue = /\b(directions?|route|path|way|reach|walk|get|go|travel|take me)\b/.test(query);
+		// A bare "from A to B" needs no cue word: it only fires when BOTH
+		// endpoints resolve to known gazetteer places, which ordinary
+		// questions do not.
+		var m = query.match(/\bfrom\s+(.+?)\s+(?:to|towards?)\s+(.+?)[?.!]*$/);
+		if (m && (cue || (this.resolvePlace(m[1]) && this.resolvePlace(m[2])))) {
+			return { origin: m[1], dest: m[2] };
+		}
+		if (!cue) return null;
+		m = query.match(/\bto\s+(.+?)\s+from\s+(.+?)[?.!]*$/);
+		if (m) return { origin: m[2], dest: m[1] };
+		m = query.match(/\b(?:directions?|route|path|way)\s+(?:to|towards?|for)\s+(.+?)[?.!]*$/)
+			|| query.match(/\b(?:get|go|walk)\s+to\s+(.+?)[?.!]*$/)
+			|| query.match(/\btake me to\s+(.+?)[?.!]*$/)
+			|| query.match(/\breach\s+(.+?)[?.!]*$/);
+		if (m) {
+			var frag = m[1];
+			var f2 = frag.match(/^(.+?)\s+from\s+(.+?)[?.!]*$/);
+			if (f2) return { origin: f2[2], dest: f2[1] };
+			return { origin: null, dest: frag };
+		}
+		return null;
+	};
+
+	Engine.prototype.directionsAnswer = function (lang, parsed, trace) {
+		var g = this.directionGazetteer();
+		var dest = this.resolvePlace(parsed.dest);
+		if (!dest) return null; // not a place we know: let retrieval handle it
+		var origin = parsed.origin ? this.resolvePlace(parsed.origin) : null;
+		if (parsed.origin && !origin) return null;
+
+		var self = this;
+		function base(extra) {
+			var res = {
+				type: "answer",
+				entryId: "directions",
+				category: "directions",
+				section: "walk",
+				walkStop: null,
+				walkStopName: null,
+				confidence: 0.9,
+				hedged: false,
+				conflict: null,
+				sources: [],
+				unresolvedTokens: [],
+				lang: lang,
+				languageFellBack: false,
+				source: {
+					entryId: "directions",
+					category: "directions",
+					updated: g.updated,
+					kbVersion: (self.kb.meta && self.kb.meta.version) || null
+				},
+				trace: trace
+			};
+			for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) res[k] = extra[k];
+			return res;
+		}
+		var noRoute = "I can only give directions along the route our campus footage covers, and DEST is not on it, so I cannot verify a walking route there. The campus map at the main gate marks it, and the office can point you: +91 90350 22250.";
+
+		if (!dest.footage) {
+			trace.steps.push({ step: "directions", outcome: "no_footage", place: dest.name });
+			return base({ answer: noRoute.replace("DEST", "the " + dest.name), directions: "unavailable" });
+		}
+		if (origin && !origin.footage) {
+			trace.steps.push({ step: "directions", outcome: "origin_no_footage", place: origin.name });
+			return base({ answer: noRoute.replace("DEST", "the " + origin.name), directions: "unavailable" });
+		}
+
+		var order = g.stops;
+		if (!origin) origin = order[0] && { name: order[0].name, stopId: order[0].id, footage: true };
+		var fromIdx = -1, toIdx = -1;
+		for (var i = 0; i < order.length; i++) {
+			if (order[i].id === origin.stopId) fromIdx = i;
+			if (order[i].id === dest.stopId) toIdx = i;
+		}
+		if (fromIdx === -1 || toIdx === -1) return null;
+		if (fromIdx === toIdx) {
+			trace.steps.push({ step: "directions", outcome: "same_place", place: dest.name });
+			return base({
+				answer: "That is the same place - " + dest.name + ". You are already there.",
+				walkStop: dest.stopId, walkStopName: dest.name, directions: "same"
+			});
+		}
+
+		var step = fromIdx < toIdx ? 1 : -1;
+		var names = [], metres = 0;
+		for (var j = fromIdx; j !== toIdx + step; j += step) {
+			names.push(order[j].name);
+			if (j !== toIdx) metres += haversineM(order[j], order[j + step]);
+		}
+		var approx = Math.round(metres / 10) * 10;
+		trace.steps.push({
+			step: "directions", outcome: "route",
+			from: origin.stopId, to: dest.stopId,
+			via: names.length - 2, metres: approx
+		});
+		var answer = "From " + origin.name + " to " + dest.name + ", follow the campus walk route: " +
+			names.join(" \u2192 ") + ". That is roughly " + approx +
+			" m along the route (an estimate from the walk's stop coordinates, not a measured path). " +
+			"This is the only route I can verify - it is the one our footage covers.";
+		return base({
+			answer: answer,
+			walkStop: dest.stopId, walkStopName: dest.name,
+			directions: "route"
+		});
+	};
+
 	/**
 	 * Answer a query. Synchronous when no LLM hook is set.
 	 * Returns a result object; never throws for ordinary input.
@@ -669,6 +833,22 @@
 		// 1. language
 		var lang = forcedLang || detectLanguage(rawQuery, this.languages());
 		trace.steps.push({ step: "language", value: lang });
+
+		// 1b. campus directions short-circuit (English data only): an explicit
+		// "how do I get to X" / "directions to X" / "from A to B" request is
+		// answered from the filmed-walk route graph, or refused honestly when
+		// the place has no footage. Never guesses a route.
+		if (lang === "en") {
+			var dirq = this.parseDirections(query);
+			if (dirq) {
+				var dres = this.directionsAnswer(lang, dirq, trace);
+				if (dres) {
+					this.counters.answered++;
+					this.memory.push({ query: rawQuery, lang: lang, entryId: null, directions: true });
+					return dres;
+				}
+			}
+		}
 
 		// 2 + 3. tokenise, then repair unknown tokens
 		var tokens = tokenise(query, lang);

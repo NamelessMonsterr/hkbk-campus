@@ -245,6 +245,42 @@ check("hook is settable", (function () {
 		kb.entries.every(function (e) { return /^\d{4}-\d{2}-\d{2}$/.test(e.updated || ""); }));
 })();
 
+/* Campus directions: routes only along footage-connected stops (2026-10) */
+(function () {
+	var HKBKChat = require("../js/chatbot-engine.js");
+	var kb = require("../data/knowledge-base.json");
+	var eng = new HKBKChat.Engine(kb);
+
+	var r1 = eng.ask("how do i get to the food court from the main gate");
+	check("directions: route answer with ordered stops", r1.type === "answer" && r1.directions === "route" &&
+		r1.answer.indexOf("Main Gate \u2192 Football Ground") !== -1 && r1.answer.indexOf("Food Court") !== -1);
+	check("directions: route deep-links to the destination stop", r1.walkStop === "canteen");
+	check("directions: distance is labelled an estimate", r1.answer.indexOf("estimate") !== -1);
+
+	var r2 = eng.ask("directions to the library");
+	check("directions: no-footage place gets an honest no-route answer", r2.directions === "unavailable" &&
+		r2.answer.indexOf("cannot verify") !== -1 && !r2.walkStop);
+
+	var r3 = eng.ask("directions to mars");
+	check("directions: unknown place falls through to refusal", r3.type === "out_of_scope");
+
+	var r4 = eng.ask("how to reach boys hostel from a block");
+	check("directions: 'reach X from Y' order resolves both endpoints", r4.directions === "route" &&
+		r4.answer.indexOf("From A Block to Boys Hostel") === 0);
+
+	var r5 = eng.ask("from a block to the gate");
+	check("directions: bare from-to fires when both endpoints resolve", r5.directions === "route");
+
+	var r6 = eng.ask("how is the bus from majestic to college");
+	check("directions: unresolvable endpoints fall through to retrieval", !r6.directions);
+
+	var r7 = eng.ask("how do i get from the gate to the gate");
+	check("directions: same origin and destination says so", r7.directions === "same");
+
+	var r8 = eng.ask("where is the library");
+	check("directions: plain location question stays with retrieval", !r8.directions && r8.type === "answer");
+})();
+
 section("Result");
 console.log("  " + pass + " passed, " + fail + " failed");
 process.exit(fail === 0 ? 0 : 1);

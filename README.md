@@ -9,6 +9,8 @@ A website for HKBK Group of Institutions, Nagawara, Bengaluru, with a first-pers
 
 **Home page** (`index.html`). A single-page college site with verified photos of the campus and a built-in enquiry assistant. The assistant answers questions about the college from a local knowledge base using fuzzy matching. It needs no server, API key or network call.
 
+**Campus directions** (in the assistant). Ask "how do I get to the Food Court from the Main Gate" and it answers with the filmed walk route between the two stops, in order, with a distance estimate from the stop coordinates. Routes are offered only between stops the footage connects; a place with no footage (like the Library) gets an honest "cannot verify" answer, never an invented route.
+
 **Campus walk** (`walk/`). A guided tour that starts at the Main Gate and ends at the Exam Section: 65 steps across 14 stops.
 
 Main Gate, Football Ground, ONESB, B Block, Girls Hostel, Admin Block, PU Block, A Block, Food Court, Boys Hostel, Main Ground, Namaz Room, Xerox, Exam Section.

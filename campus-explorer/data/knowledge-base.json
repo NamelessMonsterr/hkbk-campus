@@ -2030,5 +2030,188 @@
    "پلیسمنٹ",
    "رابطہ"
   ]
+ },
+ "directions": {
+  "updated": "2026-10-18",
+  "note": "Directions follow the filmed campus walk only: a route is offered solely between stops the footage connects, in walk order. Distances are summed straight-line segments between stop coordinates - an honest lower bound, labelled as an estimate. Stops mirror walk/walk-data.js; edit both together.",
+  "stops": [
+   {
+    "id": "gate",
+    "name": "Main Gate",
+    "lat": 13.03779,
+    "lon": 77.61905,
+    "aliases": [
+     "main gate",
+     "gate",
+     "entrance",
+     "main entrance",
+     "college gate"
+    ]
+   },
+   {
+    "id": "football",
+    "name": "Football Ground",
+    "lat": 13.03764,
+    "lon": 77.61929,
+    "aliases": [
+     "football ground",
+     "football field",
+     "football"
+    ]
+   },
+   {
+    "id": "onesb",
+    "name": "ONESB",
+    "lat": 13.03756,
+    "lon": 77.62032,
+    "aliases": [
+     "onesb",
+     "school of business",
+     "business school",
+     "mba block",
+     "onesb block"
+    ]
+   },
+   {
+    "id": "b",
+    "name": "B Block",
+    "lat": 13.03692,
+    "lon": 77.62006,
+    "aliases": [
+     "b block",
+     "block b"
+    ]
+   },
+   {
+    "id": "girls",
+    "name": "Girls Hostel",
+    "lat": 13.03695,
+    "lon": 77.61958,
+    "aliases": [
+     "girls hostel",
+     "ladies hostel",
+     "girls hostel block"
+    ]
+   },
+   {
+    "id": "aiml",
+    "name": "Admin Block",
+    "lat": 13.03749,
+    "lon": 77.61989,
+    "aliases": [
+     "admin block",
+     "administrative block",
+     "administration block",
+     "admin",
+     "aiml block",
+     "aiml"
+    ]
+   },
+   {
+    "id": "pu",
+    "name": "PU Block",
+    "lat": 13.03664,
+    "lon": 77.62055,
+    "aliases": [
+     "pu block",
+     "pu college",
+     "pre university block",
+     "pre university"
+    ]
+   },
+   {
+    "id": "a",
+    "name": "A Block",
+    "lat": 13.03586,
+    "lon": 77.62001,
+    "aliases": [
+     "a block",
+     "block a"
+    ]
+   },
+   {
+    "id": "canteen",
+    "name": "Food Court",
+    "lat": 13.03523,
+    "lon": 77.62005,
+    "aliases": [
+     "food court",
+     "canteen",
+     "food court canteen"
+    ]
+   },
+   {
+    "id": "boys",
+    "name": "Boys Hostel",
+    "lat": 13.03473,
+    "lon": 77.61958,
+    "aliases": [
+     "boys hostel",
+     "gents hostel",
+     "boys hostel block"
+    ]
+   },
+   {
+    "id": "maingr",
+    "name": "Main Ground",
+    "lat": 13.0369,
+    "lon": 77.6203,
+    "aliases": [
+     "main ground",
+     "cricket ground",
+     "big ground"
+    ]
+   },
+   {
+    "id": "namaz",
+    "name": "Namaz Room",
+    "lat": 13.0348,
+    "lon": 77.6196,
+    "aliases": [
+     "namaz room",
+     "prayer room",
+     "namaz",
+     "prayer hall",
+     "masjid"
+    ]
+   },
+   {
+    "id": "xerox",
+    "name": "Xerox",
+    "lat": 13.0347,
+    "lon": 77.61965,
+    "aliases": [
+     "xerox shop",
+     "xerox",
+     "photocopy shop",
+     "photocopy",
+     "printing shop",
+     "print shop",
+     "copy shop"
+    ]
+   },
+   {
+    "id": "exam",
+    "name": "Exam Section",
+    "lat": 13.03475,
+    "lon": 77.6197,
+    "aliases": [
+     "exam section",
+     "examination section",
+     "exam office",
+     "exam cell",
+     "exam"
+    ]
+   }
+  ],
+  "noFootage": [
+   {
+    "name": "Library",
+    "aliases": [
+     "central library",
+     "library"
+    ]
+   }
+  ]
  }
 }
