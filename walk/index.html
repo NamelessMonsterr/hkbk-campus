@@ -160,6 +160,7 @@ $('x360').onclick=close360;
 var chap=$('chap');anch.slice().sort(function(a,b){return a.n-b.n}).forEach(function(s){var o=document.createElement('option');o.value=s.step;o.textContent=s.n+'. '+s.name;chap.appendChild(o)});
 var miss=stops.filter(function(s){return s.step==null}).map(function(s){return s.name});
 $('note').textContent=miss.length?miss.join(', ')+': no footage yet.':'';
+window.__walkHook={chapter:function(){if(typeof cur!=="number")return null;var c=chapterOf(cur);return c?c.id:null}};
 function begin(i){started=true;$('intro').style.display='none';ensure(i).then(function(u){L[0].onload=function(){L[0].classList.add('show');$('bg').style.backgroundImage='url('+u+')'};L[0].src=u;cur=i;top=0;ui();pre(i)})}
 $('go').onclick=function(){begin(parseInt(chap.value,10)||0)};
 $('back').onclick=function(){stop();started=false;$('intro').style.display='flex'};
@@ -171,4 +172,5 @@ loadBin(ST[0].b).then(function(){$('loading').style.opacity='0';setTimeout(funct
   if(q.get('play'))play()});
 recenter(posAt(0));
 })();
-</script></body></html>
+</script><script src="walk-instrument.js"></script>
+</body></html>
