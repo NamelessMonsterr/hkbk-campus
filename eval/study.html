@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usability study kit - Ask HKBK</title>
+<style>
+	body { font-family: system-ui, sans-serif; background: #f4f0e6; color: #0b1030; margin: 0; }
+	main { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+	h1 { font-size: 1.5rem; margin: 0 0 6px; }
+	h2 { font-size: 1.1rem; margin: 26px 0 10px; }
+	.sub { color: #4b5270; font-size: 0.9rem; line-height: 1.5; }
+	.panel { background: #fff; border: 1px solid #0b103022; border-radius: 12px; padding: 20px; margin-top: 16px; }
+	.warn { background: #fff4dc; border: 1px solid #d9a441; color: #5a3d0a; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 14px 0; }
+	button { padding: 10px 18px; border: 1px solid #0b1030; background: #0b1030; color: #fff; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
+	button.ghost { background: transparent; color: #0b1030; }
+	button:disabled { opacity: 0.45; cursor: default; }
+	input[type=text] { padding: 9px 12px; border: 1px solid #0b103055; border-radius: 8px; font-size: 0.95rem; width: 240px; }
+	label.consent { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0; font-size: 0.92rem; line-height: 1.45; }
+	.timer { font-variant-numeric: tabular-nums; font-size: 1.4rem; font-weight: 600; }
+	.task-inst { font-size: 1.05rem; line-height: 1.5; margin: 10px 0 16px; }
+	.cond { display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: #eef2ff; color: #3730a3; border-radius: 999px; padding: 3px 10px; }
+	.likert { display: grid; grid-template-columns: 1fr repeat(5, 44px); gap: 6px; align-items: center; font-size: 0.88rem; }
+	.likert > div { padding: 6px 0; }
+	.likert .h { font-size: 0.7rem; text-align: center; color: #4b5270; }
+	.likert input { margin: 0 auto; display: block; }
+	#chatHost { border: 1px solid #0b103022; border-radius: 12px; height: 380px; overflow: hidden; background: #fff; margin-top: 12px; }
+	#chatHost .chat { display: flex; flex-direction: column; height: 100%; }
+	#chatHost .chat__log { flex: 1; overflow-y: auto; }
+	.done-list { font-size: 0.85rem; color: #4b5270; }
+	.done-list li { margin: 3px 0; }
+	textarea { width: 100%; min-height: 52px; border: 1px solid #0b103055; border-radius: 8px; padding: 8px; font-size: 0.9rem; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+	<h1>Usability study kit</h1>
+	<p class="sub">Runs a small counterbalanced usability study of the HKBK chatbot against ordinary
+	website browsing: consent, 6 timed tasks, the standard 10-question SUS, and a CSV export.
+	Everything stays on this device until the proctor downloads the CSV.</p>
+	<div class="warn">This kit collects data from people. Get faculty/ethics approval before using it
+	with real students, and only report numbers from real sessions - never from a dry run.</div>
+	<div id="app"></div>
+</main>
+
+<script src="../campus-explorer/js/chatbot-engine.js"></script>
+<script src="../campus-explorer/data/knowledge-base.js"></script>
+<script src="../campus-explorer/js/chatbot-ui.js"></script>
+<link rel="stylesheet" href="../hkbk-chat.css">
+<script>
+(function () {
+	"use strict";
+	var app = document.getElementById("app");
+	function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = String(text); return n; }
+	function h(html) { var d = el("div"); d.innerHTML = html; return d; }
+
+	/* ---------- tasks: 3 per condition, 6 total ---------- */
+	var TASKS = {
+		chatbot: [
+			{ id: "cb-fee", text: "Find the approximate total fee for the full four-year B.Tech programme." },
+			{ id: "cb-hostel", text: "Find the yearly hostel charge and whether food is included." },
+			{ id: "cb-food", text: "Find where on campus students go for food between classes." }
+		],
+		website: [
+			{ id: "wb-fee", text: "Find the approximate total fee for the full four-year B.Tech programme." },
+			{ id: "wb-elig", text: "Find the eligibility criteria for B.Tech admission." },
+			{ id: "wb-place", text: "Find the highest placement package the college reports." }
+		]
+	};
+
+	/* standard SUS statements (Brooke 1996) */
+	var SUS = [
+		"I think that I would like to use this system frequently.",
+		"I found the system unnecessarily complex.",
+		"I thought the system was easy to use.",
+		"I think that I would need the support of a technical person to be able to use this system.",
+		"I found the various functions in this system were well integrated.",
+		"I thought there was too much inconsistency in this system.",
+		"I would imagine that most people would learn to use this system very quickly.",
+		"I found the system very cumbersome to use.",
+		"I felt very confident using the system.",
+		"I needed to learn a lot of things before I could get going with this system."
+	];
+
+	var LS = "hkbk_study_v1";
+	function blank() {
+		return { consent: false, participant: "", order: null, started: null,
+			tasks: [], sus: [], notes: "", finished: null };
+	}
+	function load() { try { return JSON.parse(localStorage.getItem(LS)) || blank(); } catch (e) { return blank(); } }
+	function save() { localStorage.setItem(LS, JSON.stringify(state)); }
+	var state = load();
+
+	/* deterministic shuffle so a reopened browser keeps the same task order */
+	function seeded(str) {
+		var x = 0; for (var i = 0; i < str.length; i++) x = (x * 31 + str.charCodeAt(i)) >>> 0;
+		return function () { x = (x * 1103515245 + 12345) >>> 0; return x / 4294967296; };
+	}
+
+	function plan() {
+		/* counterbalance by participant code hash: half chatbot-first, half website-first */
+		var rnd = seeded(state.participant);
+		var first = rnd() < 0.5 ? "chatbot" : "website";
+		var second = first === "chatbot" ? "website" : "chatbot";
+		function shuffled(cond) {
+			var r = seeded(state.participant + cond);
+			var t = TASKS[cond].slice();
+			for (var i = t.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)); var tmp = t[i]; t[i] = t[j]; t[j] = tmp; }
+			return t.map(function (t2) { return { condition: cond, id: t2.id, text: t2.text }; });
+		}
+		return shuffled(first).concat(shuffled(second));
+	}
+
+	var timerInt = null, t0 = 0;
+
+	/* ---------- screens ---------- */
+	function screenConsent() {
+		app.innerHTML = "";
+		var p = el("div", "panel");
+		p.appendChild(el("h2", null, "1 - Consent"));
+		p.appendChild(h("<p class='sub'>You are asked to complete 6 short information-finding tasks - half with the " +
+			"college chatbot, half by browsing the college website - and then answer 10 standard usability questions. " +
+			"It takes about 10 minutes. We record task times, whether you found each answer, and your questionnaire " +
+			"responses. We do <b>not</b> record your name, your questions to the chatbot, or anything you type elsewhere. " +
+			"The data stays in this browser until the person running the study downloads it as a CSV file. " +
+			"Taking part is voluntary and you can stop at any time.</p>"));
+		var lab = el("label", "consent");
+		var cb = el("input"); cb.type = "checkbox";
+		lab.appendChild(cb);
+		lab.appendChild(h("<span>I have read this and I agree to take part.</span>"));
+		p.appendChild(lab);
+		p.appendChild(h("<p class='sub'>Participant code (initials or any short code - not your name):</p>"));
+		var code = el("input"); code.type = "text"; code.maxLength = 12; code.value = state.participant || "";
+		code.setAttribute("aria-label", "Participant code");
+		p.appendChild(code);
+		var go = el("button", null, "Start the study");
+		go.style.marginLeft = "12px";
+		go.disabled = true;
+		cb.addEventListener("change", function () { go.disabled = !(cb.checked && code.value.trim()); });
+		code.addEventListener("input", function () { go.disabled = !(cb.checked && code.value.trim()); });
+		go.addEventListener("click", function () {
+			state.consent = true;
+			state.participant = code.value.trim();
+			state.started = new Date().toISOString();
+			state.plan = plan();
+			state.order = state.plan[0].condition + "-first";
+			save();
+			screenTask(0);
+		});
+		p.appendChild(go);
+		app.appendChild(p);
+	}
+
+	function screenTask(i) {
+		app.innerHTML = "";
+		if (i >= state.plan.length) return screenSus();
+		var task = state.plan[i];
+		var p = el("div", "panel");
+		p.appendChild(el("h2", null, "Task " + (i + 1) + " of " + state.plan.length + " "));
+		p.lastChild.appendChild(el("span", "cond", task.condition === "chatbot" ? "chatbot" : "website"));
+		p.appendChild(el("p", "task-inst", task.text));
+		var stage = el("div");
+		p.appendChild(stage);
+
+		var startBtn = el("button", null, "Start the timer");
+		stage.appendChild(startBtn);
+		startBtn.addEventListener("click", function () {
+			stage.innerHTML = "";
+			var t = el("div", "timer", "0:00");
+			stage.appendChild(t);
+			t0 = performance.now();
+			timerInt = setInterval(function () {
+				var s = Math.floor((performance.now() - t0) / 1000);
+				t.textContent = Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2);
+			}, 500);
+
+			if (task.condition === "chatbot") {
+				stage.appendChild(el("p", "sub", "Ask the chatbot below. Click \u201CFound it\u201D as soon as you have the answer."));
+				var host = el("div"); host.id = "chatHost";
+				stage.appendChild(host);
+				new window.HKBKChatUI.ChatUI({ mount: host }).init(window.HKBK_KB);
+			} else {
+				var a = el("a", null, "Open the college website in a new tab");
+				a.href = "../index.html"; a.target = "_blank"; a.rel = "noopener";
+				a.style.cssText = "display:inline-block;margin:10px 0;padding:10px 18px;background:#1b3dff;color:#fff;border-radius:8px;text-decoration:none";
+				stage.appendChild(a);
+				stage.appendChild(el("p", "sub", "Find the answer on the website, come back here, and click \u201CFound it\u201D."));
+			}
+
+			var row = el("div");
+			row.style.marginTop = "14px";
+			var found = el("button", null, "Found it");
+			var gaveUp = el("button", "ghost", "Couldn't find it");
+			gaveUp.style.marginLeft = "10px";
+			row.appendChild(found); row.appendChild(gaveUp);
+			stage.appendChild(row);
+
+			function finish(ok) {
+				clearInterval(timerInt);
+				var ms = Math.round(performance.now() - t0);
+				stage.innerHTML = "";
+				stage.appendChild(el("p", "sub", "Anything to note about this task? (optional, one line)"));
+				var note = el("textarea");
+				note.setAttribute("aria-label", "Optional note about this task");
+				stage.appendChild(note);
+				var next = el("button", null, i + 1 >= state.plan.length ? "Continue to the questionnaire" : "Next task");
+				next.style.marginTop = "10px";
+				next.addEventListener("click", function () {
+					state.tasks.push({ condition: task.condition, id: task.id, text: task.text,
+						ms: ms, success: ok, note: note.value.trim() });
+					save();
+					screenTask(i + 1);
+				});
+				stage.appendChild(next);
+			}
+			found.addEventListener("click", function () { finish(true); });
+			gaveUp.addEventListener("click", function () { finish(false); });
+		});
+		app.appendChild(p);
+	}
+
+	function screenSus() {
+		app.innerHTML = "";
+		var p = el("div", "panel");
+		p.appendChild(el("h2", null, "3 - Usability questionnaire (SUS)"));
+		p.appendChild(el("p", "sub", "About the chatbot you just used. 1 = strongly disagree, 5 = strongly agree. Answer all 10."));
+		var grid = el("div", "likert");
+		grid.appendChild(el("div", "h", ""));
+		["1", "2", "3", "4", "5"].forEach(function (n) { var d = el("div", "h", n); d.style.textAlign = "center"; grid.appendChild(d); });
+		var inputs = [];
+		SUS.forEach(function (s, qi) {
+			grid.appendChild(el("div", null, (qi + 1) + ". " + s));
+			for (var v = 1; v <= 5; v++) {
+				var cell = el("div"); cell.style.textAlign = "center";
+				var r = el("input"); r.type = "radio"; r.name = "sus" + qi; r.value = v;
+				r.setAttribute("aria-label", "Question " + (qi + 1) + ", " + v + " of 5");
+				cell.appendChild(r); grid.appendChild(cell);
+				inputs.push(r);
+			}
+		});
+		p.appendChild(grid);
+		var done = el("button", null, "Finish");
+		done.style.marginTop = "16px";
+		done.disabled = true;
+		grid.addEventListener("change", function () {
+			var answered = 0;
+			for (var q = 0; q < 10; q++) if (grid.querySelector("input[name=sus" + q + "]:checked")) answered++;
+			done.disabled = answered < 10;
+		});
+		done.addEventListener("click", function () {
+			state.sus = [];
+			for (var q = 0; q < 10; q++) state.sus.push(Number(grid.querySelector("input[name=sus" + q + "]:checked").value));
+			state.finished = new Date().toISOString();
+			save();
+			screenExport();
+		});
+		p.appendChild(done);
+		app.appendChild(p);
+	}
+
+	function susScore(items) {
+		var s = 0;
+		items.forEach(function (v, i) { s += (i % 2 === 0) ? (v - 1) : (5 - v); });
+		return Math.round(s * 2.5 * 10) / 10;
+	}
+
+	function screenExport() {
+		app.innerHTML = "";
+		var p = el("div", "panel");
+		p.appendChild(el("h2", null, "Done - export the data"));
+		var ok = state.tasks.filter(function (t) { return t.success; }).length;
+		var summary = el("div");
+		summary.appendChild(el("p", null, "Participant " + state.participant + " - " + state.order +
+			" - tasks found: " + ok + "/" + state.tasks.length +
+			" - SUS score: " + susScore(state.sus) + " / 100"));
+		var ul = el("ul", "done-list");
+		state.tasks.forEach(function (t) {
+			ul.appendChild(el("li", null, t.id + " - " + (t.ms / 1000).toFixed(1) + "s - " + (t.success ? "found" : "not found") + (t.note ? " - \u201C" + t.note + "\u201D" : "")));
+		});
+		summary.appendChild(ul);
+		p.appendChild(summary);
+
+		var dl = el("button", null, "Download CSV");
+		dl.addEventListener("click", function () {
+			var q = function (s) { return '"' + String(s == null ? "" : s).replace(/"/g, '""') + '"'; };
+			var lines = ["participant,order,started,finished,task_id,condition,time_ms,success,note,sus_1,sus_2,sus_3,sus_4,sus_5,sus_6,sus_7,sus_8,sus_9,sus_10,sus_score"];
+			state.tasks.forEach(function (t) {
+				lines.push([q(state.participant), q(state.order), q(state.started), q(state.finished),
+					q(t.id), q(t.condition), t.ms, t.success ? 1 : 0, q(t.note),
+					state.sus.join(",").split(",").map(function (x) { return x; }).join(","), ""].slice(0, 9)
+					.concat(state.sus).concat([susScore(state.sus)]).join(","));
+			});
+			var blob = new Blob([lines.join("\n")], { type: "text/csv" });
+			var a = el("a");
+			a.href = URL.createObjectURL(blob);
+			a.download = "hkbk-study-" + state.participant + ".csv";
+			a.click();
+			URL.revokeObjectURL(a.href);
+		});
+		p.appendChild(dl);
+		var reset = el("button", "ghost", "Clear data for the next participant");
+		reset.style.marginLeft = "10px";
+		reset.addEventListener("click", function () {
+			if (!confirm("Delete this participant's data from this browser? Export it first if you need it.")) return;
+			localStorage.removeItem(LS);
+			state = blank();
+			screenConsent();
+		});
+		p.appendChild(reset);
+		app.appendChild(p);
+	}
+
+	/* resume where we left off */
+	if (!state.consent) screenConsent();
+	else if (!state.finished) {
+		if (state.tasks.length >= (state.plan || []).length) screenSus();
+		else if (state.plan) screenTask(state.tasks.length);
+		else screenConsent();
+	}
+	else screenExport();
+})();
+</script>
+</body>
+</html>
