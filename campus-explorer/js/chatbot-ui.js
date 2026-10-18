@@ -44,6 +44,9 @@
 	ChatUI.prototype.build = function () {
 		var self = this;
 		var root = el("div", "chat");
+		root.setAttribute("role", "dialog");
+		root.setAttribute("aria-label", "Ask HKBK assistant");
+		root.setAttribute("aria-hidden", "true");
 
 		/* header */
 		var head = el("div", "chat__head");
@@ -74,10 +77,14 @@
 		this.log = el("div", "chat__log");
 		this.log.setAttribute("role", "log");
 		this.log.setAttribute("aria-live", "polite");
+		this.log.setAttribute("aria-relevant", "additions");
+		this.log.setAttribute("aria-label", "Conversation");
 		root.appendChild(this.log);
 
 		/* quick replies */
 		this.chips = el("div", "chat__chips");
+		this.chips.setAttribute("role", "group");
+		this.chips.setAttribute("aria-label", "Suggested questions");
 		root.appendChild(this.chips);
 
 		/* composer */
@@ -104,6 +111,10 @@
 		this.trace = el("pre", "chat__trace");
 		root.appendChild(this.trace);
 
+		var selfEsc = this;
+		root.addEventListener("keydown", function (e) {
+			if (e.key === "Escape") { e.stopPropagation(); selfEsc.close(); }
+		});
 		this.mount.appendChild(root);
 		this.root = root;
 		this.renderChips();
@@ -423,16 +434,23 @@
 	};
 
 	ChatUI.prototype.open = function () {
+		this.returnFocusTo = document.activeElement;
 		this.root.classList.add("chat--open");
+		this.root.setAttribute("aria-hidden", "false");
 		this.input.focus();
 		this.maybeAskUsageConsent();
 	};
 
 	ChatUI.prototype.close = function () {
+		if (!this.root.classList.contains("chat--open")) return;
 		// Matches the paper: memory is per session and is discarded, not stored.
 		if (this.engine && this.engine.endSession) this.engine.endSession();
 		this.root.classList.remove("chat--open");
+		this.root.setAttribute("aria-hidden", "true");
 		if (this.opts.onClose) this.opts.onClose();
+		if (this.returnFocusTo && this.returnFocusTo.focus) {
+			try { this.returnFocusTo.focus(); } catch (e) { /* element gone */ }
+		}
 	};
 
 	global.HKBKChatUI = { ChatUI: ChatUI };

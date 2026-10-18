@@ -278,3 +278,19 @@
 	color: #15803d;
 }
 
+
+/* accessibility pass (2026-10): visible focus + reduced motion */
+.launcher:focus-visible,
+.chip:focus-visible,
+.chat__dbg:focus-visible,
+.chat__close:focus-visible,
+.chat__send:focus-visible,
+.msg__jump:focus-visible,
+.msg__suggestBtn:focus-visible,
+.msg__walk:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.section--flash { transition: none; }
+}

@@ -27,9 +27,11 @@ html,body{margin:0;height:100%;background:#0b0b0c;color:#fff;font-family:system-
 #b360{display:none}
 .side{position:absolute;top:50%;margin-top:-22px;z-index:9;width:44px;height:44px;border-radius:50%;border:1px solid #ffffff66;background:#0008;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:background .2s,border-color .2s}
 .side:hover{background:#000c;border-color:#fff}
+.side:focus-visible,.rbtn:focus-visible,#back:focus-visible,.chev:focus-visible,#go:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.tick:focus-visible{outline:2px solid #fff;outline-offset:2px}
 #pl{left:14px}#pr{right:14px}
 .side.off{opacity:.25;pointer-events:none}
-.chev{position:absolute;left:50%;z-index:6;cursor:pointer;transform-origin:50% 100%;filter:drop-shadow(0 2px 5px #0009);transition:opacity .2s,filter .2s;opacity:.8}
+.chev{position:absolute;background:none;border:0;padding:0;left:50%;z-index:6;cursor:pointer;transform-origin:50% 100%;filter:drop-shadow(0 2px 5px #0009);transition:opacity .2s,filter .2s;opacity:.8}
 .chev svg{width:100%;height:100%;display:block}
 .chev:hover{opacity:1;filter:drop-shadow(0 0 10px #fff9)}
 #cf{bottom:17%;width:130px;height:95px;margin-left:-65px;transform:perspective(520px) rotateX(62deg)}
@@ -41,7 +43,7 @@ html,body{margin:0;height:100%;background:#0b0b0c;color:#fff;font-family:system-
 #track{position:relative;height:22px;margin-right:140px;pointer-events:auto;cursor:pointer}
 #track:before{content:"";position:absolute;left:0;right:0;top:10px;height:2px;background:#ffffff40}
 #fill{position:absolute;left:0;top:10px;height:2px;background:var(--red)}
-.tick{position:absolute;top:6px;width:2px;height:10px;margin-left:-1px;background:#fff9;cursor:pointer}
+.tick{position:absolute;border:0;padding:0;top:6px;width:2px;height:10px;margin-left:-1px;background:#fff9;cursor:pointer}
 .tick:hover{background:#fff;height:14px;top:4px}
 .tick.on{background:var(--red)}
 #mm{position:absolute;right:16px;bottom:max(14px,env(safe-area-inset-bottom));z-index:12;width:112px;height:112px;border-radius:50%;overflow:hidden;border:2px solid #fffd;box-shadow:0 3px 14px #000a;background:#222;cursor:default}
@@ -65,17 +67,18 @@ html,body{margin:0;height:100%;background:#0b0b0c;color:#fff;font-family:system-
 #go{background:var(--red);color:#fff;border:0;border-radius:24px;padding:13px 34px;font-size:14px;cursor:pointer}
 #go:hover{filter:brightness(1.1)}
 #intro small{margin-top:22px;font-size:11px;color:#ffffff60;max-width:480px;line-height:1.6}
+@media(prefers-reduced-motion:reduce){.layer{transition:none}#bg{transition:none}#mmbox{transition:none}}
 @media(max-width:700px){#sname{font-size:16px}#cf{width:100px;height:74px;margin-left:-50px}#mm{width:92px;height:92px}#track{margin-right:108px}#cap{bottom:40px;max-width:55%;font-size:10px}.side{width:38px;height:38px;margin-top:-19px;font-size:17px}#pl{left:8px}#pr{right:8px}#top{padding:10px 12px}}
 </style></head><body>
-<div id="stage"><div id="bg"></div><img class="layer" id="l0" alt=""><img class="layer" id="l1" alt=""><div id="dip"></div></div>
+<div id="stage" role="img" aria-label="Campus walk frames" aria-describedby="sname"><div id="bg"></div><img class="layer" id="l0" alt=""><img class="layer" id="l1" alt="" aria-hidden="true"><div id="dip"></div></div>
 <div id="top"><button id="back">&larr; Intro</button>
 <div id="right"><div id="sname"></div><div id="ssub"></div><div id="btns"><button class="rbtn" id="play">Walk</button><button class="rbtn" id="restart">Restart</button><button class="rbtn" id="b360">360&deg;</button></div></div></div>
 <button class="side" id="pl" aria-label="Previous">&larr;</button><button class="side" id="pr" aria-label="Next">&rarr;</button>
-<div class="chev" id="cf"><svg viewBox="0 0 150 110"><path d="M12 92 L75 22 L138 92 L112 92 L75 51 L38 92 Z" fill="#fff" stroke="#0004" stroke-width="2" stroke-linejoin="round"/></svg></div>
-<div id="toast"></div><div id="cap"></div>
-<div id="bar"><div id="track"><div id="fill"></div></div></div>
-<div id="mm"><div id="mmbox"><img src="assets/campus_map.jpg" alt="map"><svg id="route" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div id="me"></div></div><div id="mmtag">MAP</div></div>
-<div id="p360"><div id="pv"></div><button class="rbtn" id="x360">Close 360&deg;</button></div>
+<button class="chev" id="cf" aria-label="Step forward"><svg viewBox="0 0 150 110"><path d="M12 92 L75 22 L138 92 L112 92 L75 51 L38 92 Z" fill="#fff" stroke="#0004" stroke-width="2" stroke-linejoin="round"/></svg></button>
+<div id="toast" role="status" aria-live="polite"></div><div id="cap"></div>
+<div id="bar"><div id="track" role="group" aria-label="Walk progress"><div id="fill"></div></div></div>
+<div id="mm"><div id="mmbox"><img src="assets/campus_map.jpg" alt="Campus map with the walk route marked"><svg id="route" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div id="me"></div></div><div id="mmtag">MAP</div></div>
+<div id="p360" role="dialog" aria-modal="true" aria-label="360 degree view"><div id="pv"></div><button class="rbtn" id="x360">Close 360&deg;</button></div>
 <div id="intro"><div class="eb">HKBK &middot; Campus &middot; Real footage</div><h1>A walk through the HKBK campus</h1>
 <p>Step through the campus one frame at a time, in route order, from the gate to the hostels. Every image is a real still from campus video, not a 3D model. Each clip change is a hard cut.</p>
 <label for="chap">Choose a chapter</label><select id="chap"></select><button id="go">Start walk</button>
@@ -113,6 +116,7 @@ function setStep(i,dir,instant){
 var tt=null;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},1500)}
 function ui(){
   var s=chapterOf(cur),atStop=s&&Math.abs(s.step-cur)<=1;
+  $('stage').setAttribute('aria-label','Campus walk, step '+ST[cur].n+' of '+N+(s?': '+s.name:''));L[top].alt='Campus walk frame';
   $('sname').textContent=s?s.name:'';
   $('ssub').textContent='Step '+ST[cur].n+' of '+N;
   $('cap').textContent='Source: '+ST[cur].c.replace('_',' ')+' \u00b7 sampled still '+(ST[cur].t+1)+(ST[cur].cut?' \u00b7 discontinuous from previous frame':'');
@@ -144,7 +148,7 @@ function stop(){playing=false;$('play').textContent='Walk';clearInterval(timer)}
 $('play').onclick=function(){playing?stop():play()};
 $('restart').onclick=function(){stop();setStep(0,-1)};
 var tr=$('track');
-stops.forEach(function(s){if(s.step==null)return;var t=document.createElement('div');t.className='tick';t.dataset.id=s.id;t.style.left=(s.step/(N-1)*100)+'%';t.title=s.n+'. '+s.name;
+stops.forEach(function(s){if(s.step==null)return;var t=document.createElement('button');t.type='button';t.className='tick';t.dataset.id=s.id;t.setAttribute('aria-label','Go to stop '+s.n+': '+s.name);t.style.left=(s.step/(N-1)*100)+'%';t.title=s.n+'. '+s.name;
   t.onclick=function(e){e.stopPropagation();stop();setStep(s.step,s.step>=cur?1:-1)};tr.appendChild(t)});
 tr.onclick=function(e){var r=tr.getBoundingClientRect();stop();var i=Math.round((e.clientX-r.left)/r.width*(N-1));setStep(i,i>=cur?1:-1)};
 var mm=$('mm'),box=$('mmbox');
@@ -153,8 +157,8 @@ $('route').innerHTML='<polyline points="'+stops.map(function(s){return s.mx+','+
 function recenter(p){var w=mm.clientWidth,h=mm.clientHeight,bw=w*3.2,bh=bw*1500/1400;box.style.width=bw+'px';box.style.transform='translate('+(w/2-p.x/100*bw)+'px,'+(h/2-p.y/100*bh)+'px)'}
 window.addEventListener('resize',function(){recenter(posAt(cur))});
 var pv=null;
-$('b360').onclick=function(){var s=chapterOf(cur);if(!s||!s.pano)return;$('p360').style.display='block';if(pv)pv.destroy();pv=pannellum.viewer('pv',{type:'equirectangular',panorama:s.pano,autoLoad:true,northOffset:s.northOffset||0,compass:true})};
-function close360(){$('p360').style.display='none';if(pv){pv.destroy();pv=null}}
+$('b360').onclick=function(){var s=chapterOf(cur);if(!s||!s.pano)return;$('p360').style.display='block';if(pv)pv.destroy();pv=pannellum.viewer('pv',{type:'equirectangular',panorama:s.pano,autoLoad:true,northOffset:s.northOffset||0,compass:true});$('x360').focus()};
+function close360(){$('p360').style.display='none';if(pv){pv.destroy();pv=null}$('b360').focus()}
 $('x360').onclick=close360;
 // intro
 var chap=$('chap');anch.slice().sort(function(a,b){return a.n-b.n}).forEach(function(s){var o=document.createElement('option');o.value=s.step;o.textContent=s.n+'. '+s.name;chap.appendChild(o)});

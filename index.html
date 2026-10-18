@@ -63,10 +63,16 @@ footer{padding:50px 56px;display:flex;justify-content:space-between;font-size:13
 .news time{font-family:Fraunces,serif;font-size:20px}.news p{font-size:19px;line-height:1.45;max-width:820px}.news small{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-top:6px;color:#0b1030aa}
 @media(max-width:900px){.cols{grid-template-columns:1fr 1fr}.dept .bd{grid-template-columns:1fr}.dept .bd dl,.dept .bd .tl{grid-column:1}.dept summary{grid-template-columns:40px 1fr 30px}.dept summary span{display:none}.dept summary:after{grid-column:3}.rank div{grid-template-columns:1fr;gap:8px}.news .items div{grid-template-columns:1fr;gap:6px}.plc .nums{grid-template-columns:1fr}}
 @media(max-width:700px){.cols{grid-template-columns:1fr}.cols div{padding-right:0}.dept summary b{font-size:24px}}
+.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:#fff;padding:12px 20px;z-index:99;font-size:14px;font-weight:600}
+.skip:focus{left:0}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.campus a:focus-visible,.adm a:focus-visible,.plc a:focus-visible{outline-color:var(--sun)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{transition:none;opacity:1;transform:none}.grid img{transition:none}}
 </style><link rel="stylesheet" href="hkbk-chat.css">
 </head><body>
+<a class=skip href="#main">Skip to main content</a>
 <header><a class=logo href="#"><span class=mark>H</span><b>HKBK Group<br>of Institutions</b></a><nav><a href="#programmes">Colleges</a><a href="#departments">Departments</a><a href="#placements">Placements</a><a href="#campus">Campus</a><a href="#news">News</a><a href="#admissions">Admissions</a><a href="#walk">Walk</a></nav><a class=apply href="#admissions">Apply now</a></header>
-<div class=hero><div class="rv in"><h1>Where Bengaluru's tech corridor <i>starts</i> its classes.</h1><p class=sub>Seventeen acres opposite Manyata Tech Park. Engineering, management, degree and pre-university, under one gate since 1997.</p><a class="btn b1" href="#programmes">Explore programmes</a><a class="btn b2" href="walk/index.html">Walk the campus &rarr;</a></div>
+<main id=main><div class=hero><div class="rv in"><h1>Where Bengaluru's tech corridor <i>starts</i> its classes.</h1><p class=sub>Seventeen acres opposite Manyata Tech Park. Engineering, management, degree and pre-university, under one gate since 1997.</p><a class="btn b1" href="#programmes">Explore programmes</a><a class="btn b2" href="walk/index.html">Walk the campus &rarr;</a></div>
 <div class="ph rv"><div class=main><img src="facade.jpg" alt="HKBK main facade"></div><div class=small><img src="glassblock.jpg" alt="Glass academic block"></div><div class=cap><span>The main facade</span><span>Nagawara, Bengaluru 560045</span></div></div></div>
 <div class=band><a href="#programmes"><span class=n>1</span><span><b>Programmes</b><small>Six colleges, from B.E. to PU</small></span></a><a href="#admissions"><span class=n>2</span><span><b>Admissions</b><small>Apply, eligibility and fees</small></span></a><a href="#walk"><span class=n>3</span><span><b>Campus walk</b><small>Block by block, from the gate</small></span></a><a href="#campus"><span class=n>4</span><span><b>Campus</b><small>Seventeen acres, outdoors</small></span></a></div>
 <section id=programmes><div class=eye>The colleges</div><h2>Six colleges, <i>one</i> campus.</h2>
@@ -89,7 +95,7 @@ footer{padding:50px 56px;display:flex;justify-content:space-between;font-size:13
 </div>
 <p class=src style="color:var(--mut)">Source: the department pages on <a href="https://www.hkbk.edu.in/engineering">hkbk.edu.in</a>.</p></section>
 <section class=campus id=campus><div class=eye>Campus</div><h2>Seventeen acres <i>under an open sky.</i></h2>
-<div class=grid><figure class="g1 rv"><img src="ablock.jpg" alt=""><figcaption>A block porch</figcaption></figure><figure class="g2 rv"><img src="glassblock.jpg" alt=""><figcaption>Glass block</figcaption></figure><figure class="g3 rv"><img src="white.jpg" alt=""><figcaption>White arched block</figcaption></figure><figure class="g4 rv"><img style="object-position:50% 0%" src="onesb.jpg" alt=""><figcaption>ONESB</figcaption></figure><figure class="g5 rv"><img style="object-position:50% 85%" src="facade.jpg" alt=""><figcaption>I ♥ HKBK</figcaption></figure></div></div></section>
+<div class=grid><figure class="g1 rv"><img src="ablock.jpg" alt="The porch of A block"><figcaption>A block porch</figcaption></figure><figure class="g2 rv"><img src="glassblock.jpg" alt="The glass-fronted academic block"><figcaption>Glass block</figcaption></figure><figure class="g3 rv"><img src="white.jpg" alt="The white arched block"><figcaption>White arched block</figcaption></figure><figure class="g4 rv"><img style="object-position:50% 0%" src="onesb.jpg" alt="The ONESB school of business building"><figcaption>ONESB</figcaption></figure><figure class="g5 rv"><img style="object-position:50% 85%" src="facade.jpg" alt="The main facade with the I love HKBK installation"><figcaption>I ♥ HKBK</figcaption></figure></div></section>
 <section><div class=stats><div class="rv in"><b data-n=17>17</b><span>acre campus</span></div><div class="rv in"><b data-n=1997>1997</b><span>year established</span></div><div class="rv in"><b>5</b><span>B.E. branches</span></div><div class="rv in"><b>Opp.</b><span>Manyata Tech Park</span></div></div></section>
 <section class=plc id=placements><div class=eye>Placements</div><h2>Where the <i>offers</i> come from.</h2>
 <div class=nums><div><b>375+</b><span>recruiters</span></div><div><b>94.3%</b><span>placements</span></div><div><b>32.4</b><span>LPA, highest package (2023)</span></div></div>
@@ -114,10 +120,10 @@ footer{padding:50px 56px;display:flex;justify-content:space-between;font-size:13
 </div>
 <p class=src>Headlines from the campus news on <a href="https://www.hkbk.edu.in/">hkbk.edu.in</a>.</p></section>
 <section class=walk id=walk style="padding:0"><div class=t><div class=eye style="color:var(--ink)">Campus walk</div><h2>Step through the gate. <i>Keep walking.</i></h2><p style="margin:26px 0 32px;font-size:18px;line-height:1.6;max-width:480px">A frame-by-frame walk through the campus, block by block, filmed on site.</p><a class="btn b1" href="walk/index.html">Start the walk &rarr;</a></div><div class=im><img src="white.jpg" alt="Campus building"></div></section>
-<section class=adm id=admissions><div class=eye style="color:var(--sun)">Admissions</div><h2>Your first class is <i>closer</i> than you think.</h2><p>Admissions are open across programmes. Talk to the admissions office for eligibility, fees and entrance routes.</p><a class="btn b1" href="tel:+919035022250">Call +91 90350 22250</a></section>
+<section class=adm id=admissions><div class=eye style="color:var(--sun)">Admissions</div><h2>Your first class is <i>closer</i> than you think.</h2><p>Admissions are open across programmes. Talk to the admissions office for eligibility, fees and entrance routes.</p><a class="btn b1" href="tel:+919035022250">Call +91 90350 22250</a></section></main>
 <footer><span>HKBK Group of Institutions<br>22/1, Opp. Manyata Tech Park, Nagawara, Bengaluru 560045</span><span>Unofficial student concept. Not the college's official website.<br>Campus photos: Google Maps contributor and on-site footage.</span></footer>
 <script>if(location.search.includes('static')){document.body.insertAdjacentHTML('beforeend','<style>.rv{transition:none!important}</style>');}if(location.search.includes('static'))document.querySelectorAll('.rv').forEach(e=>e.classList.add('in'));const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});document.querySelectorAll('.rv').forEach((e,i)=>{e.style.transitionDelay=(i%4)*80+'ms';io.observe(e)})</script>
-<button class="launcher" id="launcher" type="button" data-open-chat><span class="launcher__dot" aria-hidden="true"></span> Ask HKBK</button>
+<button class="launcher" id="launcher" type="button" data-open-chat aria-expanded="false" aria-controls="chatHost"><span class="launcher__dot" aria-hidden="true"></span> Ask HKBK</button>
 <div class="chatHost" id="chatHost"></div>
 <script src="campus-explorer/data/knowledge-base.js"></script>
 <script src="campus-explorer/js/usage-log.js"></script>
@@ -125,8 +131,8 @@ footer{padding:50px 56px;display:flex;justify-content:space-between;font-size:13
 <script src="campus-explorer/js/chatbot-ui.js"></script>
 <script>
 (function(){var host=document.getElementById("chatHost"),launcher=document.getElementById("launcher");
-var ui=new window.HKBKChatUI.ChatUI({mount:host,onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false}}).init(window.HKBK_KB);
-function openChat(q){ui.open();launcher.hidden=true;if(q)ui.submit(q)}
+var ui=new window.HKBKChatUI.ChatUI({mount:host,onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
+function openChat(q){ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");if(q)ui.submit(q)}
 document.querySelectorAll("[data-open-chat]").forEach(function(b){b.addEventListener("click",function(){openChat()})});
 window.hkbkAsk=openChat;
 var cq=new URLSearchParams(location.search).get("chatq");if(cq)openChat(cq);})();
