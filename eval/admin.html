@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usage log admin - Ask HKBK</title>
+<style>
+	body { font-family: system-ui, sans-serif; background: #f4f0e6; color: #0b1030; margin: 0; }
+	main { max-width: 760px; margin: 0 auto; padding: 32px 20px 60px; }
+	h1 { font-size: 1.5rem; margin: 0 0 6px; }
+	h2 { font-size: 1.05rem; margin: 26px 0 8px; }
+	.sub { color: #4b5270; font-size: 0.9rem; line-height: 1.5; }
+	.note { background: #fff4dc; border: 1px solid #d9a441; color: #5a3d0a; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 14px 0; }
+	table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.85rem; }
+	th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #0b103015; }
+	th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+	button { padding: 8px 14px; border: 1px solid #0b1030; background: #0b1030; color: #fff; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin-right: 8px; }
+	button.ghost { background: transparent; color: #0b1030; }
+	button.danger { background: #b91c1c; border-color: #b91c1c; }
+	.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+	.card { background: #fff; border: 1px solid #0b103022; border-radius: 10px; padding: 14px; }
+	.card b { font-size: 1.35rem; display: block; }
+	.card span { font-size: 0.78rem; color: #4b5270; }
+</style>
+</head>
+<body>
+<main>
+	<h1>Usage log admin</h1>
+	<p class="sub">This view reads only this browser's local storage. There is no server and no
+	hidden upload: data leaves the device only when someone clicks a download button here.
+	See the <a href="../eval/">evaluation page</a>.</p>
+	<div class="note">Privacy: the usage log is opt-in and stores outcomes only (what was answered
+	or refused, category, confidence band, latency) - never question text. Ratings store the entry
+	rated, never the question. Walk events store stops and dwell. The study kit stores only what its
+	consent screen says. Anything can be deleted below, permanently.</div>
+	<div id="app"></div>
+</main>
+<script>
+(function () {
+	"use strict";
+	var app = document.getElementById("app");
+	function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = String(text); return n; }
+	function get(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch (e) { return []; } }
+	function table(headers, rows) {
+		var t = el("table");
+		var tr = el("tr");
+		headers.forEach(function (h, i) { var th = el("th", i > 0 ? "num" : null, h.label || h); tr.appendChild(th); });
+		t.appendChild(tr);
+		rows.forEach(function (r) {
+			var tr2 = el("tr");
+			r.forEach(function (c, i) { tr2.appendChild(el("td", i > 0 ? "num" : null, c)); });
+			t.appendChild(tr2);
+		});
+		return t;
+	}
+	function counts(arr, key) {
+		var m = {};
+		arr.forEach(function (e) { var k = e[key] == null ? "(none)" : e[key]; m[k] = (m[k] || 0) + 1; });
+		return Object.keys(m).sort().map(function (k) { return [k, m[k]]; });
+	}
+	function card(v, label) {
+		var c = el("div", "card");
+		c.appendChild(el("b", null, String(v)));
+		c.appendChild(el("span", null, label));
+		return c;
+	}
+	function download(name, text, type) {
+		var a = el("a");
+		a.href = URL.createObjectURL(new Blob([text], { type: type || "text/plain" }));
+		a.download = name;
+		a.click();
+		URL.revokeObjectURL(a.href);
+	}
+	function toCsv(rows) {
+		if (!rows.length) return "";
+		var keys = Object.keys(rows[0]);
+		var q = function (s) { return '"' + String(s == null ? "" : s).replace(/"/g, '""') + '"'; };
+		return [keys.join(",")].concat(rows.map(function (r) { return keys.map(function (k) { return q(r[k]); }).join(","); })).join("\n");
+	}
+
+	var usage = get("hkbk_usage");
+	var ratings = get("hkbk_ratings");
+	var walk = get("hkbk_walk");
+	var optin = null;
+	try { optin = localStorage.getItem("hkbk_usage_optin"); } catch (e) {}
+
+	/* consent state + controls */
+	app.appendChild(el("h2", null, "Usage logging (opt-in)"));
+	var state = el("p", "sub", "Currently: " + (optin === "yes" ? "ON - outcomes are being logged on this device" : (optin === "no" ? "OFF (user declined)" : "NOT DECIDED YET (the chat asks on first open)")));
+	app.appendChild(state);
+	var on = el("button", "ghost", "Turn on");
+	on.addEventListener("click", function () { localStorage.setItem("hkbk_usage_optin", "yes"); location.reload(); });
+	var off = el("button", "ghost", "Turn off and delete log");
+	off.addEventListener("click", function () {
+		localStorage.setItem("hkbk_usage_optin", "no");
+		localStorage.removeItem("hkbk_usage");
+		location.reload();
+	});
+	app.appendChild(on); app.appendChild(off);
+
+	/* summary cards */
+	var cards = el("div", "cards");
+	var answered = usage.filter(function (e) { return e.type === "answer"; }).length;
+	var refused = usage.filter(function (e) { return e.type === "refusal"; }).length;
+	var clarified = usage.filter(function (e) { return e.type === "clarify"; }).length;
+	cards.appendChild(card(usage.length, "usage events"));
+	cards.appendChild(card(answered, "answers"));
+	cards.appendChild(card(clarified, "did-you-mean"));
+	cards.appendChild(card(refused, "refusals"));
+	cards.appendChild(card(ratings.length, "ratings"));
+	cards.appendChild(card(walk.length, "walk events"));
+	app.appendChild(cards);
+
+	/* breakdowns */
+	if (usage.length) {
+		app.appendChild(el("h2", null, "By category"));
+		app.appendChild(table([{ label: "category" }, { label: "events", num: 1 }], counts(usage, "category")));
+		app.appendChild(el("h2", null, "By entry"));
+		app.appendChild(table([{ label: "entry" }, { label: "events", num: 1 }], counts(usage, "entryId")));
+		app.appendChild(el("h2", null, "By confidence band"));
+		app.appendChild(table([{ label: "band" }, { label: "events", num: 1 }], counts(usage, "confidenceBand")));
+	}
+	if (ratings.length) {
+		app.appendChild(el("h2", null, "Ratings"));
+		app.appendChild(table([{ label: "rating" }, { label: "n", num: 1 }], counts(ratings, "rating")));
+		app.appendChild(table([{ label: "entry" }, { label: "n", num: 1 }], counts(ratings, "entryId")));
+	}
+	if (walk.length) {
+		app.appendChild(el("h2", null, "Walk"));
+		var stops = walk.filter(function (e) { return e.type === "stop"; });
+		var dwell = {};
+		stops.forEach(function (e) { dwell[e.id] = (dwell[e.id] || 0) + (e.dwellMs || 0); });
+		app.appendChild(table([{ label: "stop" }, { label: "total dwell (s)", num: 1 }],
+			Object.keys(dwell).sort().map(function (k) { return [k, Math.round(dwell[k] / 100) / 10]; })));
+		app.appendChild(table([{ label: "presence answer" }, { label: "n", num: 1 }],
+			counts(walk.filter(function (e) { return e.type === "presence"; }), "a")));
+		app.appendChild(el("p", "sub", "Completions: " + walk.filter(function (e) { return e.type === "complete"; }).length));
+	}
+
+	/* export + delete */
+	app.appendChild(el("h2", null, "Export and delete"));
+	var exU = el("button", null, "Download usage CSV");
+	exU.addEventListener("click", function () { download("hkbk-usage.csv", toCsv(usage), "text/csv"); });
+	var exR = el("button", "ghost", "Ratings CSV");
+	exR.addEventListener("click", function () { download("hkbk-ratings.csv", toCsv(ratings), "text/csv"); });
+	var exW = el("button", "ghost", "Walk CSV");
+	exW.addEventListener("click", function () { download("hkbk-walk.csv", toCsv(walk), "text/csv"); });
+	app.appendChild(exU); app.appendChild(exR); app.appendChild(exW);
+	var del = el("button", "danger", "Delete ALL stored data");
+	del.addEventListener("click", function () {
+		if (!confirm("Permanently delete the usage log, ratings and walk events from this browser?")) return;
+		["hkbk_usage", "hkbk_ratings", "hkbk_walk"].forEach(function (k) { localStorage.removeItem(k); });
+		location.reload();
+	});
+	app.appendChild(del);
+})();
+</script>
+</body>
+</html>

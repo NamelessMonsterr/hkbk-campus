@@ -369,6 +369,15 @@
 				self.addRating(row, res);
 			}
 
+			if (global.HKBKUsage && global.HKBKUsage.enabled()) {
+				global.HKBKUsage.log(res.type === "answer" ? "answer" : (res.type === "clarify" ? "clarify" : "refusal"), {
+					entryId: res.entryId || null,
+					category: res.category || null,
+					confidenceBand: global.HKBKUsage.band(res.confidence),
+					ms: Math.round(ms)
+				});
+			}
+
 			self.lastTrace = {
 				query: question,
 				lang: res.lang,
@@ -386,9 +395,37 @@
 
 	/* ---------- session ---------- */
 
+	/* One-time, in-transcript consent for the anonymous usage log. Plain
+	 * language, both choices equal-sized, No deletes anything logged. */
+	ChatUI.prototype.maybeAskUsageConsent = function () {
+		var self = this;
+		if (!global.HKBKUsage || global.HKBKUsage.choice() !== null) return;
+		var row = el("div", "msg msg--bot msg--consent");
+		var body = el("div", "msg__body");
+		body.appendChild(el("div", null, "Help improve this bot? Share anonymous usage: what was answered or refused, never your question text. Stays on this device; you can export or delete it any time."));
+		var wrap = el("div", "msg__consentBtns");
+		[["Yes, share anonymous usage", "yes"], ["No thanks", "no"]].forEach(function (spec) {
+			var b = el("button", "msg__suggestBtn", spec[0]);
+			b.type = "button";
+			b.addEventListener("click", function () {
+				global.HKBKUsage.setChoice(spec[1]);
+				row.remove();
+				self.addBot(spec[1] === "yes"
+					? "Thanks. Only outcomes are logged, never your questions. Turn this off any time from the admin view."
+					: "No problem - nothing is logged.");
+			});
+			wrap.appendChild(b);
+		});
+		body.appendChild(wrap);
+		row.appendChild(body);
+		this.log.appendChild(row);
+		this.scroll();
+	};
+
 	ChatUI.prototype.open = function () {
 		this.root.classList.add("chat--open");
 		this.input.focus();
+		this.maybeAskUsageConsent();
 	};
 
 	ChatUI.prototype.close = function () {
