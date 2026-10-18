@@ -1771,18 +1771,14 @@ window.HKBK_KB = {
    "id": "loc-b-block",
    "category": "location",
    "tags": [
-    "b block",
-    "white building",
-    "arches"
+    "b block"
    ],
    "en": {
     "q": [
      "where is b block",
-     "b block",
-     "white building",
-     "arched building"
+     "b block"
     ],
-    "a": "B Block is the white building with arched balconies, a short walk past the ONESB building."
+    "a": "B Block is one of the academic blocks on the campus walk."
    },
    "section": "campus",
    "walkStop": "b",
@@ -1858,15 +1854,19 @@ window.HKBK_KB = {
    "category": "location",
    "tags": [
     "a block",
-    "porch"
+    "porch",
+    "white building",
+    "arches"
    ],
    "en": {
     "q": [
      "where is a block",
      "a block",
-     "a block porch"
+     "a block porch",
+     "white building",
+     "arched building"
     ],
-    "a": "A Block has the arched porch and sits just past the PU Block, before the Food Court."
+    "a": "A Block is the white building with arched balconies; its arched porch sits just past the PU Block, before the Food Court."
    },
    "section": "campus",
    "walkStop": "a",

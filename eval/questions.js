@@ -413,7 +413,7 @@ window.HKBK_EVAL = {
    "id": "a45",
    "q": "where is the white arched building",
    "expect": {
-    "entry": "loc-b-block"
+    "entry": "loc-a-block"
    },
    "category": "location",
    "split": "dev"
