@@ -69,12 +69,25 @@
 		a.href = URL.createObjectURL(new Blob([text], { type: type || "text/plain" }));
 		a.download = name;
 		a.click();
-		URL.revokeObjectURL(a.href);
+		setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
 	}
 	function toCsv(rows) {
 		if (!rows.length) return "";
-		var keys = Object.keys(rows[0]);
-		var q = function (s) { return '"' + String(s == null ? "" : s).replace(/"/g, '""') + '"'; };
+		/* union of keys across rows - an event with an extra field would
+		 * otherwise lose that column entirely */
+		var keys = [], seen = {};
+		rows.forEach(function (r) {
+			Object.keys(r).forEach(function (k) {
+				if (!seen[k]) { seen[k] = 1; keys.push(k); }
+			});
+		});
+		/* values starting with = + - @ are formulas when the CSV is opened
+		 * in a spreadsheet; prefix them so a pasted question cannot run one */
+		var q = function (s) {
+			var v = String(s == null ? "" : s);
+			if (/^[=+\-@]/.test(v)) v = "'" + v;
+			return '"' + v.replace(/"/g, '""') + '"';
+		};
 		return [keys.join(",")].concat(rows.map(function (r) { return keys.map(function (k) { return q(r[k]); }).join(","); })).join("\n");
 	}
 

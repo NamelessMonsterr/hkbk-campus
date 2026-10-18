@@ -98,9 +98,15 @@
 	}
 
 	function plan() {
-		/* counterbalance by participant code hash: half chatbot-first, half website-first */
-		var rnd = seeded(state.participant);
-		var first = rnd() < 0.5 ? "chatbot" : "website";
+		/* counterbalance: alternate chatbot-first / website-first on this
+		 * machine via a local counter; participant-code hashing does not
+		 * guarantee a balanced split at classroom sizes */
+		var n = 0;
+		try {
+			n = Number(localStorage.getItem("hkbk_study_counter") || "0");
+			localStorage.setItem("hkbk_study_counter", String(n + 1));
+		} catch (e) {}
+		var first = (n % 2 === 0) ? "chatbot" : "website";
 		var second = first === "chatbot" ? "website" : "chatbot";
 		function shuffled(cond) {
 			var r = seeded(state.participant + cond);
@@ -282,7 +288,11 @@
 
 		var dl = el("button", null, "Download CSV");
 		dl.addEventListener("click", function () {
-			var q = function (s) { return '"' + String(s == null ? "" : s).replace(/"/g, '""') + '"'; };
+			var q = function (s) {
+				var v = String(s == null ? "" : s);
+				if (/^[=+\-@]/.test(v)) v = "'" + v; /* spreadsheet formula guard */
+				return '"' + v.replace(/"/g, '""') + '"';
+			};
 			var lines = ["participant,order,started,finished,task_id,condition,time_ms,success,note,sus_1,sus_2,sus_3,sus_4,sus_5,sus_6,sus_7,sus_8,sus_9,sus_10,sus_score"];
 			state.tasks.forEach(function (t) {
 				lines.push([q(state.participant), q(state.order), q(state.started), q(state.finished),
@@ -295,7 +305,7 @@
 			a.href = URL.createObjectURL(blob);
 			a.download = "hkbk-study-" + state.participant + ".csv";
 			a.click();
-			URL.revokeObjectURL(a.href);
+			setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
 		});
 		p.appendChild(dl);
 		var reset = el("button", "ghost", "Clear data for the next participant");

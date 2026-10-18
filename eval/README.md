@@ -68,18 +68,23 @@ Held-out test split (35 questions):
 
 | config | acc % | +clarify % | wrong % | refusal % | false % | R@1 % | R@3 % | MRR | p50 ms |
 |---|---|---|---|---|---|---|---|---|---|
-| tfidf + repair (shipped) | 70.4 | 92.6 | 0 | 75.0 | 0 | 85.2 | 88.9 | 0.870 | 1.9 |
-| bm25 + repair | 81.5 | 81.5 | 11.1 | 50.0 | 50.0 | 77.8 | 88.9 | 0.833 | 2.7 |
-| tfidf, no repair | 70.4 | 92.6 | 0 | 87.5 | 0 | 85.2 | 88.9 | 0.870 | 1.8 |
-| bm25, no repair | 81.5 | 81.5 | 11.1 | 62.5 | 37.5 | 77.8 | 88.9 | 0.833 | 1.7 |
+| tfidf + repair (shipped) | 70.4 | 92.6 | 0 | 75.0 | 0 | 85.2 | 92.6 | 0.883 | 1.9 |
+| bm25 + repair | 85.2 | 92.6 | 0 | 50.0 | 25.0 | 85.2 | 92.6 | 0.883 | 1.9 |
+| tfidf, no repair | 70.4 | 92.6 | 0 | 87.5 | 0 | 85.2 | 92.6 | 0.883 | 1.8 |
+| bm25, no repair | 85.2 | 92.6 | 0 | 62.5 | 25.0 | 85.2 | 92.6 | 0.883 | 1.8 |
 
-Reading it honestly: BM25 answers more questions (81.5% strict) but buys it
-with wrong answers (11.1%) and false answers on nonsense (up to 50%), because
-the shipped refusal floors were calibrated for the tfidf cosine score
-distribution and BM25's normalised scores sit higher on weak matches. To ship
-BM25 you would recalibrate the floors for it on the dev split - the raw
-accuracy gain may survive that, but that is a measurement, not an assumption,
-and the UI ships tfidf + repair until the measurement exists. The no-repair
-ablation shows repair is worth +0 accuracy on this set but catches real typos
-(the whole-question fuzzy path hides most of it here); it stays on because
-the dev-split refusal accuracy drops without it (100% -> 87.5% on test).
+Reading it honestly: BM25 answers more questions (85.2% strict vs 70.4%)
+with no wrong answers on this set, but it still answers 25% of the outright
+nonsense questions that tfidf refuses cleanly, because the shipped refusal
+floors were calibrated for the tfidf cosine score distribution. To ship BM25
+you would recalibrate the floors for it on the dev split - the accuracy gain
+may survive that, but that is a measurement, not an assumption, and the UI
+ships tfidf + repair until the measurement exists. (The 2026-10 council
+review fixed the BM25 normalisation: scores were clamped at 1.0 against a
+too-small query norm, which had produced the wrong-answer rows in earlier
+versions of this table.) The no-repair ablation shows repair is worth +0 strict accuracy on this
+set: without it, held-out refusal accuracy rises from 75% to 87.5% (repair
+stops rescuing borderline trap questions), but real typo questions stop
+being answered. Repair stays on because catching genuine typos is the
+feature's point; the trap trade-off is handled by the refusal floors. Dev
+split refusal accuracy is 100% with or without repair.

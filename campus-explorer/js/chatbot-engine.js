@@ -357,12 +357,14 @@
 	// contributing its idf once) - a document containing every query term at
 	// average length scores ~1. That keeps the calibrated refusal floors
 	// meaningful across both scorers. Baseline for the /eval comparison.
-	Index.prototype.searchBM25 = function (tokens, lang, k) {
+	Index.prototype.searchBM25 = function (tokens, lang, k, k1, b) {
 		var pool = this.byLang[lang];
 		var usedLang = lang;
 		if (!pool || !pool.length) { pool = this.byLang.en || []; usedLang = "en"; }
 
-		var k1 = CONFIG.bm25K1, b = CONFIG.bm25B, N = this.docCount, avg = this.avgdl;
+		k1 = (typeof k1 === "number") ? k1 : CONFIG.bm25K1;
+		b = (typeof b === "number") ? b : CONFIG.bm25B;
+		var N = this.docCount, avg = this.avgdl;
 		var qtf = Object.create(null);
 		for (var i = 0; i < tokens.length; i++) qtf[tokens[i]] = (qtf[tokens[i]] || 0) + 1;
 		var norm = 0;
@@ -386,7 +388,11 @@
 				if (!f) continue;
 				s += qidf[term] * (f * (k1 + 1)) / (f + K);
 			}
-			if (s > 0) scored.push({ doc: doc, score: Math.min(1, s / norm) });
+			/* normalised against the query's true best case: each term can
+			 * contribute at most idf*(k1+1), so s/(norm*(k1+1)) is in (0,1]
+			 * with no clamp - the old Math.min(1, s/norm) saturated at 1.0
+			 * and destroyed the ranking ties. */
+			if (s > 0) scored.push({ doc: doc, score: s / (norm * (k1 + 1)) });
 		}
 		scored.sort(function (a, b2) { return b2.score - a.score; });
 		return { hits: scored.slice(0, k || CONFIG.topK), lang: usedLang };
@@ -614,7 +620,7 @@
 	 */
 	Engine.prototype.retrieve = function (tokens, lang, trace, label) {
 		var res = this.config.retriever === "bm25"
-			? this.index.searchBM25(tokens, lang, this.config.topK)
+			? this.index.searchBM25(tokens, lang, this.config.topK, this.config.bm25K1, this.config.bm25B)
 			: this.index.search(tokens, lang, this.config.topK);
 		trace.steps.push({
 			step: label || "retrieval",
@@ -1016,6 +1022,7 @@
 			trace.steps.push({ step: "confidence_floor", confidence: Number(confidence.toFixed(3)), floor: this.config.clarifyFloor, outcome: "refused" });
 			var refusal = this.outOfScope(lang, rawQuery);
 			refusal.trace = trace;
+			refusal.ranking = ranking;
 			this.memory.push({ query: rawQuery, lang: lang, entryId: null, outOfScope: true });
 			return refusal;
 		}

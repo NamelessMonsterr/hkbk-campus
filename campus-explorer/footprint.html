@@ -100,10 +100,11 @@
 	var qs = ["what are the fees for btech", "where is the food court", "hostel facilities",
 		"placement highest package", "how do i get admission", "asdf qwer zxcv"];
 	var times = [];
-	for (var i = 0; i < 300; i++) {
+	for (var i = 0; i < 320; i++) {
 		var q0 = performance.now();
 		engine.ask(qs[i % qs.length]);
-		times.push(performance.now() - q0);
+		/* first 20 runs warm the JIT and caches; they are not reported */
+		if (i >= 20) times.push(performance.now() - q0);
 	}
 	times.sort(function (a, b) { return a - b; });
 	function pct(p) { return times[Math.min(times.length - 1, Math.floor(p / 100 * times.length))].toFixed(2); }
@@ -116,10 +117,11 @@
 
 	/* ---- file sizes + KB stats ---- */
 	var st = engine.stats();
-	var kbSize = 0, engSize = 0;
+	var kbSize = 0, engSize = 0, uiSize = 0;
 	res.forEach(function (r) {
 		if (/knowledge-base\.js/.test(r.name)) kbSize = r.decodedBodySize || 0;
 		if (/chatbot-engine\.js/.test(r.name)) engSize = r.decodedBodySize || 0;
+		if (/chatbot-ui\.js/.test(r.name)) uiSize = r.decodedBodySize || 0;
 	});
 	/* ---- KB freshness: version, date spread, conflict report ---- */
 	var kbd = window.HKBK_KB;
@@ -144,7 +146,7 @@
 	row("fileTable", ["file", "uncompressed"], true);
 	row("fileTable", ["knowledge base (v" + window.HKBK_KB.meta.version + ", " + st.entries + " entries)", kb(kbSize)]);
 	row("fileTable", ["retrieval engine (chatbot-engine.js)", kb(engSize)]);
-	row("fileTable", ["chat UI (chatbot-ui.js)", "~12 KB"]);
+	row("fileTable", ["chat UI (chatbot-ui.js)", uiSize ? kb(uiSize) : "not reported by browser"]);
 	row("fileTable", ["index built at load", st.chunks + " chunks, " + st.vocabulary + " terms, " + buildMs.toFixed(0) + " ms"]);
 	card(kb(kbSize), "knowledge base, " + st.entries + " entries");
 	card(st.chunks, "retrieval chunks at load");
