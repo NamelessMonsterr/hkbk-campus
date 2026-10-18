@@ -87,7 +87,8 @@
 			" by with from about into it its this that these those i me my we our you" +
 			" your and or but if then so as what which who whom how when where why" +
 			" can could will would shall should may might must there here have has had" +
-			" get got tell give please kindly want need know am much many done just really also any some happen happens run runs").split(" ")
+			" get got tell give please kindly want need know am much many done just really also any some happen happens run runs").split(" "),
+		kn: "\u0c8f\u0cb7\u0ccd\u0c9f\u0cc1 \u0c8f\u0ca8\u0cc1 \u0cb9\u0cc7\u0c97\u0cc6 \u0c8e\u0cb2\u0ccd\u0cb2\u0cbf \u0caf\u0cbe\u0cb5 \u0cae\u0ca4\u0ccd\u0ca4\u0cc1 \u0c85\u0ca5\u0cb5\u0cbe \u0c87\u0ca6\u0cc6\u0caf\u0cbe \u0c87\u0ca6\u0cc6\u0caf\u0cc7 \u0c89\u0c82\u0c9f\u0cbe \u0c86\u0c97\u0cbf\u0cb0\u0cc1\u0ca4\u0ccd\u0ca4\u0cc6 \u0c88\u0ca4\u0cc1 \u0c85\u0ca6\u0cc1 \u0c87\u0ca6\u0cc1 \u0ca8\u0cae\u0c97\u0cc6 \u0ca8\u0cbe\u0ca8\u0cc1 \u0ca6\u0caf\u0cb5\u0cbf\u0c9f\u0ccd\u0c9f\u0cc1".split(" ")
 	};
 
 	var STOPSET = {};
@@ -135,7 +136,10 @@
 		return { text: out, unresolved: unresolved };
 	}
 
-	var WORD_RE = /[\p{L}\p{N}]+/gu;
+	/* \p{M} matters: Indic vowel signs and the virama are combining marks,
+	 * not letters. Without them "ವೈಫೈ" shredded into single consonants and
+	 * every Kannada token missed the vocabulary. */
+	var WORD_RE = /[\p{L}\p{M}\p{N}]+/gu;
 
 	function tokenise(text, lang) {
 		var raw = normalise(text).match(WORD_RE) || [];
@@ -218,6 +222,8 @@
 		this.kb = kb;
 		this.docs = [];          // one per (entry, language, chunk)
 		this.df = Object.create(null);
+		this.langDf = Object.create(null);   // per-language df: idf comes from
+		                                     // the language's own corpus
 		this.vocab = Object.create(null);
 		this.byLang = Object.create(null);
 		this.entryById = Object.create(null);
@@ -256,6 +262,8 @@
 					for (var term in tf) {
 						if (!Object.prototype.hasOwnProperty.call(tf, term)) continue;
 						this.df[term] = (this.df[term] || 0) + 1;
+						var ldf = this.langDf[lang] || (this.langDf[lang] = Object.create(null));
+						ldf[term] = (ldf[term] || 0) + 1;
 					}
 					var doc = {
 						id: this.docs.length,
@@ -286,6 +294,28 @@
 			if (!Object.prototype.hasOwnProperty.call(this.df, t)) continue;
 			this.idf[t] = Math.log(1 + (N / this.df[t]));
 		}
+		/* per-language idf and stats: a query in one language must not have
+		 * its weights shifted by another language's documents. The global
+		 * tables above stay for vocabulary-coverage checks only. */
+		this.langIdf = Object.create(null);
+		this.langN = Object.create(null);
+		this.langAvgdl = Object.create(null);
+		for (var lg in this.byLang) {
+			if (!Object.prototype.hasOwnProperty.call(this.byLang, lg)) continue;
+			var ldocs = this.byLang[lg];
+			var lN = ldocs.length || 1;
+			this.langN[lg] = lN;
+			var llen = 0;
+			for (var ld = 0; ld < ldocs.length; ld++) llen += ldocs[ld].length;
+			this.langAvgdl[lg] = llen / lN || 1;
+			var lidf = Object.create(null);
+			var ldf2 = this.langDf[lg] || {};
+			for (var lt in ldf2) {
+				if (!Object.prototype.hasOwnProperty.call(ldf2, lt)) continue;
+				lidf[lt] = Math.log(1 + (lN / ldf2[lt]));
+			}
+			this.langIdf[lg] = lidf;
+		}
 		for (var d = 0; d < this.docs.length; d++) {
 			this.vectorise(this.docs[d]);
 		}
@@ -298,7 +328,8 @@
 		for (var term in doc.tf) {
 			if (!Object.prototype.hasOwnProperty.call(doc.tf, term)) continue;
 			// sublinear tf damps repeated words; idf rewards distinctive ones
-			var weight = (1 + Math.log(doc.tf[term])) * (this.idf[term] || 0);
+			var didf = this.langIdf[doc.lang] || this.idf;
+			var weight = (1 + Math.log(doc.tf[term])) * (didf[term] || 0);
 			vec[term] = weight;
 			sum += weight * weight;
 		}
@@ -306,7 +337,7 @@
 		doc.norm = Math.sqrt(sum) || 1;
 	};
 
-	Index.prototype.queryVector = function (tokens) {
+	Index.prototype.queryVector = function (tokens, lang) {
 		var tf = Object.create(null);
 		for (var i = 0; i < tokens.length; i++) {
 			tf[tokens[i]] = (tf[tokens[i]] || 0) + 1;
@@ -315,7 +346,8 @@
 		var sum = 0;
 		for (var term in tf) {
 			if (!Object.prototype.hasOwnProperty.call(tf, term)) continue;
-			var weight = (1 + Math.log(tf[term])) * (this.idf[term] || 0);
+			var qidfMap = this.langIdf[lang] || this.idf;
+			var weight = (1 + Math.log(tf[term])) * (qidfMap[term] || 0);
 			if (!weight) continue;
 			vec[term] = weight;
 			sum += weight * weight;
@@ -342,7 +374,7 @@
 		var usedLang = lang;
 		if (!pool || !pool.length) { pool = this.byLang.en || []; usedLang = "en"; }
 
-		var qv = this.queryVector(tokens);
+		var qv = this.queryVector(tokens, usedLang);
 		var scored = [];
 		for (var i = 0; i < pool.length; i++) {
 			var s = cosine(qv, pool[i]);
@@ -364,14 +396,15 @@
 
 		k1 = (typeof k1 === "number") ? k1 : CONFIG.bm25K1;
 		b = (typeof b === "number") ? b : CONFIG.bm25B;
-		var N = this.docCount, avg = this.avgdl;
+		var N = this.langN[usedLang] || this.docCount, avg = this.langAvgdl[usedLang] || this.avgdl;
+		var poolDf = this.langDf[usedLang] || this.df;
 		var qtf = Object.create(null);
 		for (var i = 0; i < tokens.length; i++) qtf[tokens[i]] = (qtf[tokens[i]] || 0) + 1;
 		var norm = 0;
 		var qidf = Object.create(null);
 		for (var t in qtf) {
 			if (!Object.prototype.hasOwnProperty.call(qtf, t)) continue;
-			var df = this.df[t] || 0;
+			var df = poolDf[t] || 0;
 			qidf[t] = Math.log(1 + (N - df + 0.5) / (df + 0.5));
 			if (df) norm += qidf[t];
 		}
@@ -561,15 +594,25 @@
 	};
 
 	Engine.prototype.phraseConflict = function (lang) {
+		/* fallbacks are nested per language (fallbacks.kn.conflict); an older
+		 * flat shape (fallbacks.conflict.en) is still tolerated */
+		var perLang = this.kb.fallbacks && this.kb.fallbacks[lang];
+		if (perLang && perLang.conflict) return perLang.conflict;
 		var f = (this.kb.fallbacks && this.kb.fallbacks.conflict) || {};
 		if (f[lang]) return f[lang];
 		if (f.en) return f.en;
+		var en = this.kb.fallbacks && this.kb.fallbacks.en;
+		if (en && en.conflict) return en.conflict;
 		return "Published sources disagree on this figure, so please confirm it with the college office before you rely on it.";
 	};
 
 	Engine.prototype.outOfScope = function (lang, query) {
+		/* nested per-language shape first (fallbacks.kn.outOfScope) - the flat
+		 * lookup used to miss it and refuse in English on Kannada queries */
+		var perLang = this.kb.fallbacks && this.kb.fallbacks[lang];
 		var f = (this.kb.fallbacks && this.kb.fallbacks.outOfScope) || {};
-		var raw = f[lang] || f.en ||
+		var raw = (perLang && perLang.outOfScope) || f[lang] ||
+			(this.kb.fallbacks && this.kb.fallbacks.en && this.kb.fallbacks.en.outOfScope) || f.en ||
 			"I do not have reliable information on that. Please contact the college directly rather than take a guess from me.";
 		var resolved = resolveTokens(raw, this.kb.meta && this.kb.meta.tokens, lang);
 		var text = resolved.text;

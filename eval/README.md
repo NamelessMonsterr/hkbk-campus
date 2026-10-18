@@ -108,3 +108,20 @@ stops rescuing borderline trap questions), but real typo questions stop
 being answered. Repair stays on because catching genuine typos is the
 feature's point; the trap trade-off is handled by the refusal floors. Dev
 split refusal accuracy is 100% with or without repair.
+
+## Kannada smoke set (2026-10, `--questions questions-kn.json`)
+
+Kannada is a shipping language for the 19 KB entries that carry `kn` blocks
+(core admissions, fees, placements, contact topics). `questions-kn.json` is a
+small team-written smoke set: 14 answerable + 4 traps, no dev/test split - it
+exists to prove the path works, not to measure accuracy. Latest run:
+13/14 answered correctly outright, 1 correct via did-you-mean, all 4 traps
+refused, 0 wrong answers. Every Kannada string in the KB and this set needs
+review by a native speaker before any public claim; none has had one yet.
+
+Enabling it exposed two engine bugs, both fixed and pinned by tests: the
+word regex missed Unicode combining marks, so Kannada words shredded into
+consonants and missed the vocabulary; and idf was computed over the merged
+corpus, so one language's documents shifted the other's rankings (idf is now
+per-language). Anything outside the 19 covered entries refuses in Kannada
+rather than guessing or silently answering in English.

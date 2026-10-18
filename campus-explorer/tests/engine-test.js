@@ -132,24 +132,35 @@ check("refusal carries handoff contacts",
 	refusal.handoff && Object.keys(refusal.handoff).length > 0);
 console.log("  refusal text: " + refusal.answer);
 
-section("Shipping configuration: English only");
-var knQ = "\u0CB9\u0CBE\u0CB8\u0CCD\u0C9F\u0CC6\u0CB2\u0CCD \u0CB6\u0CC1\u0CB2\u0CCD\u0C95 \u0C8E\u0CB7\u0CCD\u0C9F\u0CC1";
-check("only English is active",
-	JSON.stringify(engine.languages()) === JSON.stringify(["en"]),
-	"active: " + JSON.stringify(engine.languages()));
-var knOnEnglishBuild = engine.ask(knQ);
-check("a Kannada query is refused, not answered badly",
-	knOnEnglishBuild.type === "out_of_scope",
-	"got " + knOnEnglishBuild.type + " lang=" + knOnEnglishBuild.lang);
+/* Calibrated expectation (2026-10): Kannada was re-enabled as a shipping
+ * language after the council review; coverage is the 19 entries with kn
+ * blocks, everything else refuses honestly. */
+check("Indic combining marks stay inside tokens",
+	JSON.stringify(I.tokenise("\u0cb5\u0cc8\u0cab\u0cc8 \u0cb9\u0cbe\u0cb8\u0ccd\u0c9f\u0cc6\u0cb2\u0ccd", "kn")) ===
+	JSON.stringify(["\u0cb5\u0cc8\u0cab\u0cc8", "\u0cb9\u0cbe\u0cb8\u0ccd\u0c9f\u0cc6\u0cb2\u0ccd"]),
+	"tokens: " + JSON.stringify(I.tokenise("\u0cb5\u0cc8\u0cab\u0cc8", "kn")));
 
-section("Multilingual capability retained, just switched off");
-// Turning Kannada back on must be a data change, never a code change.
+section("Shipping configuration: English and Kannada");
+var knQ = "\u0CB9\u0CBE\u0CB8\u0CCD\u0C9F\u0CC6\u0CB2\u0CCD \u0CB6\u0CC1\u0CB2\u0CCD\u0C95 \u0C8E\u0CB7\u0CCD\u0C9F\u0CC1";
+check("English and Kannada are active",
+	JSON.stringify(engine.languages()) === JSON.stringify(["en", "kn"]),
+	"active: " + JSON.stringify(engine.languages()));
+var knOnShipping = engine.ask(knQ);
+check("a covered Kannada query is answered in Kannada",
+	knOnShipping.type === "answer" && knOnShipping.lang === "kn" && knOnShipping.entryId === "fees-hostel",
+	"got " + knOnShipping.type + " lang=" + knOnShipping.lang + " entry=" + knOnShipping.entryId);
+
+section("Kannada coverage limits are honest");
 var multiKb = JSON.parse(JSON.stringify(kb));
 multiKb.meta.languages = ["en", "kn"];
 var multi = new HKBKChat.Engine(multiKb);
 var kn = multi.ask(knQ);
-check("re-enabling Kannada answers in Kannada", kn.type === "answer" && kn.lang === "kn",
+check("Kannada answers in Kannada", kn.type === "answer" && kn.lang === "kn",
 	"got " + kn.type + " lang=" + kn.lang + " entry=" + kn.entryId);
+var knRefuse = engine.ask("\u0cad\u0cb0\u0cbf\u0caf\u0cbe\u0ca3\u0cbf \u0c8e\u0cb2\u0ccd\u0cb2\u0cbf \u0cb8\u0cbf\u0c97\u0cc1\u0ca4\u0ccd\u0ca4\u0cc6"); // "where do I get biryani"
+check("an uncovered Kannada query refuses in Kannada, no guessing",
+	knRefuse.type === "out_of_scope" && /[\u0C80-\u0CFF]/.test(knRefuse.answer || ""),
+	"got " + knRefuse.type + " lang=" + knRefuse.lang);
 check("Kannada answer is in Kannada script", /[\u0C80-\u0CFF]/.test(kn.answer || ""));
 check("Kannada answer carries no English figure",
 	!/(lakh|LPA|approximately)/.test(kn.answer || ""), String(kn.answer).slice(0, 160));

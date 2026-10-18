@@ -71,7 +71,10 @@ python3 -c "import json;d=json.load(open('data/knowledge-base.json',encoding='ut
 
 ## How the assistant answers
 
-1. **Language identification** by script range, before anything else.
+1. **Language identification** by script range, before anything else. English
+   and Kannada are indexed and served; Kannada covers the 19 entries with `kn`
+   blocks and refuses in Kannada outside them (see `eval/README.md` for the
+   smoke-set numbers and the review caveat).
 2. **Normalise and tokenise** the query.
 3. **TF-IDF retrieval** over 512-token chunks with 64-token overlap, ranked by
    cosine similarity, top 5 kept.

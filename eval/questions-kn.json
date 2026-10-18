@@ -1,0 +1,172 @@
+{
+ "meta": {
+  "label": "PLACEHOLDER KANNADA QUESTION SET v1 - small, not real student data",
+  "created": "2026-10-18",
+  "note": "Kannada coverage is a 19-entry subset of the KB (core admissions/fees/placements topics only). These 18 questions were written by the team to smoke-test that subset: 14 answerable from kn blocks, 4 traps that must refuse. Numbers from this set are placeholder smoke-test numbers, not accuracy claims. Kannada strings must be reviewed by a native speaker before any public claim.",
+  "schema": "expect.entry = expected KB entry id; expect.refuse = true means out_of_scope is correct. Every question is Kannada script; language detection must pick kn."
+ },
+ "questions": [
+  {
+   "id": "k01",
+   "q": "ಬಿ.ಇ. ಶುಲ್ಕ ಎಷ್ಟು",
+   "expect": {
+    "entry": "fees-btech"
+   },
+   "category": "fees",
+   "split": "kn"
+  },
+  {
+   "id": "k02",
+   "q": "ಹಾಸ್ಟೆಲ್ ಶುಲ್ಕ ಎಷ್ಟು",
+   "expect": {
+    "entry": "fees-hostel"
+   },
+   "category": "fees",
+   "split": "kn"
+  },
+  {
+   "id": "k03",
+   "q": "ಪ್ಲೇಸ್‌ಮೆಂಟ್ ಹೇಗಿದೆ",
+   "expect": {
+    "entry": "placements"
+   },
+   "category": "placements",
+   "split": "kn"
+  },
+  {
+   "id": "k04",
+   "q": "ಸಿಇಟಿ ಕೋಡ್ ಏನು",
+   "expect": {
+    "entry": "cet-code"
+   },
+   "category": "admission",
+   "split": "kn"
+  },
+  {
+   "id": "k05",
+   "q": "ಪ್ರವೇಶ ಹೇಗೆ",
+   "expect": {
+    "entry": "admission-process"
+   },
+   "category": "admission",
+   "split": "kn"
+  },
+  {
+   "id": "k06",
+   "q": "ಎಂಬಿಬಿಎ ಕೋರ್ಸ್ ಇದೆಯೇ",
+   "expect": {
+    "entry": "mba"
+   },
+   "category": "courses",
+   "split": "kn"
+  },
+  {
+   "id": "k07",
+   "q": "ಸೌಲಭ್ಯಗಳು ಏನಿವೆ",
+   "expect": {
+    "entry": "campus-facilities"
+   },
+   "category": "facilities",
+   "split": "kn"
+  },
+  {
+   "id": "k08",
+   "q": "ಸ್ಕಾಲರ್‌ಶಿಪ್ ಸಿಗುತ್ತಾ",
+   "expect": {
+    "entry": "scholarships"
+   },
+   "category": "fees",
+   "split": "kn"
+  },
+  {
+   "id": "k09",
+   "q": "ಕಾಲೇಜು ಹೇಗಿದೆ",
+   "expect": {
+    "entry": "about-college"
+   },
+   "category": "website",
+   "split": "kn"
+  },
+  {
+   "id": "k10",
+   "q": "ಯಾವ ಕೋರ್ಸ್‌ಗಳು ಇವೆ",
+   "expect": {
+    "entry": "courses-offered"
+   },
+   "category": "courses",
+   "split": "kn"
+  },
+  {
+   "id": "k11",
+   "q": "ದಾಖಲೆಗಳು ಯಾವುವು ಬೇಕು",
+   "expect": {
+    "entry": "documents-required"
+   },
+   "category": "admission",
+   "split": "kn"
+  },
+  {
+   "id": "k12",
+   "q": "ಕಟ್‌ಆಫ್ ಎಷ್ಟು",
+   "expect": {
+    "entry": "cutoff"
+   },
+   "category": "admission",
+   "split": "kn"
+  },
+  {
+   "id": "k13",
+   "q": "ವಿದೇಶಿ ವಿದ್ಯಾರ್ಥಿಗಳು ಸೇರಬಹುದೇ",
+   "expect": {
+    "entry": "international-students"
+   },
+   "category": "admission",
+   "split": "kn"
+  },
+  {
+   "id": "k14",
+   "q": "ಸಂಪರ್ಕ ಮಾಹಿತಿ ಕೊಡಿ",
+   "expect": {
+    "entry": "contact"
+   },
+   "category": "website",
+   "split": "kn"
+  },
+  {
+   "id": "k15",
+   "q": "ವೈಫೈ ಪಾಸ್‌ವರ್ಡ್ ಏನು",
+   "expect": {
+    "refuse": true
+   },
+   "category": "unanswerable",
+   "split": "kn"
+  },
+  {
+   "id": "k16",
+   "q": "ರೇಷ್ಮೆ ಹೊಳೆ ಎಲ್ಲಿದೆ",
+   "expect": {
+    "refuse": true
+   },
+   "category": "unanswerable",
+   "split": "kn"
+  },
+  {
+   "id": "k17",
+   "q": "ನಾಳೆ ಪರೀಕ್ಷೆ ಇದೆಯೇ",
+   "expect": {
+    "refuse": true
+   },
+   "category": "unanswerable",
+   "split": "kn"
+  },
+  {
+   "id": "k18",
+   "q": "ಬೆಂಗಳೂರಿನಲ್ಲಿ ಉತ್ತಮ ಬಿರಿಯಾನಿ ಎಲ್ಲಿ ಸಿಗುತ್ತದೆ",
+   "expect": {
+    "refuse": true
+   },
+   "category": "unanswerable",
+   "split": "kn"
+  }
+ ]
+}

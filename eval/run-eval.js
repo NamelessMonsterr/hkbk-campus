@@ -19,7 +19,11 @@ var perf = (typeof performance !== "undefined" && performance.now) ? performance
 
 var ROOT = path.join(__dirname, "..");
 var kb = JSON.parse(fs.readFileSync(path.join(ROOT, "campus-explorer", "data", "knowledge-base.json"), "utf8"));
-var set = JSON.parse(fs.readFileSync(path.join(__dirname, "questions.json"), "utf8"));
+/* --questions <file> runs an alternate set (e.g. questions-kn.json); the
+ * default remains questions.json */
+var args0 = process.argv.slice(2);
+var qi = args0.indexOf("--questions");
+var set = JSON.parse(fs.readFileSync(path.join(__dirname, qi !== -1 ? args0[qi + 1] : "questions.json"), "utf8"));
 var HKBKChat = require(path.join(ROOT, "campus-explorer", "js", "chatbot-engine.js"));
 var EV = require(path.join(__dirname, "eval-core.js"));
 
@@ -148,17 +152,26 @@ if (flag("--sweep")) {
 }
 
 var results = EV.run(engine, set.questions, now);
+/* alternate sets without a dev/test split (the small Kannada smoke set) run
+ * as a single block - no tuning/held-out semantics are claimed for them */
+var hasDevTest = set.questions.some(function (q) { return q.split === "dev" || q.split === "test"; });
 var devResults = results.filter(function (r) { return r.split === "dev"; });
 var testResults = results.filter(function (r) { return r.split === "test"; });
 
-printSummary("dev split, shipped config", EV.summarise(devResults));
-printSummary("test split, shipped config", EV.summarise(testResults));
+if (hasDevTest) {
+	printSummary("dev split, shipped config", EV.summarise(devResults));
+	printSummary("test split, shipped config", EV.summarise(testResults));
+} else {
+	printSummary("whole set, shipped config", EV.summarise(results));
+}
 
-console.log("\n== coverage vs accuracy (test split, single hard floor) ==");
-EV.coverageCurve(HKBKChat.Engine, kb, set.questions.filter(function (q) { return q.split === "test"; }), now)
-	.forEach(function (p) {
-		console.log("  floor " + p.threshold.toFixed(2) + "  coverage " + String(p.coverage).padStart(5) + "%  accuracy " + p.accuracy + "%");
-	});
+if (hasDevTest) {
+	console.log("\n== coverage vs accuracy (test split, single hard floor) ==");
+	EV.coverageCurve(HKBKChat.Engine, kb, set.questions.filter(function (q) { return q.split === "test"; }), now)
+		.forEach(function (p) {
+			console.log("  floor " + p.threshold.toFixed(2) + "  coverage " + String(p.coverage).padStart(5) + "%  accuracy " + p.accuracy + "%");
+		});
+}
 
 printFailures(results);
 

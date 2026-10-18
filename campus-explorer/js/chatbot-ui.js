@@ -193,7 +193,7 @@
 		Object.keys(handoff).forEach(function (k) {
 			var v = handoff[k];
 			var item = el("div", "msg__handoffItem");
-			item.appendChild(el("span", "msg__handoffKey", k));
+			item.appendChild(el("span", "msg__handoffKey", labelise(k)));
 			var isPhone = /^[+0-9][0-9 ()-]{6,}$/.test(String(v));
 			var isMail = String(v).indexOf("@") > -1;
 			if (isPhone || isMail) {
