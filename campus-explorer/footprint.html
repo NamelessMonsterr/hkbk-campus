@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System footprint - Ask HKBK</title>
+<style>
+	body { font-family: system-ui, sans-serif; background: #f4f0e6; color: #0b1030; margin: 0; padding: 32px 20px 60px; }
+	main { max-width: 760px; margin: 0 auto; }
+	h1 { font-size: 1.5rem; margin: 0 0 4px; }
+	.sub { color: #4b5270; font-size: 0.9rem; margin-bottom: 24px; }
+	.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+	.card { background: #fff; border: 1px solid #0b103022; border-radius: 10px; padding: 14px; }
+	.card b { font-size: 1.35rem; display: block; }
+	.card span { font-size: 0.78rem; color: #4b5270; }
+	table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.85rem; }
+	th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #0b103015; }
+	th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+	h2 { font-size: 1.05rem; margin: 28px 0 8px; }
+	p.note { font-size: 0.82rem; color: #4b5270; line-height: 1.5; }
+	a { color: #1b3dff; }
+</style>
+</head>
+<body>
+<main>
+	<h1>System footprint</h1>
+	<p class="sub">What the chatbot costs to ship and to run, measured in your browser right now.
+	Nothing is sent anywhere. See also the <a href="../eval/">evaluation page</a>.</p>
+
+	<div class="cards" id="cards"></div>
+
+	<h2>What a visitor downloads</h2>
+	<table id="netTable"></table>
+	<p class="note">Transfer and uncompressed sizes come from the browser's own resource timing
+	for this page load. On a repeat visit with a warm HTTP cache the transfer reads near zero -
+	that is the cache doing its job, not a smaller site, and the uncompressed size stays honest.</p>
+
+	<h2>Answer latency (measured now)</h2>
+	<table id="latTable"></table>
+	<p class="note">300 real queries through the engine in this tab: 6 canned questions, 50 rounds,
+	timed with performance.now(). No server, no network, no external model - the whole pipeline
+	(tokenise, fuzzy repair, TF-IDF retrieval, calibrated refusal) runs in the page.</p>
+
+	<h2>The whole system, in files</h2>
+	<table id="fileTable"></table>
+	<p class="note">Retrieval engine, UI, and the full knowledge base. There is no backend
+	component: these files plus any static host are the entire deployment.</p>
+</main>
+
+<script src="js/chatbot-engine.js"></script>
+<script src="data/knowledge-base.js"></script>
+<script>
+(function () {
+	"use strict";
+	function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = String(text); return n; }
+	function kb(n) { return n >= 1048576 ? (n / 1048576).toFixed(2) + " MB" : Math.round(n / 1024 * 10) / 10 + " KB"; }
+	function card(value, label) {
+		var c = el("div", "card");
+		c.appendChild(el("b", null, value)); c.appendChild(el("span", null, label));
+		document.getElementById("cards").appendChild(c);
+	}
+	function row(tableId, cells, header) {
+		var tr = el("tr");
+		cells.forEach(function (c, i) {
+			var cell = el(header ? "th" : "td");
+			if (i > 0) cell.className = "num";
+			cell.textContent = c;
+			tr.appendChild(cell);
+		});
+		document.getElementById(tableId).appendChild(tr);
+	}
+
+	/* ---- this page's load, from real browser timing (after load fires) ---- */
+	var nav, res;
+	function measure() {
+	nav = performance.getEntriesByType("navigation")[0];
+	res = performance.getEntriesByType("resource");
+	var transfer = 0, decoded = 0;
+	res.forEach(function (r) { transfer += r.transferSize || 0; decoded += r.decodedBodySize || 0; });
+	row("netTable", ["measure", "value"], true);
+	if (nav) {
+		row("netTable", ["HTML response", Math.round(nav.responseEnd - nav.startTime) + " ms"]);
+		row("netTable", ["DOM content loaded", nav.domContentLoadedEventEnd ? Math.round(nav.domContentLoadedEventEnd - nav.startTime) + " ms" : "n/a this visit"]);
+		row("netTable", ["full load (cold, this visit)", nav.loadEventEnd ? Math.round(nav.loadEventEnd - nav.startTime) + " ms" : "n/a this visit"]);
+		row("netTable", ["transferred, all resources", transfer === 0 ? "0 (warm cache)" : kb(transfer)]);
+		row("netTable", ["uncompressed, all resources", kb(decoded)]);
+	}
+
+	/* ---- engine build + query latency, measured live ---- */
+	var t0 = performance.now();
+	var engine = new window.HKBKChat.Engine(window.HKBK_KB);
+	var buildMs = performance.now() - t0;
+	var qs = ["what are the fees for btech", "where is the food court", "hostel facilities",
+		"placement highest package", "how do i get admission", "asdf qwer zxcv"];
+	var times = [];
+	for (var i = 0; i < 300; i++) {
+		var q0 = performance.now();
+		engine.ask(qs[i % qs.length]);
+		times.push(performance.now() - q0);
+	}
+	times.sort(function (a, b) { return a - b; });
+	function pct(p) { return times[Math.min(times.length - 1, Math.floor(p / 100 * times.length))].toFixed(2); }
+	row("latTable", ["measure", "ms"], true);
+	row("latTable", ["mean", (times.reduce(function (a, b) { return a + b; }, 0) / times.length).toFixed(2)]);
+	row("latTable", ["p50", pct(50)]);
+	row("latTable", ["p95", pct(95)]);
+	row("latTable", ["max", times[times.length - 1].toFixed(2)]);
+	card(pct(50) + " ms", "answer latency p50 (300 queries)");
+
+	/* ---- file sizes + KB stats ---- */
+	var st = engine.stats();
+	var kbSize = 0, engSize = 0;
+	res.forEach(function (r) {
+		if (/knowledge-base\.js/.test(r.name)) kbSize = r.decodedBodySize || 0;
+		if (/chatbot-engine\.js/.test(r.name)) engSize = r.decodedBodySize || 0;
+	});
+	row("fileTable", ["file", "uncompressed"], true);
+	row("fileTable", ["knowledge base (v" + window.HKBK_KB.meta.version + ", " + st.entries + " entries)", kb(kbSize)]);
+	row("fileTable", ["retrieval engine (chatbot-engine.js)", kb(engSize)]);
+	row("fileTable", ["chat UI (chatbot-ui.js)", "~12 KB"]);
+	row("fileTable", ["index built at load", st.chunks + " chunks, " + st.vocabulary + " terms, " + buildMs.toFixed(0) + " ms"]);
+	card(kb(kbSize), "knowledge base, " + st.entries + " entries");
+	card(st.chunks, "retrieval chunks at load");
+	card(buildMs.toFixed(0) + " ms", "index build time");
+	}
+	if (document.readyState === "complete") measure();
+	else window.addEventListener("load", measure);
+})();
+</script>
+</body>
+</html>
