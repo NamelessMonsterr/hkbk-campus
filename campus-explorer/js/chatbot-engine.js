@@ -685,7 +685,15 @@
 	 * Returns { name, stopId|null, footage, lat, lon } or null. */
 	Engine.prototype.resolvePlace = function (fragment) {
 		if (!fragment) return null;
-		var text = " " + normalise(fragment).replace(/^the\s+/, "") + " ";
+		/* strip fillers and stray direction verbs, then require the matched
+		 * alias to cover most of what is left - "hostel office for fee
+		 * payment" must not resolve to the hostel just because "hostel"
+		 * appears in it */
+		var cleaned = normalise(fragment)
+			.replace(/^(?:the\s+)?(?:get|go|walk|reach|travel|head)\s+(?:to\s+)?/, "")
+			.replace(/^the\s+/, "").replace(/\s+(please|now)$/, "").trim();
+		if (!cleaned) return null;
+		var text = " " + cleaned + " ";
 		var g = this.directionGazetteer();
 		var best = null, bestLen = 0;
 		function consider(place, stopId, footage) {
@@ -693,7 +701,8 @@
 			for (var i = 0; i < aliases.length; i++) {
 				var a = normalise(aliases[i]);
 				if (!a) continue;
-				if ((text === " " + a + " " || text.indexOf(" " + a + " ") !== -1) && a.length > bestLen) {
+				if ((text === " " + a + " " || text.indexOf(" " + a + " ") !== -1) &&
+						a.length >= 0.6 * cleaned.length && a.length > bestLen) {
 					best = { name: place.name, stopId: stopId, footage: footage, lat: place.lat, lon: place.lon };
 					bestLen = a.length;
 				}
@@ -714,7 +723,10 @@
 		// endpoints resolve to known gazetteer places, which ordinary
 		// questions do not.
 		var m = query.match(/\bfrom\s+(.+?)\s+(?:to|towards?)\s+(.+?)[?.!]*$/);
-		if (m && (cue || (this.resolvePlace(m[1]) && this.resolvePlace(m[2])))) {
+		// Without a cue word, fire only when the destination resolves - an
+		// unknown origin is answered honestly downstream, never silently
+		// replaced with the gate.
+		if (m && (cue || this.resolvePlace(m[2]))) {
 			return { origin: m[1], dest: m[2] };
 		}
 		if (!cue) return null;
@@ -735,12 +747,25 @@
 
 	Engine.prototype.directionsAnswer = function (lang, parsed, trace) {
 		var g = this.directionGazetteer();
+		var self = this;
 		var dest = this.resolvePlace(parsed.dest);
 		if (!dest) return null; // not a place we know: let retrieval handle it
 		var origin = parsed.origin ? this.resolvePlace(parsed.origin) : null;
-		if (parsed.origin && !origin) return null;
+		var originDefaulted = false;
+		var contact = (this.kb.meta && this.kb.meta.tokens && this.kb.meta.tokens.admissionsIndian) || "+91 90350 22250";
+		if (parsed.origin && !origin) {
+			/* the user named a start point we do not know: say so instead of
+			 * silently routing from the gate or dropping to retrieval */
+			trace.steps.push({ step: "directions", outcome: "origin_unknown", fragment: parsed.origin });
+			return base({
+				answer: "I do not know " + parsed.origin.replace(/^the\s+/i, "") +
+					" on this campus, so I cannot verify a route from there. Routes I can verify start at the " +
+					g.stops[0].name + " or another filmed stop - ask, for example, \u201Chow do I get to the " +
+					dest.name + " from the " + g.stops[0].name + "\u201D.",
+				directions: "origin_unknown"
+			});
+		}
 
-		var self = this;
 		function base(extra) {
 			var res = {
 				type: "answer",
@@ -749,7 +774,9 @@
 				section: "walk",
 				walkStop: null,
 				walkStopName: null,
-				confidence: 0.9,
+				/* deterministic route lookup, not a retrieval score: no
+				 * confidence, so usage-log bands stay retrieval-only */
+				confidence: null,
 				hedged: false,
 				conflict: null,
 				sources: [],
@@ -767,19 +794,19 @@
 			for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) res[k] = extra[k];
 			return res;
 		}
-		var noRoute = "I can only give directions along the route our campus footage covers, and DEST is not on it, so I cannot verify a walking route there. The campus map at the main gate marks it, and the office can point you: +91 90350 22250.";
+		var noRoute = "I can only give directions along the route our campus footage covers, and DEST is not on it, so I cannot verify a walking route there. The office can point you: PHONE.";
 
 		if (!dest.footage) {
 			trace.steps.push({ step: "directions", outcome: "no_footage", place: dest.name });
-			return base({ answer: noRoute.replace("DEST", "the " + dest.name), directions: "unavailable" });
+			return base({ answer: noRoute.replace("DEST", "the " + dest.name).replace("PHONE", contact), directions: "unavailable" });
 		}
 		if (origin && !origin.footage) {
 			trace.steps.push({ step: "directions", outcome: "origin_no_footage", place: origin.name });
-			return base({ answer: noRoute.replace("DEST", "the " + origin.name), directions: "unavailable" });
+			return base({ answer: noRoute.replace("DEST", "the " + origin.name).replace("PHONE", contact), directions: "unavailable" });
 		}
 
 		var order = g.stops;
-		if (!origin) origin = order[0] && { name: order[0].name, stopId: order[0].id, footage: true };
+		if (!origin) { origin = order[0] && { name: order[0].name, stopId: order[0].id, footage: true }; originDefaulted = true; }
 		var fromIdx = -1, toIdx = -1;
 		for (var i = 0; i < order.length; i++) {
 			if (order[i].id === origin.stopId) fromIdx = i;
@@ -787,29 +814,45 @@
 		}
 		if (fromIdx === -1 || toIdx === -1) return null;
 		if (fromIdx === toIdx) {
-			trace.steps.push({ step: "directions", outcome: "same_place", place: dest.name });
+			trace.steps.push({ step: "directions", outcome: "same_place", place: dest.name, originDefaulted: originDefaulted });
 			return base({
-				answer: "That is the same place - " + dest.name + ". You are already there.",
+				answer: originDefaulted
+					/* the user never said where they are - claiming "you are
+					 * already there" would be invented */
+					? "The " + dest.name + " is the start of the filmed campus walk, so there is no route to compute - the walk begins there."
+					: "Those are the same place - " + dest.name + ", so there is no route to compute.",
 				walkStop: dest.stopId, walkStopName: dest.name, directions: "same"
 			});
 		}
 
-		var step = fromIdx < toIdx ? 1 : -1;
-		var names = [], metres = 0;
+		var reversed = fromIdx > toIdx;
+		var step = reversed ? -1 : 1;
+		var names = [], metres = 0, distOk = true;
 		for (var j = fromIdx; j !== toIdx + step; j += step) {
 			names.push(order[j].name);
-			if (j !== toIdx) metres += haversineM(order[j], order[j + step]);
+			if (j !== toIdx) {
+				var a = order[j], b = order[j + step];
+				if (typeof a.lat !== "number" || typeof b.lat !== "number") { distOk = false; }
+				else metres += haversineM(a, b);
+			}
 		}
+		if (!isFinite(metres)) distOk = false;
 		var approx = Math.round(metres / 10) * 10;
 		trace.steps.push({
 			step: "directions", outcome: "route",
 			from: origin.stopId, to: dest.stopId,
-			via: names.length - 2, metres: approx
+			via: names.length - 2, metres: distOk ? approx : null, reversed: reversed
 		});
 		var answer = "From " + origin.name + " to " + dest.name + ", follow the campus walk route: " +
-			names.join(" \u2192 ") + ". That is roughly " + approx +
-			" m along the route (an estimate from the walk's stop coordinates, not a measured path). " +
-			"This is the only route I can verify - it is the one our footage covers.";
+			names.join(" \u2192 ") + ".";
+		if (distOk) {
+			answer += " That is at least roughly " + approx +
+				" m (straight-line between the filmed stops, so the real path is a little longer).";
+		}
+		if (reversed) {
+			answer += " The walk was filmed in the other direction, so you would follow it in reverse.";
+		}
+		answer += " This is the only route I can verify - it is the one our footage covers.";
 		return base({
 			answer: answer,
 			walkStop: dest.stopId, walkStopName: dest.name,

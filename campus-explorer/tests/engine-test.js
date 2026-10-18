@@ -255,7 +255,8 @@ check("hook is settable", (function () {
 	check("directions: route answer with ordered stops", r1.type === "answer" && r1.directions === "route" &&
 		r1.answer.indexOf("Main Gate \u2192 Football Ground") !== -1 && r1.answer.indexOf("Food Court") !== -1);
 	check("directions: route deep-links to the destination stop", r1.walkStop === "canteen");
-	check("directions: distance is labelled an estimate", r1.answer.indexOf("estimate") !== -1);
+	check("directions: distance is labelled a lower-bound estimate", r1.answer.indexOf("at least roughly") !== -1 &&
+		r1.answer.indexOf("straight-line") !== -1);
 
 	var r2 = eng.ask("directions to the library");
 	check("directions: no-footage place gets an honest no-route answer", r2.directions === "unavailable" &&
@@ -279,6 +280,24 @@ check("hook is settable", (function () {
 
 	var r8 = eng.ask("where is the library");
 	check("directions: plain location question stays with retrieval", !r8.directions && r8.type === "answer");
+
+	var r9 = eng.ask("directions to the main gate");
+	check("directions: defaulted origin at the first stop never claims you are there", r9.directions === "same" &&
+		r9.answer.indexOf("walk begins there") !== -1 && r9.answer.indexOf("already there") === -1);
+
+	var r10 = eng.ask("from my home to the canteen");
+	check("directions: unknown origin is answered honestly", r10.directions === "origin_unknown" &&
+		r10.answer.indexOf("cannot verify a route from there") !== -1);
+
+	var r11 = eng.ask("from a block to the gate");
+	check("directions: reverse routes say the walk was filmed the other way", r11.directions === "route" &&
+		r11.answer.indexOf("in reverse") !== -1);
+
+	var r12 = eng.ask("walk to the hostel office for fee payment");
+	check("directions: alias inside a longer fragment does not hijack", !r12.directions);
+
+	var r13 = eng.ask("how do i get to the food court from the main gate");
+	check("directions: no fabricated confidence score", r13.confidence === null);
 })();
 
 section("Result");
