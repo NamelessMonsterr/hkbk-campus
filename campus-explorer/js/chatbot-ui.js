@@ -450,9 +450,9 @@
 		body.appendChild(wrap);
 		/* the "export or delete any time" promise needs a visible path:
 		 * link straight to the admin view that does both */
-		if (this.options.privacyHref) {
+		if (this.opts.privacyHref) {
 			var link = el("a", null, "Export or delete your data");
-			link.href = this.options.privacyHref;
+			link.href = this.opts.privacyHref;
 			link.target = "_blank";
 			link.rel = "noopener";
 			link.style.cssText = "display:inline-block;margin-top:8px;font-size:12px";

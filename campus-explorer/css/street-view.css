@@ -7,7 +7,8 @@
 
 .sv-body {
 	margin: 0;
-	background: #000;
+	background: var(--bg);
+	color: var(--fg);
 }
 
 /* Full first viewport, not position:fixed - fixed would trap the page
@@ -17,7 +18,7 @@
 	position: relative;
 	width: 100%;
 	height: 100vh;
-	background: #000;
+	background: #0b1030;
 	overflow: hidden;
 }
 
@@ -30,7 +31,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: radial-gradient(ellipse at center, #14161b 0%, #08090b 100%);
+	background: radial-gradient(ellipse at center, #f8f5ee 0%, #ece5d3 100%);
 	z-index: 5;
 }
 .sv-start__inner {
@@ -126,7 +127,7 @@
 	cursor: pointer;
 	backdrop-filter: blur(3px);
 }
-.sv-chevron:hover { background: rgba(194, 75, 63, 0.75); }
+.sv-chevron:hover { background: rgba(27, 61, 255, 0.75); }
 .sv-chevron--back { left: 22px; }
 .sv-chevron--fwd { right: 22px; }
 .sv-chevron:disabled { opacity: 0.25; cursor: default; }

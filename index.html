@@ -132,7 +132,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 <script src="campus-explorer/js/chatbot-ui.js"></script>
 <script>
 (function(){var host=document.getElementById("chatHost"),launcher=document.getElementById("launcher");
-var ui=new window.HKBKChatUI.ChatUI({mount:host,onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
+var ui=new window.HKBKChatUI.ChatUI({mount:host,privacyHref:"eval/admin.html",onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
 function openChat(q){ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");if(q)ui.submit(q)}
 document.querySelectorAll("[data-open-chat]").forEach(function(b){b.addEventListener("click",function(){openChat()})});
 window.hkbkAsk=openChat;
