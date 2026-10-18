@@ -40,10 +40,19 @@
 		                        // instead of guessing or dead-ending. Below: refuse.
 		ambiguityMargin: 0.02,  // runner-up this close (and not a strong match):
 		                        // offer both entries instead of picking one
-		coveragePenalty: true   // scale confidence by the share of the query's
+		coveragePenalty: true,  // scale confidence by the share of the query's
 		                        // content tokens the KB vocabulary actually covers.
 		                        // "hack the exam portal" scores on "exam" alone;
 		                        // coverage 1/3 pulls it under the refusal floor.
+		retriever: "tfidf",     // scoring function for retrieval: "tfidf"
+		                        // (cosine, as shipped) or "bm25" (Okapi BM25,
+		                        // normalised against the query's own score so the
+		                        // calibrated floors still apply). Baseline switch
+		                        // for the /eval comparison - the UI ships tfidf.
+		repair: true,           // fuzzy repair of out-of-vocabulary tokens.
+		                        // false ablates step 3 for the /eval comparison.
+		bm25K1: 1.5,            // Okapi BM25 term-frequency saturation
+		bm25B: 0.75             // Okapi BM25 length normalisation
 	};
 
 	/* ----------------------------------------------------------------
@@ -268,6 +277,10 @@
 
 		// Second pass: idf is only knowable once every chunk is counted.
 		var N = this.docs.length || 1;
+		this.docCount = N;
+		var totalLen = 0;
+		for (var dl = 0; dl < this.docs.length; dl++) totalLen += this.docs[dl].length;
+		this.avgdl = totalLen / N || 1;
 		this.idf = Object.create(null);
 		for (var t in this.df) {
 			if (!Object.prototype.hasOwnProperty.call(this.df, t)) continue;
@@ -336,6 +349,46 @@
 			if (s > 0) scored.push({ doc: pool[i], score: s });
 		}
 		scored.sort(function (a, b) { return b.score - a.score; });
+		return { hits: scored.slice(0, k || CONFIG.topK), lang: usedLang };
+	};
+
+	// Okapi BM25 over the same chunks. Raw BM25 scores are unbounded, so the
+	// score is divided by the query's own best-case score (each query term
+	// contributing its idf once) - a document containing every query term at
+	// average length scores ~1. That keeps the calibrated refusal floors
+	// meaningful across both scorers. Baseline for the /eval comparison.
+	Index.prototype.searchBM25 = function (tokens, lang, k) {
+		var pool = this.byLang[lang];
+		var usedLang = lang;
+		if (!pool || !pool.length) { pool = this.byLang.en || []; usedLang = "en"; }
+
+		var k1 = CONFIG.bm25K1, b = CONFIG.bm25B, N = this.docCount, avg = this.avgdl;
+		var qtf = Object.create(null);
+		for (var i = 0; i < tokens.length; i++) qtf[tokens[i]] = (qtf[tokens[i]] || 0) + 1;
+		var norm = 0;
+		var qidf = Object.create(null);
+		for (var t in qtf) {
+			if (!Object.prototype.hasOwnProperty.call(qtf, t)) continue;
+			var df = this.df[t] || 0;
+			qidf[t] = Math.log(1 + (N - df + 0.5) / (df + 0.5));
+			if (df) norm += qidf[t];
+		}
+		if (!norm) return { hits: [], lang: usedLang };
+
+		var scored = [];
+		for (var d = 0; d < pool.length; d++) {
+			var doc = pool[d];
+			var K = k1 * (1 - b + b * (doc.length / avg));
+			var s = 0;
+			for (var term in qidf) {
+				if (!Object.prototype.hasOwnProperty.call(qidf, term)) continue;
+				var f = doc.tf[term];
+				if (!f) continue;
+				s += qidf[term] * (f * (k1 + 1)) / (f + K);
+			}
+			if (s > 0) scored.push({ doc: doc, score: Math.min(1, s / norm) });
+		}
+		scored.sort(function (a, b2) { return b2.score - a.score; });
 		return { hits: scored.slice(0, k || CONFIG.topK), lang: usedLang };
 	};
 
@@ -560,7 +613,9 @@
 	 * but the sum is damped so that merely long entries cannot dominate.
 	 */
 	Engine.prototype.retrieve = function (tokens, lang, trace, label) {
-		var res = this.index.search(tokens, lang, this.config.topK);
+		var res = this.config.retriever === "bm25"
+			? this.index.searchBM25(tokens, lang, this.config.topK)
+			: this.index.search(tokens, lang, this.config.topK);
 		trace.steps.push({
 			step: label || "retrieval",
 			lang: res.lang,
@@ -589,6 +644,8 @@
 		return {
 			entry: this.index.entryById[winner.id],
 			confidence: winner.best,
+			// full entry ranking (best chunk score per entry) for eval rank metrics
+			ranking: ranked.map(function (r) { return r.id; }),
 			runnerUp: runner ? { entry: this.index.entryById[runner.id], confidence: runner.best } : null,
 			sources: res.hits.map(function (h) {
 				return { entryId: h.doc.entryId, category: h.doc.category, score: Number(h.score.toFixed(3)) };
@@ -615,7 +672,9 @@
 
 		// 2 + 3. tokenise, then repair unknown tokens
 		var tokens = tokenise(query, lang);
-		var repaired = this.index.repair(tokens);
+		var repaired = this.config.repair === false
+			? { tokens: tokens, repairs: [] }
+			: this.index.repair(tokens);
 		if (repaired.repairs.length) {
 			this.counters.fuzzyRecovered++;
 			trace.steps.push({ step: "fuzzy_repair", repairs: repaired.repairs });
@@ -647,7 +706,7 @@
 
 		// 4. whole-question fuzzy match short-circuits retrieval
 		var direct = this.index.fuzzyQuestion(query, lang);
-		var entry = null, confidence = 0, sources = [], runnerUp = null;
+		var entry = null, confidence = 0, sources = [], runnerUp = null, ranking = [];
 
 		// The whole-question shortcut is for typos of STORED questions. A
 		// near-identical string (>= 0.90) is a typo and always fires; a merely
@@ -670,6 +729,7 @@
 			entry = primary.entry;
 			confidence = primary.confidence;
 			sources = primary.sources;
+			ranking = primary.ranking || [];
 			runnerUp = primary.runnerUp;
 
 			// Only if that was weak do we consider the previous topic. Conversation
@@ -755,6 +815,7 @@
 			});
 			var clarifyRes = this.clarify(lang, rawQuery, offered, sources);
 			clarifyRes.trace = trace;
+			clarifyRes.ranking = ranking;
 			// The top suggestion becomes the tentative topic, so a follow-up
 			// ("what about the fee for it") still resolves against it.
 			this.memory.push({ query: rawQuery, lang: lang, entryId: entry.id, clarified: true });
@@ -789,6 +850,7 @@
 			hedged: confidence < this.config.strongMatch,
 			conflict: conflict,
 			sources: sources,
+			ranking: ranking,
 			trace: trace
 		};
 	};

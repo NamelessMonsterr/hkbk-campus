@@ -4,6 +4,8 @@
  *   node eval/run-eval.js              run with the engine's shipped config
  *   node eval/run-eval.js --sweep      grid-search the refusal floors on the
  *                                      dev split, then score the winner on test
+ *   node eval/run-eval.js --compare    retriever baseline comparison on the
+ *                                      held-out test split (all LLM-free)
  *   node eval/run-eval.js --csv out.csv --json out.json
  *
  * Exit code 1 if any regression vs expectations is found, so this can run as
@@ -69,6 +71,35 @@ function printFailures(results) {
 			"  -> got " + (r.entryId || (r.suggestions.length ? "clarify:" + r.suggestions.join(",") : r.type)) +
 			" (conf " + r.confidence + ")");
 	});
+}
+
+if (flag("--compare")) {
+	// Same frozen questions, same refusal floors, four scorers. Every one is
+	// LLM-free: no external model, no network call, no API key. The shipped
+	// config (tfidf + repair) is the first row so the others read as deltas.
+	var configs = [
+		{ label: "tfidf + repair (shipped)", config: {} },
+		{ label: "bm25 + repair", config: { retriever: "bm25" } },
+		{ label: "tfidf, no repair", config: { repair: false } },
+		{ label: "bm25, no repair", config: { retriever: "bm25", repair: false } }
+	];
+	var splits = ["dev", "test"];
+	splits.forEach(function (sp) {
+		var qs = set.questions.filter(function (q) { return q.split === sp; });
+		var rows = EV.compare(HKBKChat.Engine, kb, qs, configs, now);
+		console.log("\n== retriever comparison, " + sp + " split (" + qs.length + " questions, all LLM-free) ==");
+		console.log(("config").padEnd(26) + "acc%   acc+clar%  wrong%  refuse%  false%  R@1%   R@3%   MRR    p50ms");
+		rows.forEach(function (r) {
+			var s = r.summary;
+			console.log(r.label.padEnd(26) +
+				String(s.accuracy).padEnd(7) + String(s.accuracyWithClarify).padEnd(11) +
+				String(s.wrongAnswerRate).padEnd(8) + String(s.refusalAccuracy).padEnd(9) +
+				String(s.falseAnswerRate).padEnd(8) + String(s.recallAt1).padEnd(7) +
+				String(s.recallAt3).padEnd(7) + String(s.mrr).padEnd(7) + s.latencyP50);
+		});
+	});
+	console.log("\nNOTE: dev split tuned the shipped floors; the test split is the held-out headline.");
+	process.exit(0);
 }
 
 var t0 = now();

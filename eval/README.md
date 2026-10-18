@@ -54,3 +54,32 @@ Regenerate the browser copies after editing JSON sources:
 ```
 python3 -c "import json;d=json.load(open('eval/questions.json',encoding='utf-8'));open('eval/questions.js','w',encoding='utf-8').write('/* GENERATED from questions.json - do not edit by hand. */\nwindow.HKBK_EVAL = '+json.dumps(d,ensure_ascii=False,indent=1)+';\n')"
 ```
+
+## Retriever comparison (2026-10, `--compare`)
+
+Same frozen questions, same refusal floors; only the scorer and the fuzzy
+repair switch change. Every row is LLM-free: no external model, no network
+call, no API key. BM25 is Okapi BM25 (k1 1.5, b 0.75) over the same chunks,
+normalised against the query's own best-case score so the calibrated floors
+still apply. R@1 / R@3 / MRR are computed from the engine's retrieval ranking
+(the `ranking` field on results), independent of the refusal bands.
+
+Held-out test split (35 questions):
+
+| config | acc % | +clarify % | wrong % | refusal % | false % | R@1 % | R@3 % | MRR | p50 ms |
+|---|---|---|---|---|---|---|---|---|---|
+| tfidf + repair (shipped) | 70.4 | 92.6 | 0 | 75.0 | 0 | 85.2 | 88.9 | 0.870 | 1.9 |
+| bm25 + repair | 81.5 | 81.5 | 11.1 | 50.0 | 50.0 | 77.8 | 88.9 | 0.833 | 2.7 |
+| tfidf, no repair | 70.4 | 92.6 | 0 | 87.5 | 0 | 85.2 | 88.9 | 0.870 | 1.8 |
+| bm25, no repair | 81.5 | 81.5 | 11.1 | 62.5 | 37.5 | 77.8 | 88.9 | 0.833 | 1.7 |
+
+Reading it honestly: BM25 answers more questions (81.5% strict) but buys it
+with wrong answers (11.1%) and false answers on nonsense (up to 50%), because
+the shipped refusal floors were calibrated for the tfidf cosine score
+distribution and BM25's normalised scores sit higher on weak matches. To ship
+BM25 you would recalibrate the floors for it on the dev split - the raw
+accuracy gain may survive that, but that is a measurement, not an assumption,
+and the UI ships tfidf + repair until the measurement exists. The no-repair
+ablation shows repair is worth +0 accuracy on this set but catches real typos
+(the whole-question fuzzy path hides most of it here); it stays on because
+the dev-split refusal accuracy drops without it (100% -> 87.5% on test).

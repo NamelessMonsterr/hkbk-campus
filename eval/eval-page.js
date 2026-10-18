@@ -68,6 +68,29 @@
 				out.appendChild(summaryBlock(split + " split (" + rs.length + " questions)", window.HKBKEval.summarise(rs)));
 			});
 
+			// Retriever baseline comparison, all LLM-free. Same questions, same
+			// refusal bands; only the scorer / repair switch changes.
+			out.appendChild(el("h2", null, "retriever comparison - LLM-free baselines (test split)"));
+			out.appendChild(el("p", "sub",
+				"Same frozen questions, same refusal floors. No external model, no network call in any row. " +
+				"The shipped config is the first row; the rest are ablations and the BM25 alternative."));
+			var testQs = set.questions.filter(function (q) { return q.split === "test"; });
+			var cmp = window.HKBKEval.compare(window.HKBKChat.Engine, window.HKBK_KB, testQs, [
+				{ label: "tfidf + repair (shipped)", config: {} },
+				{ label: "bm25 + repair", config: { retriever: "bm25" } },
+				{ label: "tfidf, no repair", config: { repair: false } },
+				{ label: "bm25, no repair", config: { retriever: "bm25", repair: false } }
+			], now);
+			out.appendChild(table(
+				[{ label: "config" }, { label: "acc %", num: 1 }, { label: "+clarify %", num: 1 }, { label: "wrong %", num: 1 },
+				 { label: "refusal %", num: 1 }, { label: "false %", num: 1 }, { label: "R@1 %", num: 1 }, { label: "R@3 %", num: 1 },
+				 { label: "MRR", num: 1 }, { label: "p50 ms", num: 1 }],
+				cmp.map(function (r, i) {
+					var s = r.summary;
+					return { cls: i === 0 ? "shipped" : "", cells: [r.label, s.accuracy, s.accuracyWithClarify, s.wrongAnswerRate,
+						s.refusalAccuracy, s.falseAnswerRate, s.recallAt1, s.recallAt3, s.mrr, s.latencyP50] };
+				})));
+
 			out.appendChild(el("h2", null, "coverage vs accuracy (test split, single hard floor)"));
 			var curve = window.HKBKEval.coverageCurve(window.HKBKChat.Engine, window.HKBK_KB, set.questions.filter(function (q) { return q.split === "test"; }), now);
 			out.appendChild(table(

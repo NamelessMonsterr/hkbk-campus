@@ -59,6 +59,16 @@
 					if (st.step === "confidence_floor") conf = st.confidence;
 				});
 			}
+			// Rank of the expected entry in the engine's retrieval ranking,
+			// independent of the refusal bands. Lets the comparison report
+			// recall@1 / recall@3 / MRR for each scorer, not just end outcomes.
+			var rank = null;
+			var ok2 = acceptable(qq.expect);
+			if (ok2 && res.ranking && res.ranking.length) {
+				for (var ri = 0; ri < res.ranking.length; ri++) {
+					if (ok2.indexOf(res.ranking[ri]) !== -1) { rank = ri + 1; break; }
+				}
+			}
 			return {
 				id: qq.id,
 				q: qq.q,
@@ -69,6 +79,7 @@
 				entryId: res.entryId || null,
 				suggestions: (res.suggestions || []).map(function (s) { return s.entryId; }),
 				confidence: conf,
+				rank: rank,
 				outcome: scoreOne(res, qq.expect),
 				ms: Math.round(ms * 100) / 100
 			};
@@ -125,7 +136,22 @@
 				p95: percentile(lat, 95),
 				max: lat.length ? lat[lat.length - 1] : 0
 			},
-			byCategory: byCat
+			byCategory: byCat,
+			retrieval: (function () {
+				var r1 = 0, r3 = 0, rr = 0, ranked = 0;
+				ans.forEach(function (r) {
+					if (r.rank == null) return;
+					ranked++;
+					if (r.rank === 1) r1++;
+					if (r.rank <= 3) r3++;
+					rr += 1 / r.rank;
+				});
+				return {
+					recallAt1: pct(r1, ans.length),
+					recallAt3: pct(r3, ans.length),
+					mrr: Math.round((rr / (ans.length || 1)) * 1000) / 1000
+				};
+			})()
 		};
 	}
 
@@ -197,11 +223,38 @@
 		return rows;
 	}
 
+	// Retriever baseline comparison: same frozen questions, same refusal
+	// bands, different scorer / repair setting. Every config is LLM-free -
+	// no external model, no network call. Configs: [{label, config}].
+	function compare(EngineClass, kb, questions, configs, nowFn) {
+		return configs.map(function (c) {
+			var engine = new EngineClass(kb, c.config);
+			var results = run(engine, questions, nowFn);
+			var s = summarise(results);
+			return {
+				label: c.label,
+				config: c.config,
+				summary: {
+					accuracy: s.answerable.accuracy,
+					accuracyWithClarify: s.answerable.accuracyWithClarify,
+					wrongAnswerRate: s.answerable.wrongAnswerRate,
+					refusalAccuracy: s.unanswerable.refusalAccuracy,
+					falseAnswerRate: s.unanswerable.falseAnswerRate,
+					recallAt1: s.retrieval.recallAt1,
+					recallAt3: s.retrieval.recallAt3,
+					mrr: s.retrieval.mrr,
+					latencyP50: s.latency.p50
+				}
+			};
+		});
+	}
+
 	var api = {
 		run: run,
 		summarise: summarise,
 		coverageCurve: coverageCurve,
 		sweep: sweep,
+		compare: compare,
 		scoreOne: scoreOne
 	};
 	global.HKBKEval = api;

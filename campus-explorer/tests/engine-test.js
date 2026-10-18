@@ -211,6 +211,35 @@ check("hook is settable", (function () {
 	return ok;
 }()));
 
+/* Retriever switch + repair ablation (eval baselines, 2026-10) */
+(function () {
+	var HKBKChat = require("../js/chatbot-engine.js");
+	var kb = require("../data/knowledge-base.json");
+	var known = kb.questionsKnown || "where is the canteen";
+
+	var bm = new HKBKChat.Engine(kb, { retriever: "bm25" });
+	var r1 = bm.ask("where is the canteen");
+	check("bm25 answers a known query", r1.type === "answer" && r1.entryId === "loc-food-court");
+
+	var r2 = bm.ask("asdf qwer zxcv");
+	check("bm25 still refuses nonsense", r2.type === "out_of_scope");
+
+	var nr = new HKBKChat.Engine(kb, { repair: false });
+	var r3 = nr.ask("canteenn timmings");
+	check("no-repair ablation does no fuzzy repair", !r3.trace.steps.some(function (s) { return s.step === "fuzzy_repair"; }));
+
+	var df = new HKBKChat.Engine(kb);
+	var r4 = df.ask("canteenn timmings");
+	check("default config does fuzzy repair", r4.trace.steps.some(function (s) { return s.step === "fuzzy_repair"; }));
+
+	// a phrasing that is NOT a stored variant, so retrieval (not the direct
+	// whole-question match) produces the answer and exposes its ranking
+	var r5 = df.ask("tell me about hostel rooms");
+	check("answer exposes retrieval ranking for rank metrics",
+		Array.isArray(r5.ranking) && r5.ranking.length > 0 && r5.ranking[0] === r5.entryId);
+})();
+
 section("Result");
 console.log("  " + pass + " passed, " + fail + " failed");
 process.exit(fail === 0 ? 0 : 1);
+
