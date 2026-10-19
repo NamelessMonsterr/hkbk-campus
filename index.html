@@ -160,11 +160,12 @@ function playTour(lang){
  (function next(){
   if(!player)return;
   if(i>=segs.length){stopTour();return}
-  var seg=segs[i];i++;
+  var idx=i,seg=segs[i];i++;
   txt.textContent=seg; /* captions always on: this is the no-voice fallback too */
   var done=function(){setTimeout(next,350)};
   if(V.getMuted()){done();return}
-  var started=V.speak(seg,lang,{onend:done,onmissing:function(){}});
+  var url=(V.AUDIO&&V.AUDIO[lang])?V.AUDIO[lang][idx]:null; /* pre-generated en/hi; kn/ur stay on browser speech */
+  var started=V.speak(seg,lang,{onend:done,onmissing:function(){},audioUrl:url});
   if(!started)done();
  })();
 }

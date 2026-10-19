@@ -1,6 +1,7 @@
 /*
  * voice-guide.js - spoken guided tour + shared speech helpers.
- * Uses only the browser's built-in speech synthesis / recognition. No keys,
+ * Tour audio is pre-generated for English and Hindi (picked voices); other
+ * speech uses only the browser's built-in synthesis / recognition. No keys,
  * no network services. All facts below come from the verified knowledge
  * base and the site's published figures.
  */
@@ -49,12 +50,36 @@
 		]
 	};
 
+
+	/* Pre-generated tour audio (2026-10): English recorded in Kokoro
+	 * en_af_heart, Hindi in Parler hi_Divya_parler, both picked by Hammad.
+	 * One file per tour segment so captions and Stop stay in sync. Kannada
+	 * and Urdu intentionally have NO files: their scripts await native-
+	 * speaker review, so those languages stay text-only with the browser
+	 * speech fallback below. A missing or failing file falls back to the
+	 * browser voice automatically. */
+	var AUDIO = {
+		en: [1, 2, 3, 4, 5, 6].map(function (n) { return "assets/audio/tour-en-" + n + ".mp3"; }),
+		hi: [1, 2, 3, 4, 5, 6].map(function (n) { return "assets/audio/tour-hi-" + n + ".mp3"; })
+	};
+
 	/* Spoken notice when a language has no voice in this browser. */
 	var NO_VOICE_NOTICE = {
 		en: "This browser has no voice for that language, so here it is in English.",
 		kn: "This browser has no Kannada voice, so here it is in English.",
 		hi: "This browser has no Hindi voice, so here it is in English.",
 		ur: "This browser has no Urdu voice, so here it is in English."
+	};
+
+	/* The same notices as English audio files (voice en_af_heart), so the
+	 * voice stays consistent when a browser is missing one. All four lines
+	 * are English whatever language was asked for; keyed by that language.
+	 * (en is the default for anything unlisted.) */
+	var NOTICE_AUDIO = {
+		en: "assets/audio/notice-en-1.mp3",
+		kn: "assets/audio/notice-en-2.mp3",
+		hi: "assets/audio/notice-en-3.mp3",
+		ur: "assets/audio/notice-en-4.mp3"
 	};
 
 	/* Firefox on Android reports three-letter codes (eng-US-f000); Android
@@ -82,18 +107,65 @@
 	}
 
 	var currentUtterance = null;
+	var currentAudio = null;
 
 	function cancel() {
 		try { global.speechSynthesis && global.speechSynthesis.cancel(); } catch (e) {}
+		if (currentAudio) { try { currentAudio.pause(); } catch (e) {} currentAudio = null; }
 		currentUtterance = null;
 	}
 
-	/* speak(text, langCode, opts): opts.onend, opts.onmissing(langCode).
-	 * When the chosen language has no voice, speaks opts.missingNotice (or the
-	 * default notice) in English instead, then calls onmissing so the caller
-	 * can show the text. Never throws; resolves false when unsupported. */
+	/* Play one audio file; onend/onerror fire exactly once. Returns false
+	 * immediately when this browser has no Audio element at all. */
+	function playFile(url, onend, onerror) {
+		if (typeof global.Audio !== "function") return false;
+		var a = new global.Audio();
+		var settled = false;
+		function finish(cb) {
+			if (settled) return;
+			settled = true;
+			if (currentAudio === a) currentAudio = null;
+			cb();
+		}
+		a.onended = function () { finish(onend); };
+		a.onerror = function () { finish(onerror); };
+		cancel();
+		currentAudio = a;
+		a.src = url;
+		try {
+			var p = a.play();
+			if (p && p.catch) p.catch(function () { finish(onerror); });
+		} catch (e) { finish(onerror); }
+		return true;
+	}
+
+	/* Speak one utterance in the given voice/language. */
+	function speakTts(toSay, sayLang, voice, opts) {
+		cancel();
+		var u = new global.SpeechSynthesisUtterance(toSay);
+		u.lang = sayLang;
+		if (voice) u.voice = voice;
+		u.rate = opts.rate || 1;
+		if (opts.onend) u.onend = opts.onend;
+		u.onerror = function () { if (opts.onend) opts.onend(); };
+		currentUtterance = u;
+		global.speechSynthesis.speak(u);
+	}
+
+	/* speak(text, langCode, opts): opts.audioUrl, opts.onend,
+	 * opts.onmissing(langCode). A pre-generated file (tour line, or the
+	 * English "no voice" notice) plays first; on any failure the browser
+	 * voice takes over so the line is never lost. When the chosen language
+	 * has no voice, speaks opts.missingNotice (or the default notice) in
+	 * English instead, then calls onmissing so the caller can show the
+	 * text. Never throws; resolves false when unsupported. */
 	function speak(text, langCode, opts) {
 		opts = opts || {};
+		if (opts.audioUrl && playFile(opts.audioUrl,
+			function () { if (opts.onend) opts.onend(); },
+			function () { speak(text, langCode, { onend: opts.onend, onmissing: opts.onmissing, missingNotice: opts.missingNotice, rate: opts.rate }); })) {
+			return true;
+		}
 		if (!global.speechSynthesis || !global.SpeechSynthesisUtterance) {
 			if (opts.onmissing) opts.onmissing(langCode);
 			if (opts.onend) opts.onend();
@@ -104,22 +176,23 @@
 		var speechCode = lang ? lang.speech : "en-IN";
 		var voices = global.speechSynthesis.getVoices();
 		var voice = pickVoice(voices, speechCode);
-		var toSay = text, sayLang = speechCode;
 		if (!voice && langCode !== "en") {
 			voice = pickVoice(voices, "en-IN") || pickVoice(voices, "en-US") || voices[0] || null;
-			toSay = (opts.missingNotice || NO_VOICE_NOTICE[langCode] || NO_VOICE_NOTICE.en) + " " + text;
-			sayLang = voice ? voice.lang : "en-IN";
+			var sayLang = voice ? voice.lang : "en-IN";
 			if (opts.onmissing) opts.onmissing(langCode);
+			var noticeText = opts.missingNotice || NO_VOICE_NOTICE[langCode] || NO_VOICE_NOTICE.en;
+			/* The notice line is English whatever was asked for, so a pre-
+			 * generated English file can speak it; the line itself still goes
+			 * to the browser voice. File failure reads both in one utterance. */
+			if (!opts.missingNotice && playFile(NOTICE_AUDIO[langCode] || NOTICE_AUDIO.en,
+				function () { speakTts(text, sayLang, voice, opts); },
+				function () { speakTts(noticeText + " " + text, sayLang, voice, opts); })) {
+				return true;
+			}
+			speakTts(noticeText + " " + text, sayLang, voice, opts);
+			return true;
 		}
-		cancel();
-		var u = new global.SpeechSynthesisUtterance(toSay);
-		u.lang = sayLang;
-		if (voice) u.voice = voice;
-		u.rate = opts.rate || 1;
-		if (opts.onend) u.onend = opts.onend;
-		u.onerror = function () { if (opts.onend) opts.onend(); };
-		currentUtterance = u;
-		global.speechSynthesis.speak(u);
+		speakTts(text, speechCode, voice, opts);
 		return true;
 	}
 
@@ -131,6 +204,8 @@
 	var api = {
 		LANGS: LANGS,
 		SCRIPT: SCRIPT,
+		AUDIO: AUDIO,
+		NOTICE_AUDIO: NOTICE_AUDIO,
 		NO_VOICE_NOTICE: NO_VOICE_NOTICE,
 		pickVoice: pickVoice,
 		speak: speak,
