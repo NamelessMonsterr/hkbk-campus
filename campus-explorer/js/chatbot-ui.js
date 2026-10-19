@@ -472,6 +472,8 @@
 			};
 			if (self.debug) self.renderTrace(self.lastTrace);
 
+			self.maybeAskUsageConsent();
+
 			self.busy = false;
 			self.input.focus();
 		}, 260);
@@ -479,8 +481,12 @@
 
 	/* ---------- session ---------- */
 
-	/* One-time, in-transcript consent for the anonymous usage log. Plain
-	 * language, both choices equal-sized, No deletes anything logged. */
+	/* One-time, in-transcript consent for the anonymous usage log, asked
+	 * after the first answer rather than on open: an unasked-for bubble
+	 * straight under the greeting reads as a stray message, and its buttons
+	 * sit where a first-time user taps. Plain language, both choices
+	 * equal-sized, No deletes anything logged. Nothing is logged before a
+	 * Yes either way (HKBKUsage.enabled gates every write). */
 	ChatUI.prototype.maybeAskUsageConsent = function () {
 		var self = this;
 		if (!global.HKBKUsage || global.HKBKUsage.choice() !== null) return;
@@ -490,7 +496,7 @@
 		body.appendChild(el("div", null, "Help improve this bot? Share anonymous usage: what was answered or refused, thumbs ratings, and walk visits - never your question text. Stays on this device; saying No deletes all of it, and you can export or delete it any time."));
 		var wrap = el("div", "msg__consentBtns");
 		[["Yes, share anonymous usage", "yes"], ["No thanks", "no"]].forEach(function (spec) {
-			var b = el("button", "msg__suggestBtn", spec[0]);
+			var b = el("button", "msg__consentBtn", spec[0]);
 			b.type = "button";
 			b.addEventListener("click", function () {
 				global.HKBKUsage.setChoice(spec[1]);
@@ -523,7 +529,6 @@
 		this.root.classList.add("chat--open");
 		this.root.setAttribute("aria-hidden", "false");
 		this.input.focus();
-		this.maybeAskUsageConsent();
 	};
 
 	ChatUI.prototype._setHandsFree = function (on) {
