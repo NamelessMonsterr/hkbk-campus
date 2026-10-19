@@ -58,10 +58,19 @@
 .chat__title {
 	font-family: var(--serif);
 	font-size: 19px;
+	order: 1;
 }
+/* One header row does not fit the panel (392px), so the head wraps on
+ * purpose: title + close on row one, the sub full-width on row two, the
+ * feature buttons on row three. Nothing hangs off the panel edge. */
+.chat__close { order: 2; margin-left: auto; }
+.chat__dbg { order: 4; }
+.chat__speak { order: 5; }
+.chat__hf { order: 6; }
 .chat__sub {
-	flex: 1;
+	flex: 1 1 100%;
 	min-width: 0;
+	order: 3;
 	font-family: var(--sans);
 	font-size: 10px;
 	letter-spacing: 0.1em;
