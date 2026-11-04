@@ -173,7 +173,8 @@
 	var SPEAK_ALIASES = [
 		[/\bHKBKCE\b/g, "H K B K C E"],
 		[/\bManyata\b/g, "Manyaata"],
-		[/\bNagawara\b/g, "Naagavara"]
+		[/\bNagawara\b/g, "Naagavara"],
+		[/\bCOMEDK\b/g, "Comed-K"]
 	];
 	/* All-caps acronyms (HKBK, KCET, CSE, MBA...) are spelled letter by
 	 * letter - the convention Indian-English listeners expect, and safe for

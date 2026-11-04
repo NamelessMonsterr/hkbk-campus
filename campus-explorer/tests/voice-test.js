@@ -224,7 +224,7 @@ ok(V._speakable("ratio 1997.5 exactly") === "ratio 1997.5 exactly", "decimal unt
 
 /* pronunciation layer: acronyms spelled out, flagged names respelled (speech only) */
 ok(V._speakable("HKBK College of Engineering") === "H K B K College of Engineering", "HKBK spelled letter by letter");
-ok(V._speakable("through KCET, COMEDK or management quota") === "through K C E T, C O M E D K or management quota", "exam acronyms spelled");
+ok(V._speakable("through KCET, COMEDK or management quota") === "through K C E T, Comed-K or management quota", "KCET spelled, COMEDK said as the word everyone uses");
 ok(V._speakable("MBA and CSE intake") === "M B A and C S E intake", "degree acronyms spelled");
 ok(V._speakable("opposite Manyata Tech Park") === "opposite Manyaata Tech Park", "Manyata respelled for speech");
 ok(V._speakable("the Nagawara side") === "the Naagavara side", "Nagawara respelled for speech");
