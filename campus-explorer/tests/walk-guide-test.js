@@ -24,6 +24,7 @@ var spoken = [];
 global.HKBKVoice = { speak: function (t, lang, opts) { spoken.push(t); if (opts && opts.onend) opts.onend(); }, cancel: function () {} };
 require(path.join(ROOT, "js", "chatbot-engine.js"));
 require(path.join(ROOT, "js", "talk-config.js"));
+global.HKBK_TALK_CONFIG.endpoint = "";  // unit tests stay deterministic: offline only, no network
 require(path.join(ROOT, "js", "conversation.js"));
 require(path.join(ROOT, "js", "talk-actions.js"));
 var WG = require(path.join(ROOT, "..", "walk", "walk-guide.js"));

@@ -102,10 +102,21 @@ section("Upstream failure maps to 502, one call, no retry");
 {
 	const realFetch = globalThis.fetch;
 	let calls = 0;
-	globalThis.fetch = () => { calls++; return Promise.resolve(new Response("{}", { status: 429 })); };
+	globalThis.fetch = () => { calls++; return Promise.resolve(new Response("{}", { status: 500 })); };
 	const res = await worker.fetch(req({ ...QUESTION, __ip: "x" }), { GROQ_API_KEY: "k" });
-	check("upstream 429 -> 502 to client", res.status === 502);
+	check("upstream 500 -> 502 to client", res.status === 502);
 	check("exactly one upstream call", calls === 1);
+	globalThis.fetch = realFetch;
+}
+
+section("Provider quota 429 surfaces as 503 quota");
+{
+	const realFetch = globalThis.fetch;
+	globalThis.fetch = () => Promise.resolve(new Response("{}", { status: 429 }));
+	const res = await worker.fetch(req({ ...QUESTION, __ip: "q" }), { GROQ_API_KEY: "k" });
+	check("upstream 429 -> 503 to client", res.status === 503);
+	const body = await res.json();
+	check("error code is quota", body.error === "quota");
 	globalThis.fetch = realFetch;
 }
 

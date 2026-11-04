@@ -123,7 +123,7 @@
 	/* Online configured but the proxy answer fell back to the local KB:
 	 * say so openly - never let a local answer masquerade as an AI-phrased one. */
 	TalkUI.prototype._showFallback = function (onlineError) {
-		var reason = { http_429: "today's online share is used up", timeout: "the phrasing service is slow", network: "the phrasing service is unreachable" }[onlineError] || "online phrasing is unavailable";
+		var reason = { http_429: "too many questions in a short burst - it recovers in a few seconds", http_503: "the shared online quota is used up for now", timeout: "the phrasing service is slow", network: "the phrasing service is unreachable" }[onlineError] || "online phrasing is unavailable";
 		this.modeDot.textContent = "local answers";
 		this.modeDot.classList.add("talk__mode--fallback");
 		this.modeDot.title = "Online phrasing: " + reason + ". Answers are coming from the on-device knowledge base.";
@@ -134,6 +134,7 @@
 		this.modeDot.classList.remove("talk__mode--fallback");
 		this.modeDot.textContent = "online";
 		this.modeDot.title = "Online: replies are phrased by an AI service from verified facts only";
+		this._note("");
 	};
 
 	/* ---------- open/close ---------- */

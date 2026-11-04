@@ -180,6 +180,10 @@ export default {
 		}
 		clearTimeout(timer);
 
+		// Provider quota spent (Groq 429) is a different story from a generic
+		// upstream failure: the site tells the visitor the shared quota is used
+		// up, not that something broke.
+		if (upstream.status === 429) return jsonResponse({ error: "quota" }, 503, origin);
 		if (!upstream.ok) return jsonResponse({ error: "upstream_" + upstream.status }, 502, origin);
 		let data;
 		try { data = await upstream.json(); } catch { return jsonResponse({ error: "upstream_parse" }, 502, origin); }
