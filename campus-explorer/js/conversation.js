@@ -112,6 +112,14 @@
 		return null;
 	}
 
+		/* A conflicted fact must keep its caveat in voice too: when the KB
+		 * answer does not already carry one, append the conflict note so the
+		 * spoken/shown answer never reads as definitive. */
+		function withConflict(res, text) {
+			if (res.conflict && res.conflict.text && text.indexOf("disagree") === -1) return text + " " + res.conflict.text;
+			return text;
+		}
+
 		function reply(question) {
 			var small = smallTalk(question);
 			if (small) {
@@ -120,7 +128,7 @@
 			}
 			var res = engine.ask(question);
 			if (!config.endpoint || !fetchImpl) {
-				return Promise.resolve({ text: res.answer, mode: "offline", engine: res, onlineError: null });
+				return Promise.resolve({ text: withConflict(res, res.answer), mode: "offline", engine: res, onlineError: null });
 			}
 			return onlineReply(res, question).then(function (text) {
 				if (text) {
@@ -128,7 +136,7 @@
 					while (history.length > config.historyTurns) history.shift();
 					return { text: text, mode: "online", engine: res, onlineError: null };
 				}
-				return { text: res.answer, mode: "offline", engine: res, onlineError: lastOnlineError };
+				return { text: withConflict(res, res.answer), mode: "offline", engine: res, onlineError: lastOnlineError };
 			});
 		}
 

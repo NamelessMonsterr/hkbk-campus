@@ -549,7 +549,7 @@ window.HKBK_KB = {
      "where do students stay",
      "do i have to pay for the hostel"
     ],
-    "a": "Separate hostel accommodation is available for men and women, with mess facilities, Wi-Fi, and 24-hour security. Hostel charges are currently {{FEE_HOSTEL_YEAR}}. Rooms are allotted in order of application, so applying early is advisable."
+    "a": "Separate hostel accommodation is available for men and women, with mess facilities, Wi-Fi, and 24-hour security. The latest published hostel fee is about {{FEE_HOSTEL_YEAR}} (student-reported, July 2026); earlier listings say less. Rooms are allotted in order of application, so applying early is advisable."
    },
    "kn": {
     "q": [
@@ -560,13 +560,13 @@ window.HKBK_KB = {
      "ಹಾಸ್ಟೆಲ್ ಶುಲ್ಕ ಎಷ್ಟು",
      "ವಸತಿ ಶುಲ್ಕ ಎಷ್ಟು"
     ],
-    "a": "ಪುರುಷ ಮತ್ತು ಮಹಿಳಾ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಪ್ರತ್ಯೇಕ ಹಾಸ್ಟೆಲ್ ವ್ಯವಸ್ಥೆ ಇದೆ, ಮೆಸ್, ವೈ-ಫೈ ಮತ್ತು 24 ಗಂಟೆ ಭದ್ರತೆ ಸಹಿತ. ಹಾಸ್ಟೆಲ್ ಶುಲ್ಕ ವರ್ಷಕ್ಕೆ {{FEE_HOSTEL_YEAR}}. ಅರ್ಜಿ ಸಲ್ಲಿಸಿದ ಕ್ರಮದಲ್ಲಿ ಕೊಠಡಿ ಹಂಚಿಕೆಯಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಬೇಗ ಅರ್ಜಿ ಸಲ್ಲಿಸುವುದು ಉತ್ತಮ."
+    "a": "ಪುರುಷ ಮತ್ತು ಮಹಿಳಾ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಪ್ರತ್ಯೇಕ ಹಾಸ್ಟೆಲ್ ವ್ಯವಸ್ಥೆ ಇದೆ, ಮೆಸ್, ವೈ-ಫೈ ಮತ್ತು 24 ಗಂಟೆ ಭದ್ರತೆ ಸಹಿತ. ಇತ್ತೀಚಿನ ಪ್ರಕಟಿತ ಹಾಸ್ಟೆಲ್ ಶುಲ್ಕ ಸುಮಾರು {{FEE_HOSTEL_YEAR}} (ವಿದ್ಯಾರ್ಥಿಗಳಿಂದ, ಜುಲೈ 2026); ಹಳೆಯ ಪಟ್ಟಿಗಳಲ್ಲಿ ಕಡಿಮೆ ದಾಖಲಾಗಿದೆ. ಅರ್ಜಿ ಸಲ್ಲಿಸಿದ ಕ್ರಮದಲ್ಲಿ ಕೊಠಡಿ ಹಂಚಿಕೆಯಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಬೇಗ ಅರ್ಜಿ ಸಲ್ಲಿಸುವುದು ಉತ್ತಮ."
    },
    "conflicts": [
     "hostelFee"
    ],
    "section": "hostel",
-   "updated": "2026-10-18"
+   "updated": "2026-11-04"
   },
   {
    "id": "admission-process",

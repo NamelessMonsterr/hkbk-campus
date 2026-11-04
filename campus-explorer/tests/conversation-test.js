@@ -68,7 +68,8 @@ var tests = [
 		return c2.reply("what is the hostel fee").then(function (r) {
 			check("offline mode reported", r.mode === "offline");
 			check("no network call in offline mode", fetchNever.calls.length === 0);
-			check("offline text is the KB answer verbatim", r.text === r.engine.answer);
+			check("offline text starts with the KB answer", r.text.indexOf(r.engine.answer) === 0);
+			check("conflicted fact keeps its caveat when spoken", r.engine.conflict ? r.text.indexOf(r.engine.conflict.text) !== -1 : true);
 		});
 	},
 	function () {
@@ -104,7 +105,7 @@ var tests = [
 		var f429 = mockFetchStatus(429);
 		var c = conv(f429);
 		return c.reply("what is the hostel fee").then(function (r) {
-			check("429 -> offline answer", r.mode === "offline" && r.text === r.engine.answer);
+			check("429 -> offline answer", r.mode === "offline" && r.text.indexOf(r.engine.answer) === 0 && (!r.engine.conflict || r.text.indexOf(r.engine.conflict.text) !== -1));
 			check("exactly one request, no retry", f429.count() === 1);
 			check("error recorded", r.onlineError === "http_429");
 		}).then(function () {

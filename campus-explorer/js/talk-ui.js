@@ -123,7 +123,7 @@
 	/* Online configured but the proxy answer fell back to the local KB:
 	 * say so openly - never let a local answer masquerade as an AI-phrased one. */
 	TalkUI.prototype._showFallback = function (onlineError) {
-		var reason = { http_429: "too many questions in a short burst - it recovers in a few seconds", http_503: "the shared online quota is used up for now", timeout: "the phrasing service is slow", network: "the phrasing service is unreachable" }[onlineError] || "online phrasing is unavailable";
+		var reason = { http_429: "too many questions in a short burst - it usually recovers within a minute", http_503: "the shared online quota is used up for now", timeout: "the phrasing service is slow", network: "the phrasing service is unreachable" }[onlineError] || "online phrasing is unavailable";
 		this.modeDot.textContent = "local answers";
 		this.modeDot.classList.add("talk__mode--fallback");
 		this.modeDot.title = "Online phrasing: " + reason + ". Answers are coming from the on-device knowledge base.";
@@ -149,7 +149,7 @@
 		var greet = "Hi! I'm the HKBK guide. Ask me about the college, or just say: walk me through the campus.";
 		if (this.conversation.isOnline() && !this._privacyNoted) {
 			this._privacyNoted = true;
-			this._note("Online mode: your question text is sent to an AI service for phrasing. The facts come only from the verified knowledge base, and nothing is stored there. Voice typing uses your browser's speech recognition, which may send the audio to your browser provider.");
+			this._note("Online mode: your question text is sent to an AI service for phrasing. The facts come only from the verified knowledge base. Voice typing uses your browser's speech recognition, which may send the audio to your browser provider.");
 		} else if (!this.conversation.isOnline()) {
 			this._note("Offline mode: answers come only from the knowledge base on this device - no question text is sent to any AI service. Voice typing uses your browser's speech recognition, which may send the audio to your browser provider.");
 		}
