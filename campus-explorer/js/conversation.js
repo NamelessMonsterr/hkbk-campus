@@ -30,27 +30,6 @@
 
 		var history = [];      // [{ user, assistant }] - this session only, never stored
 		var lastOnlineError = null;
-		var lastRes = null;        // last confident KB answer - the anchor for follow-ups
-
-		/* Follow-up turns ("does that include food?", "and the girls one?",
-		 * "what about documents?") carry too little vocabulary for retrieval
-		 * on their own and used to fall into clarify/out-of-scope even when
-		 * the antecedent was answered a second ago. When retrieval is weak
-		 * and the turn reads like a follow-up, answer it from the SAME
-		 * verified KB entry as the previous turn: facts still come only from
-		 * the knowledge base, and the model just phrases them against the
-		 * follow-up question. */
-		function looksLikeFollowUp(q) {
-			var t = String(q || "").trim();
-			if (!t) return false;
-			if (/^(and|but|so|ok|okay|also|what about|how about)\b/i.test(t)) return true;
-			if (/\b(that|this|it|those|they|them|there)\b/i.test(t)) return true;
-			return t.split(/\s+/).length <= 4;
-		}
-
-		function weakResult(res) {
-			return res.type !== "answer" || !(res.confidence >= 0.28);
-		}
 
 		/* Facts sent to the proxy: only what the engine actually retrieved,
 		 * with the refusal wording and contacts so an out-of-scope reply uses
@@ -148,8 +127,6 @@
 					engine: { type: "smalltalk", lang: "en", confidence: 1 }, onlineError: null });
 			}
 			var res = engine.ask(question);
-			if (weakResult(res) && lastRes && looksLikeFollowUp(question)) res = lastRes;
-			if (res.type === "answer" && res.entryId) lastRes = res;
 			if (!config.endpoint || !fetchImpl) {
 				return Promise.resolve({ text: withConflict(res, res.answer), mode: "offline", engine: res, onlineError: null });
 			}
@@ -166,7 +143,7 @@
 		return {
 			reply: reply,
 			history: function () { return history.slice(); },
-			clear: function () { history = []; lastRes = null; lastOnlineError = null; if (engine.endSession) engine.endSession(); },
+			clear: function () { history = []; lastOnlineError = null; if (engine.endSession) engine.endSession(); },
 			isOnline: function () { return !!(config.endpoint && fetchImpl); },
 			lastError: function () { return lastOnlineError; }
 		};

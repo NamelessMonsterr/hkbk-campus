@@ -158,59 +158,6 @@ var tests = [
 		}).then(function (r) {
 			check("real questions still reach the engine", r.engine.type !== "smalltalk", r.engine.type);
 		});
-	},
-	function () {
-		section("Follow-up anchoring");
-		var f = mockFetchOk("Yes, the published fee already includes the mess.");
-		var c = conv(f);
-		return c.reply("what is the hostel fee").then(function (r1) {
-			check("first turn answers from the fee entry", r1.engine.entryId === "fees-hostel", r1.engine.entryId);
-			return c.reply("does that include food");
-		}).then(function (r2) {
-			var payload = f.calls[f.calls.length - 1].body;
-			check("weak follow-up reuses the previous entry's facts, not a clarify",
-				payload.outcome === "answer" && payload.facts && payload.facts[0] && payload.facts[0].id === "fees-hostel",
-				JSON.stringify({ outcome: payload.outcome, facts: payload.facts }).slice(0, 120));
-			check("follow-up still carries the question verbatim", payload.question === "does that include food");
-			check("follow-up turn is remembered too", c.history().length === 2, c.history().length + " turns");
-		});
-	},
-	function () {
-		section("Follow-up anchoring - boundaries");
-		var f = mockFetchOk("x");
-		var c = conv(f);
-		return c.reply("what is the hostel fee").then(function () {
-			return c.reply("who won the cricket world cup");
-		}).then(function (r2) {
-			var payload = f.calls[f.calls.length - 1].body;
-			check("unrelated weak question keeps its out-of-scope outcome (no anchor leak)",
-				payload.outcome === "out_of_scope", payload.outcome);
-			check("unrelated question does not reuse fee facts",
-				!(payload.facts && payload.facts[0] && payload.facts[0].id === "fees-hostel"));
-			return c.reply("what is the hostel fee");
-		}).then(function () {
-			return c.reply("when is the admission deadline");
-		}).then(function (r3) {
-			check("confident new topic replaces the anchor", r3.engine.entryId !== "fees-hostel", r3.engine.entryId);
-			c.clear();
-			return c.reply("does that include food");
-		}).then(function (r4) {
-			var payload = f.calls[f.calls.length - 1].body;
-			check("clear() drops the anchor", payload.outcome !== "answer" || !(payload.facts && payload.facts[0] && payload.facts[0].id === "fees-hostel"), payload.outcome);
-		});
-	},
-	function () {
-		section("Follow-up anchoring - offline");
-		var c2 = conv(mockFetchOk("x"), { endpoint: "" });
-		return c2.reply("what is the hostel fee").then(function () {
-			return c2.reply("does that include food");
-		}).then(function (r2) {
-			check("offline follow-up answers from the anchored entry",
-				r2.engine.entryId === "fees-hostel" && r2.mode === "offline",
-				r2.engine.entryId + " / " + r2.mode);
-			check("offline follow-up keeps the conflict caveat",
-				r2.engine.conflict ? r2.text.indexOf(r2.engine.conflict.text) !== -1 : true);
-		});
 	}
 ];
 
