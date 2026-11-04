@@ -207,6 +207,10 @@
 			this._status("Paused");
 			return;
 		}
+		/* Any further command or question un-pauses: typing "continue" (a
+		 * next-command) or asking something must not leave the guide stuck
+		 * in the paused flag while it keeps narrating. */
+		if (this.paused) { this.paused = false; this._status("Guiding"); }
 		if (action && action.type === "guide_repeat") { this._speak(this.lastNarration || "Nothing to repeat yet.", function () { self._listen(); }); return; }
 		if (action && action.type === "guide_next" || action && action.type === "guide_prev") {
 			/* next/back mean the next NAMED STOP, not one frame of the walk. */

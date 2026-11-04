@@ -93,6 +93,16 @@ var ctl2 = fakeCtl();
 var g2 = mkGuide(ctl2);
 g2._hear("stop");
 check("'stop' pauses the tour", g2.paused === true);
+/* any command or question after pause clears the paused flag */
+var g3 = mkGuide(fakeCtl());
+g3._hear("pause");
+check("typed pause sets paused", g3.paused === true);
+g3._hear("next");
+check("a command after pause clears the paused flag", g3.paused === false);
+var g4 = mkGuide(fakeCtl());
+g4._hear("pause");
+g4._hear("what is the hostel fee");
+check("a question after pause clears the paused flag", g4.paused === false);
 g2._hear("end tour");
 check("'end tour' deactivates the guide", g2.active === false);
 
