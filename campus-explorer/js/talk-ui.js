@@ -255,7 +255,10 @@
 			/* A reply that lands after close (or a newer session) must not
 			 * speak or listen again - the conversation is over. */
 			if (self.state === "closed" || session !== self._session) return;
-			if (r.mode === "offline" && self.conversation.isOnline()) self._showFallback(r.onlineError);
+			/* Small talk and chatter pivots are local BY DESIGN - they must not
+			 * flip the badge to "local answers" or claim online phrasing failed. */
+			var localByDesign = r.engine && r.engine.type === "smalltalk";
+			if (r.mode === "offline" && !localByDesign && self.conversation.isOnline()) self._showFallback(r.onlineError);
 			else if (r.mode === "online") self._clearFallback();
 			if (r.engine && r.engine.lang) self.lastLang = r.engine.lang;
 			if (global.HKBKUsage && global.HKBKUsage.enabled() && r.engine && r.engine.type !== "smalltalk") {
