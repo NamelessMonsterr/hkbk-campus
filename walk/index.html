@@ -5,6 +5,7 @@
 <title>HKBK Campus Walk</title>
 <link rel="stylesheet" href="lib/pannellum.css">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="../hkbk-talk.css">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--serif:"Playfair Display","Libre Baskerville",Georgia,"Times New Roman",serif;--red:#d9453d}
@@ -72,7 +73,7 @@ html,body{margin:0;height:100%;background:#0b0b0c;color:#fff;font-family:system-
 </style></head><body>
 <div id="stage" role="img" aria-label="Campus walk frames" aria-describedby="sname"><div id="bg"></div><img class="layer" id="l0" alt=""><img class="layer" id="l1" alt="" aria-hidden="true"><div id="dip"></div></div>
 <div id="top"><button id="back">&larr; Intro</button>
-<div id="right"><div id="sname"></div><div id="ssub"></div><div id="btns"><button class="rbtn" id="play">Walk</button><button class="rbtn" id="restart">Restart</button><button class="rbtn" id="b360">360&deg;</button></div></div></div>
+<div id="right"><div id="sname"></div><div id="ssub"></div><div id="btns"><button class="rbtn" id="guide">Guide</button><button class="rbtn" id="play">Walk</button><button class="rbtn" id="restart">Restart</button><button class="rbtn" id="b360">360&deg;</button></div></div></div>
 <button class="side" id="pl" aria-label="Previous">&larr;</button><button class="side" id="pr" aria-label="Next">&rarr;</button>
 <button class="chev" id="cf" aria-label="Step forward"><svg viewBox="0 0 150 110"><path d="M12 92 L75 22 L138 92 L112 92 L75 51 L38 92 Z" fill="#fff" stroke="#0004" stroke-width="2" stroke-linejoin="round"/></svg></button>
 <div id="toast" role="status" aria-live="polite"></div><div id="cap"></div>
@@ -165,6 +166,7 @@ var chap=$('chap');anch.slice().sort(function(a,b){return a.n-b.n}).forEach(func
 var miss=stops.filter(function(s){return s.step==null}).map(function(s){return s.name});
 $('note').textContent=miss.length?miss.join(', ')+': no footage yet.':'';
 window.__walkHook={chapter:function(){if(typeof cur!=="number")return null;var c=chapterOf(cur);return c?c.id:null}};
+window.__walkCtl={next:tapF,prev:tapB,gotoStop:function(id){var s=stops.filter(function(x){return x.id===id&&x.step!=null})[0];if(s){stop();setStep(s.step,s.step>=cur?1:-1)}},play:play,pause:stop,chapter:function(){var c=chapterOf(cur);return c?c.id:null}};
 function begin(i){started=true;$('intro').style.display='none';ensure(i).then(function(u){L[0].onload=function(){L[0].classList.add('show');$('bg').style.backgroundImage='url('+u+')'};L[0].src=u;cur=i;top=0;ui();pre(i)})}
 $('go').onclick=function(){begin(parseInt(chap.value,10)||0)};
 $('back').onclick=function(){stop();started=false;$('intro').style.display='flex'};
@@ -176,6 +178,25 @@ loadBin(ST[0].b).then(function(){$('loading').style.opacity='0';setTimeout(funct
   if(q.get('play')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)play()});
 recenter(posAt(0));
 })();
-</script><script src="../campus-explorer/js/usage-log.js"></script>
+</script><script src="../campus-explorer/data/knowledge-base.js"></script>
+<script src="../campus-explorer/js/voice-guide.js"></script>
+<script src="../campus-explorer/js/chatbot-engine.js"></script>
+<script src="../campus-explorer/js/talk-config.js"></script>
+<script src="../campus-explorer/js/conversation.js"></script>
+<script src="../campus-explorer/js/talk-actions.js"></script>
+<script src="walk-guide.js"></script>
+<script>
+(function(){
+  if(!window.HKBKWalkGuide||!window.__walkCtl||!window.HKBK_KB)return;
+  var guide=new HKBKWalkGuide.WalkGuide({ctl:window.__walkCtl,kb:window.HKBK_KB});
+  var c=window.HKBKVoice&&window.HKBKVoice.getChoice&&window.HKBKVoice.getChoice();
+  if(c&&c!=="skip")guide.lastLang=c;
+  guide.build();
+  var b=document.getElementById("guide");
+  if(b)b.addEventListener("click",function(){guide.start()});
+  if(new URLSearchParams(location.search).get("guide")){setTimeout(function(){guide.start()},900)}
+})();
+</script>
+<script src="../campus-explorer/js/usage-log.js"></script>
 <script src="walk-instrument.js"></script>
 </body></html>

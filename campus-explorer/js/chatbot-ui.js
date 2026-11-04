@@ -90,6 +90,14 @@
 		head.appendChild(hfB);
 		this._hfBtn = hfB;
 
+		if (this.opts.onTalk) {
+			var talkB = el("button", "chat__talk", "Talk");
+			talkB.type = "button";
+			talkB.title = "Talk to the guide - voice conversation";
+			talkB.addEventListener("click", function () { self.close(); self.opts.onTalk(); });
+			head.appendChild(talkB);
+		}
+
 		var close = el("button", "chat__close", "\u00D7");
 		close.type = "button";
 		close.setAttribute("aria-label", "Close chat and end session");

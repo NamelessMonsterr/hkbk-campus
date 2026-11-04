@@ -71,7 +71,7 @@ footer{padding:50px 56px;display:flex;justify-content:space-between;font-size:13
 a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .campus a:focus-visible,.adm a:focus-visible,.plc a:focus-visible{outline-color:var(--sun)}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{transition:none;opacity:1;transform:none}.grid img{transition:none}}
-</style><link rel="stylesheet" href="hkbk-chat.css">
+</style><link rel="stylesheet" href="hkbk-chat.css"><link rel="stylesheet" href="hkbk-talk.css">
 </head><body>
 <a class=skip href="#main">Skip to main content</a>
 <header><a class=logo href="#"><span class=mark>H</span><b>HKBK Group<br>of Institutions</b></a><nav><a href="#programmes">Colleges</a><a href="#departments">Departments</a><a href="#placements">Placements</a><a href="#campus">Campus</a><a href="#news">News</a><a href="#admissions">Admissions</a><a href="#walk">Walk</a></nav><a class=apply href="#admissions">Apply now</a></header>
@@ -126,19 +126,28 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 <section class=adm id=admissions><div class=eye style="color:var(--sun)">Admissions</div><h2>Your first class is <i>closer</i> than you think.</h2><p>Admissions are open across programmes. Talk to the admissions office for eligibility, fees and entrance routes.</p><a class="btn b1" href="admissions.html">Read the admissions guide</a> <a class="btn b1" href="tel:+919035022250" style="margin-left:12px">Call +91 90350 22250</a></section></main>
 <footer><span>HKBK Group of Institutions<br>22/1, Opp. Manyata Tech Park, Nagawara, Bengaluru 560045</span><span>Unofficial student concept. Not the college's official website.<br>Campus photos: Google Maps contributor and on-site footage.</span></footer>
 <script>if(location.search.includes('static')){document.body.insertAdjacentHTML('beforeend','<style>.rv{transition:none!important}</style>');}if(location.search.includes('static'))document.querySelectorAll('.rv').forEach(e=>e.classList.add('in'));const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});document.querySelectorAll('.rv').forEach((e,i)=>{e.style.transitionDelay=(i%4)*80+'ms';io.observe(e)})</script>
+<button class="launcher launcher--talk" id="talkLauncher" type="button"><span class="launcher__dot" aria-hidden="true"></span> Talk</button>
 <button class="launcher" id="launcher" type="button" data-open-chat aria-expanded="false" aria-controls="chatHost"><span class="launcher__dot" aria-hidden="true"></span> Ask HKBK</button>
 <div class="chatHost" id="chatHost"></div>
 <script src="campus-explorer/data/knowledge-base.js"></script>
+<script src="walk/walk-data.js"></script>
 <script src="campus-explorer/js/usage-log.js"></script>
 <script src="campus-explorer/js/voice-guide.js"></script>
 <script src="campus-explorer/js/chatbot-engine.js"></script>
 <script src="campus-explorer/js/chatbot-ui.js"></script>
+<script src="campus-explorer/js/talk-config.js"></script>
+<script src="campus-explorer/js/conversation.js"></script>
+<script src="campus-explorer/js/talk-actions.js"></script>
+<script src="campus-explorer/js/talk-ui.js"></script>
 <script>
 (function(){var host=document.getElementById("chatHost"),launcher=document.getElementById("launcher");
-var ui=new window.HKBKChatUI.ChatUI({mount:host,privacyHref:"eval/admin.html",onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
+var talk=null;
+var ui=new window.HKBKChatUI.ChatUI({mount:host,privacyHref:"eval/admin.html",onTalk:function(){openTalk()},onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
 function openChat(q){ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");if(q)ui.submit(q)}
 document.querySelectorAll("[data-open-chat]").forEach(function(b){b.addEventListener("click",function(){openChat()})});
 window.hkbkAsk=openChat;
+function openTalk(){if(!window.HKBKTalkUI)return;if(!talk){talk=new window.HKBKTalkUI.TalkUI({kb:window.HKBK_KB,walkBase:"walk/",onClose:function(){}});talk.build()}talk.open()}
+var tl=document.getElementById("talkLauncher");if(tl)tl.addEventListener("click",function(){openTalk()});
 var cq=new URLSearchParams(location.search).get("chatq");if(cq)openChat(cq);})();
 </script>
 

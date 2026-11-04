@@ -1,0 +1,60 @@
+/* Talk to HKBK - voice-first conversation sheet. Same tokens as the site. */
+.talk{position:fixed;left:0;right:0;bottom:0;z-index:90;background:var(--paper,#f4f0e6);color:var(--ink,#0b1030);
+	border-top:3px solid var(--ink,#0b1030);box-shadow:0 -12px 40px #0b103022;
+	padding:14px 22px 18px;font-family:Inter,sans-serif;
+	transform:translateY(102%);transition:transform .35s cubic-bezier(.2,.7,.2,1);
+	max-height:62vh;display:flex;flex-direction:column;gap:10px}
+.talk--open{transform:none}
+.talk__bar{display:flex;align-items:center;gap:10px}
+.talk__title{font-family:Fraunces,serif;font-size:20px;font-weight:500;color:var(--blue,#1b3dff)}
+.talk__mode{font-size:11px;font-weight:600;letter-spacing:.08em;padding:3px 10px;border:2px solid var(--ink,#0b1030);border-radius:999px;text-transform:uppercase}
+.talk__close{margin-left:auto;background:none;border:0;font-size:26px;line-height:1;cursor:pointer;color:var(--ink,#0b1030);padding:4px 8px}
+.talk__status{font-size:14px;font-weight:600}
+.talk--listening .talk__status{color:var(--blue,#1b3dff)}
+.talk__caption{min-height:54px;max-height:120px;overflow-y:auto;font-size:15px;line-height:1.5}
+.talk__line b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue,#1b3dff);margin-bottom:2px}
+.talk__line--you b{color:var(--mut,#4b5270)}
+.talk__mid{display:flex;justify-content:center;padding:2px 0}
+.talk__mic{width:72px;height:72px;border-radius:50%;border:0;background:var(--blue,#1b3dff);color:#fff;font-size:26px;cursor:pointer;
+	box-shadow:0 6px 0 var(--ink,#0b1030);transition:transform .12s,box-shadow .12s}
+.talk__mic:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink,#0b1030)}
+.talk--listening .talk__mic{animation:talkPulse 1.2s ease-in-out infinite;background:var(--ink,#0b1030)}
+.talk--speaking .talk__mic{background:var(--sun,#ffc21a);color:var(--ink,#0b1030)}
+@keyframes talkPulse{0%,100%{box-shadow:0 6px 0 var(--blue,#1b3dff)}50%{box-shadow:0 6px 0 var(--blue,#1b3dff),0 0 0 14px #1b3dff22}}
+.talk__form{display:flex;gap:10px}
+.talk__input{flex:1;min-width:0;padding:12px 14px;font-size:15px;border:2px solid var(--ink,#0b1030);background:#fff;color:var(--ink,#0b1030);border-radius:0}
+.talk__send{padding:12px 20px;font-weight:600;font-size:14px;border:0;background:var(--ink,#0b1030);color:#fff;cursor:pointer}
+.talk__send:hover{background:var(--blue,#1b3dff)}
+.talk__note{font-size:12px;color:var(--mut,#4b5270);line-height:1.45}
+.talk__note:empty{display:none}
+@media(max-width:700px){.talk{max-height:72vh;padding:12px 16px 14px}.talk__mic{width:64px;height:64px}}
+@media(prefers-reduced-motion:reduce){.talk{transition:none}.talk--listening .talk__mic{animation:none}}
+
+/* Walk guide panel (dark walk page) */
+.guide{position:absolute;left:14px;bottom:120px;z-index:11;max-width:min(420px,80vw);background:#0b0b0cd8;backdrop-filter:blur(10px);
+	border:1px solid #ffffff2a;border-radius:14px;padding:14px 16px;color:#fff;font-family:system-ui,sans-serif;display:none}
+.guide.on{display:block}
+.guide__status{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ffd54a;margin-bottom:6px}
+.guide__caption{font-size:13.5px;line-height:1.5;max-height:96px;overflow-y:auto}
+.guide__row{display:flex;gap:10px;align-items:center;margin-top:10px}
+.guide__mic{width:46px;height:46px;border-radius:50%;border:0;background:#d9453d;color:#fff;font-size:17px;cursor:pointer;flex:none}
+.guide__mic.on{outline:3px solid #d9453d66;animation:guidePulse 1.2s infinite}
+@keyframes guidePulse{50%{box-shadow:0 0 0 10px #d9453d22}}
+.guide__input{flex:1;min-width:0;background:#ffffff14;border:1px solid #ffffff2a;border-radius:10px;color:#fff;padding:9px 12px;font-size:13px}
+.guide__end{background:none;border:1px solid #ffffff3a;color:#fffc;border-radius:10px;padding:9px 12px;font-size:12px;cursor:pointer}
+@media(max-width:700px){.guide{left:10px;right:10px;max-width:none;bottom:126px}}
+
+/* Talk launcher sits just above the Ask HKBK launcher. */
+.launcher--talk{right:22px;bottom:78px;background:var(--blue,#1b3dff);color:#fff;border-color:var(--blue,#1b3dff)}
+.launcher--talk .launcher__dot{background:#ffd54a;box-shadow:0 0 8px #ffd54a}
+@media(max-width:560px){.launcher--talk{right:12px;bottom:68px}}
+
+/* Chat header Talk button matches the other header buttons. */
+.chat__talk{background:none;border:1px solid var(--hex-line,rgba(11,16,48,.35));color:var(--fg,#0b1030);border-radius:999px;
+	padding:5px 12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:var(--sans,Inter,sans-serif)}
+.chat__talk:hover{border-color:var(--accent,#1b3dff);color:var(--accent,#1b3dff)}
+
+/* While the talk sheet is open it owns the bottom edge: hide the
+ * chat/talk launchers and the voice-guide mini controls so nothing
+ * overlaps the input row or the privacy note. */
+.talk-open .launcher,.talk-open .vg-fab{display:none}

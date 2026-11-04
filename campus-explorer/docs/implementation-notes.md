@@ -186,3 +186,28 @@ These cannot be resolved from public sources and need the college office:
 3. Current NAAC grade — the verifiable certificate expired in June 2022.
 4. Current Principal — three names in circulation.
 5. Whether Civil and Electrical & Electronics are currently admitting.
+
+## 7. Talk to HKBK - the conversational layer (talk-mode branch)
+
+The site now has a voice-first assistant on top of the same knowledge base:
+
+- **Offline by default, paper-compatible.** With no proxy configured the
+  assistant answers verbatim from the KB on the device. Nothing is sent
+  anywhere. The OFFLINE/ONLINE badge in the sheet says which mode is live.
+- **One call, no retries.** A question the engine answers confidently may be
+  phrased by the proxy when configured; timeouts, 429s and network failures
+  fall back to the offline answer, never to a second attempt.
+- **No invented facts.** The proxy receives the KB answer and rephrases it;
+  questions the KB cannot answer are refused before any call.
+- **It can act on the page.** "Show me placements" scrolls there, "take me to
+  the food court" or "open the walk" starts the guided walk
+  (`walk/index.html?guide=1`), where the guide narrates each stop from the
+  KB, moves on "next"/"back", jumps on "take me to X", and answers questions
+  mid-tour.
+- **Session memory only.** Conversation history lives in the tab and is
+  cleared when the sheet closes.
+
+New modules: `js/talk-config.js`, `js/conversation.js`, `js/talk-actions.js`,
+`js/talk-ui.js`, `walk/walk-guide.js`, `proxy/worker.js`. Tests:
+`tests/conversation-test.js` (24), `tests/talk-actions-test.js` (19),
+`tests/walk-guide-test.js` (15), `proxy/worker-test.mjs` (21).
