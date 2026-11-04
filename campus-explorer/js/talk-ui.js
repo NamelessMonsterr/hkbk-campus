@@ -226,7 +226,9 @@
 		}, function (err) {
 			if (self.state === "closed" || session !== self._session) return;
 			var why = (((err && err.message) || "") + " " + ((err && err.name) || "")).trim() || "failed";
-			var msg = /NotAllowed|Permission|denied/i.test(why) ? "Microphone permission was denied - allow the mic in your browser's site settings, or type below instead" :
+			var msg = /microphone_permission_timeout/.test(why) ? "Microphone permission is still waiting - choose Allow in your browser, then reopen Assistant mode, or type below" :
+				/audio_start_timeout/.test(why) ? "Browser audio did not start - close and reopen Assistant mode, or type below" :
+				/NotAllowed|Permission|denied/i.test(why) ? "Microphone permission was denied - allow the mic in your browser's site settings, or type below instead" :
 				/^token_503|not_configured/.test(why) ? "Live voice is not set up yet" :
 				/^token_429|token_503/.test(why) ? "Live voice is busy or its quota is used up" : "Live voice could not start";
 			self._liveFallback(greet, msg);

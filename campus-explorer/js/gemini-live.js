@@ -275,17 +275,23 @@
 		var self = this;
 		if (!(this.opts.endpoint || "")) return Promise.reject(new Error("no_endpoint"));
 		var AC = global.AudioContext || global.webkitAudioContext;
-		return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (stream) {
+		var permission = navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+		var permissionTimer;
+		var waitPermission = new Promise(function (resolve, reject) { permissionTimer = global.setTimeout(function () { reject(new Error("microphone_permission_timeout")); }, 15000); permission.then(resolve, reject); });
+		permission.then(function (stream) { if (self.closed) stream.getTracks().forEach(function (t) { t.stop(); }); }, function () {});
+		return waitPermission.then(function (stream) {
+			global.clearTimeout(permissionTimer);
 			if (self.closed) { stream.getTracks().forEach(function (t) { t.stop(); }); throw new Error("session_closed"); }
 			self.stream = stream;
 			self.ctx = new AC();
-			return self.ctx.resume().then(function () { return self._connect(null); });
+			var resumeTimer;
+			return Promise.race([self.ctx.resume(), new Promise(function (resolve, reject) { resumeTimer = global.setTimeout(function () { reject(new Error("audio_start_timeout")); }, 8000); })]).then(function () { global.clearTimeout(resumeTimer); return self._connect(null); }, function (e) { global.clearTimeout(resumeTimer); throw e; });
 		}).then(function () {
 			if (self.closed) { self.stop(); throw new Error("session_closed"); }
 			self._startMic();
 			self.ready = true;
 			self._emit("ready");
-		}, function (err) { self.stop(); throw err; });
+		}, function (err) { global.clearTimeout(permissionTimer); self.stop(); throw err; });
 	};
 
 	/* The connection dropped or Google asked for a reconnect (about every ten
