@@ -41,7 +41,7 @@
 .guide__status{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ffd54a;margin-bottom:6px}
 .guide__caption{font-size:13.5px;line-height:1.5;max-height:96px;overflow-y:auto}
 .guide__row{display:flex;gap:10px;align-items:center;margin-top:10px}
-.guide__mic{width:46px;height:46px;border-radius:50%;border:0;background:#d9453d;color:#fff;font-size:17px;cursor:pointer;flex:none}
+.guide__mic{width:46px;height:46px;border-radius:50%;border:0;background:#ca3932;color:#fff;font-size:17px;cursor:pointer;flex:none}
 .guide__mic.on{outline:3px solid #d9453d66;animation:guidePulse 1.2s infinite}
 @keyframes guidePulse{50%{box-shadow:0 0 0 10px #d9453d22}}
 .guide__input{flex:1;min-width:0;background:#ffffff14;border:1px solid #ffffff2a;border-radius:10px;color:#fff;padding:9px 12px;font-size:13px}
