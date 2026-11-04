@@ -94,16 +94,25 @@
 	function pickVoice(voices, speechCode) {
 		if (!voices || !voices.length) return null;
 		var i, v;
+		var want = normLang(speechCode);
 		for (i = 0; i < voices.length; i++) {
 			v = voices[i];
-			if (normLang(v.lang) === normLang(speechCode)) return v;
+			if (normLang(v.lang) === want) return v;
 		}
-		var prefix = normLang(speechCode).split("-")[0];
+		/* Same language, wrong region: prefer the Indian voice for this Indian
+		 * campus context (en-IN over en-US etc.), then any same-language
+		 * voice. Pronunciation quality tracks the voice's home region. */
+		var prefix = want.split("-")[0];
+		var region = want.split("-")[1] || "IN";
+		var firstMatch = null;
 		for (i = 0; i < voices.length; i++) {
 			v = voices[i];
-			if (normLang(v.lang).indexOf(prefix) === 0) return v;
+			var vl = normLang(v.lang);
+			if (vl.indexOf(prefix) !== 0) continue;
+			if (!firstMatch) firstMatch = v;
+			if (vl === prefix + "-in") return v;
 		}
-		return null;
+		return firstMatch;
 	}
 
 	var currentUtterance = null;

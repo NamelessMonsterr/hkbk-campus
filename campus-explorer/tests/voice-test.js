@@ -44,6 +44,8 @@ ok(V.pickVoice(voices, "kn-IN").lang === "kn-IN", "exact match wins");
 ok(V.pickVoice(voices, "hi-IN").lang === "hi_IN", "underscore variant matches");
 ok(V.pickVoice(voices, "ur-PK") === null, "no urdu voice returns null (fallback path)");
 ok(V.pickVoice([{ lang: "en-GB" }], "en-IN").lang === "en-GB", "prefix match for en");
+ok(V.pickVoice([{ lang: "en-US" }, { lang: "en-IN" }], "en-IN").lang === "en-IN", "exact en-IN beats listed-first en-US");
+ok(V.pickVoice([{ lang: "en-AU" }, { lang: "en-GB" }, { lang: "en-IN" }], "en-US").lang === "en-IN", "no exact region: Indian voice preferred over other same-language regions");
 ok(V.pickVoice([], "en-IN") === null, "empty voice list returns null");
 ok(V.pickVoice(null, "en-IN") === null, "null voice list returns null");
 
