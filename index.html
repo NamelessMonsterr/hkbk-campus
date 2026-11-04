@@ -142,10 +142,11 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 (function(){var host=document.getElementById("chatHost"),launcher=document.getElementById("launcher");
 var talk=null;
 var ui=new window.HKBKChatUI.ChatUI({mount:host,privacyHref:"eval/admin.html",onTalk:function(){openTalk()},onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
-function openChat(q){ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");if(q)ui.submit(q)}
+function openChat(q){if(window.hkbkVoiceGuide)window.hkbkVoiceGuide.dismissAll();ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");if(q)ui.submit(q)}
 document.querySelectorAll("[data-open-chat]").forEach(function(b){b.addEventListener("click",function(){openChat()})});
 window.hkbkAsk=openChat;
-function openTalk(){if(!window.HKBKTalkUI)return;if(!talk){talk=new window.HKBKTalkUI.TalkUI({kb:window.HKBK_KB,walkBase:"walk/",onClose:function(){}});talk.build()}talk.open()}
+function openTalk(){if(!window.HKBKTalkUI)return;if(window.hkbkVoiceGuide)window.hkbkVoiceGuide.dismissAll();if(!talk){talk=new window.HKBKTalkUI.TalkUI({kb:window.HKBK_KB,walkBase:"walk/",onClose:function(){}});talk.build()}talk.open()}
+window.hkbkTalkClose=function(){if(talk)talk.close()};
 
 var cq=new URLSearchParams(location.search).get("chatq");if(cq)openChat(cq);})();
 </script>
@@ -154,10 +155,16 @@ var cq=new URLSearchParams(location.search).get("chatq");if(cq)openChat(cq);})()
 (function(){
 var V=window.HKBKVoice;if(!V)return;
 function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
-var player=null;
+var player=null,vgOverlay=null;
 function stopTour(){V.cancel();if(player){player.remove();player=null}}
+function dismissPrompt(){if(vgOverlay){vgOverlay.remove();vgOverlay=null}}
+/* One speech source at a time: opening Ask HKBK or Assistant mode clears
+ * the intro chooser (for this visit - no choice is recorded) and stops any
+ * running tour; starting the tour closes Assistant mode first. */
+window.hkbkVoiceGuide={dismissAll:function(){dismissPrompt();stopTour()},stopTour:stopTour};
 function playTour(lang){
  stopTour();
+ closeTalkUI();
  var segs=V.SCRIPT[lang]||V.SCRIPT.en,i=0;
  player=el('div','vg-player');
  player.setAttribute('role','status');
@@ -177,8 +184,11 @@ function playTour(lang){
   if(!started)done();
  })();
 }
+function closeTalkUI(){if(window.hkbkTalkClose)window.hkbkTalkClose()}
 function showPrompt(){
+ closeTalkUI();
  var ov=el('div','vg-overlay');
+ vgOverlay=ov;
  var card=el('div','vg-modal');
  card.setAttribute('role','dialog');card.setAttribute('aria-label','Choose your language');
  card.appendChild(el('div','eye','Voice guide'));
@@ -186,13 +196,13 @@ function showPrompt(){
  card.appendChild(el('p',null,'The site introduces itself out loud - about a minute. Your choice is remembered, and everything is also written on the page.'));
  var row=el('div','vg-langs');
  var first=null;
- V.LANGS.forEach(function(l){var b=el('button','vg-lang',l.label);b.type='button';b.addEventListener('click',function(){V.setChoice(l.code);ov.remove();playTour(l.code)});if(!first)first=b;row.appendChild(b)});
+ V.LANGS.forEach(function(l){var b=el('button','vg-lang',l.label);b.type='button';b.addEventListener('click',function(){V.setChoice(l.code);dismissPrompt();playTour(l.code)});if(!first)first=b;row.appendChild(b)});
  card.appendChild(row);
  var skip=el('button','vg-skip','Skip - read at my own pace');
- skip.type='button';skip.addEventListener('click',function(){V.setChoice('skip');ov.remove()});
+ skip.type='button';skip.addEventListener('click',function(){V.setChoice('skip');dismissPrompt()});
  card.appendChild(skip);
  ov.appendChild(card);document.body.appendChild(ov);
- ov.addEventListener('keydown',function(e){if(e.key==='Escape'){V.setChoice('skip');ov.remove()}});
+ ov.addEventListener('keydown',function(e){if(e.key==='Escape'){V.setChoice('skip');dismissPrompt()}});
  if(first)first.focus();
 }
 var fab=el('div','vg-fab');
