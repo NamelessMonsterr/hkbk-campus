@@ -27,14 +27,17 @@ const UPSTREAM = "https://api.groq.com/openai/v1/chat/completions";
 const MAX_QUESTION_CHARS = 1200;
 const MAX_TOKENS = 220;          // short spoken replies
 // Protective defaults, derived from the Groq free tier verified on
-// 2026-11-04 (1,000 requests/day org-wide): the global cap stays under it
-// with headroom even if an isolate's in-memory bucket resets, and the
-// per-visitor cap leaves room for ~40 distinct visitors a day.
-// Both are deployment settings, not product limits: override with the
-// PER_IP_DAILY / GLOBAL_DAILY worker vars if the owner approves different
-// values. When a cap trips, visitors silently get the offline KB answer.
-const PER_IP_PER_DAY = 20;
-const GLOBAL_PER_DAY = 800;
+// 2026-11-04 (1,000 requests/day, org-wide). That quota is SHARED: the same
+// key already serves FaultSeeker, so this worker reserves at most ~1/3 of
+// it for public phrasing (300/day global) and 10/day per visitor - plenty
+// for a campus site, and the global cap trips before HKBK can starve the
+// other consumer even if an isolate's in-memory bucket resets.
+// Both are deployment settings, not product limits: the owner can raise or
+// lower them with the PER_IP_DAILY / GLOBAL_DAILY worker vars, no redeploy.
+// When a cap trips the site says so and answers from the local knowledge
+// base instead - visitors never see an error or a fake "AI" reply.
+const PER_IP_PER_DAY = 10;
+const GLOBAL_PER_DAY = 300;
 const UPSTREAM_TIMEOUT_MS = 6000;
 
 // Best-effort in-memory buckets. A Worker isolate resets under load or
@@ -167,7 +170,7 @@ export default {
 					"Content-Type": "application/json"
 				},
 				body: JSON.stringify({
-					model: MODEL,
+					model: env.MODEL || MODEL,
 					messages: buildMessages(body),
 					max_tokens: MAX_TOKENS,
 					temperature: 0.4
@@ -187,6 +190,6 @@ export default {
 			? String(data.choices[0].message.content || "").trim() : "";
 		if (!reply) return jsonResponse({ error: "empty" }, 502, origin);
 		// Nothing is logged: the question text never touches Workers logs here.
-		return jsonResponse({ reply, model: MODEL }, 200, origin);
+		return jsonResponse({ reply, model: env.MODEL || MODEL }, 200, origin);
 	}
 };

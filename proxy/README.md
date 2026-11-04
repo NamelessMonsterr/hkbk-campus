@@ -22,10 +22,12 @@ A single Cloudflare Worker (`worker.js`) that:
 - caps input at 1200 characters and output at 220 tokens,
 - applies a 6-second upstream timeout and returns the site's offline answer
   unchanged on any failure,
-- rate-limits per IP (default 20/day) and globally (default 800/day) with
-  in-memory buckets - protective defaults derived from the verified Groq free
-  tier (1,000 requests/day org-wide); both are owner-adjustable via the
-  PER_IP_DAILY / GLOBAL_DAILY worker vars without a redeploy,
+- rate-limits per IP (default 10/day) and globally (default 300/day) with
+  in-memory buckets - protective defaults against the verified Groq free
+  tier (1,000 requests/day org-wide), which this key SHARES with other
+  projects, so HKBK reserves at most ~1/3 of it; both are adjustable via the
+  PER_IP_DAILY / GLOBAL_DAILY worker vars without a redeploy, and when a cap
+  trips the site shows it is answering locally instead of phrasing online,
 - logs nothing about the conversation.
 
 ## Deploy (about 10 minutes, free)

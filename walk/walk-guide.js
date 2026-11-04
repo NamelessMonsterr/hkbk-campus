@@ -232,7 +232,8 @@
 		this._status("Thinking\u2026");
 		this.conversation.reply(text).then(function (r) {
 			if (r.engine && r.engine.lang) self.lastLang = r.engine.lang;
-			self._status("Guiding");
+			self._status(r.mode === "offline" && self.conversation.isOnline()
+				? "Guiding - local answers (online phrasing unavailable)" : "Guiding");
 			self._speak(r.text, function () { self._listen(); });
 		}, function () {
 			self._speak("Something broke on my side. Try that again?", function () { self._listen(); });

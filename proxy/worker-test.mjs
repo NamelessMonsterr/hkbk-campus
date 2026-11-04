@@ -91,9 +91,9 @@ section("Per-IP daily bucket");
 		body: JSON.stringify(QUESTION)
 	});
 	let last;
-	for (let i = 0; i < 21; i++) last = await worker.fetch(ipReq(), env);
-	check("21st request from one IP refused", last.status === 429);
-	check("upstream saw only the allowed 20", up.calls.length === 20, "got " + up.calls.length);
+	for (let i = 0; i < 11; i++) last = await worker.fetch(ipReq(), env);
+	check("11th request from one IP refused", last.status === 429);
+	check("upstream saw only the allowed 10", up.calls.length === 10, "got " + up.calls.length);
 	up.restore();
 }
 

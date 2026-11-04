@@ -120,6 +120,22 @@
 		this.noteEl.textContent = text || "";
 	};
 
+	/* Online configured but the proxy answer fell back to the local KB:
+	 * say so openly - never let a local answer masquerade as an AI-phrased one. */
+	TalkUI.prototype._showFallback = function (onlineError) {
+		var reason = { http_429: "today's online share is used up", timeout: "the phrasing service is slow", network: "the phrasing service is unreachable" }[onlineError] || "online phrasing is unavailable";
+		this.modeDot.textContent = "local answers";
+		this.modeDot.classList.add("talk__mode--fallback");
+		this.modeDot.title = "Online phrasing: " + reason + ". Answers are coming from the on-device knowledge base.";
+		this._note("Showing local knowledge-base answers: " + reason + ". Nothing was sent again - the next question tries online phrasing once more.");
+	};
+	TalkUI.prototype._clearFallback = function () {
+		if (!this.modeDot.classList.contains("talk__mode--fallback")) return;
+		this.modeDot.classList.remove("talk__mode--fallback");
+		this.modeDot.textContent = "online";
+		this.modeDot.title = "Online: replies are phrased by an AI service from verified facts only";
+	};
+
 	/* ---------- open/close ---------- */
 
 	TalkUI.prototype.open = function () {
@@ -232,6 +248,8 @@
 
 		this._setState("thinking", "Thinking\u2026");
 		this.conversation.reply(text).then(function (r) {
+			if (r.mode === "offline" && self.conversation.isOnline()) self._showFallback(r.onlineError);
+			else if (r.mode === "online") self._clearFallback();
 			if (r.engine && r.engine.lang) self.lastLang = r.engine.lang;
 			if (global.HKBKUsage && global.HKBKUsage.enabled() && r.engine && r.engine.type !== "smalltalk") {
 				global.HKBKUsage.log(r.engine.type === "answer" ? "answer" : (r.engine.type === "clarify" ? "clarify" : "refusal"), {
