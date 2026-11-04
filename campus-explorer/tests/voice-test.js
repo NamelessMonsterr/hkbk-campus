@@ -205,5 +205,18 @@ delete globalThis.speechSynthesis;
 delete globalThis.SpeechSynthesisUtterance;
 
 
+/* speech-only year normalization: browser voices can read 1997 as
+ * "nineteen hundred ninety seven"; speakTts now speaks years pair-wise while
+ * captions keep the exact digits. Money, counts and IDs must not change. */
+ok(typeof V._speakable === "function", "speakable normalizer exported");
+ok(V._speakable("Established 1997 with four branches") === "Established nineteen ninety seven with four branches", "1997 spoken pair-wise");
+ok(V._speakable("grew from 45 students in 1997 to 300 by 2024") === "grew from 45 students in nineteen ninety seven to 300 by twenty twenty four", "years normalize inside a sentence");
+ok(V._speakable("Rs 1,00,000 per year") === "Rs 1,00,000 per year", "money with Indian grouping untouched");
+ok(V._speakable("PIN 560043, call 9876543210") === "PIN 560043, call 9876543210", "PIN and phone untouched");
+ok(V._speakable("version 0.8.0") === "version 0.8.0", "dotted version untouched");
+ok(V._speakable("the 2007 batch") === "the twenty oh seven batch", "zero-decade year spoken with oh");
+ok(V._speakable("1900 onwards") === "nineteen hundred onwards", "round century reads as hundred");
+ok(V._speakable("19975 entries") === "19975 entries", "five-digit count untouched");
+
 console.log("voice-test: " + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);

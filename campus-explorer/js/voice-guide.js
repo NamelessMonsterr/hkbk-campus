@@ -139,10 +139,34 @@
 		return true;
 	}
 
+	/* Speech-only text fix: captions keep the exact KB wording, but browser
+	 * voices can read a year like 1997 as "nineteen hundred ninety seven".
+	 * Speak years pair-wise ("nineteen ninety seven") instead. Years only:
+	 * money, counts and IDs keep their digits (a 4-digit run next to a comma,
+	 * point or another digit is left alone, so Rs 1,00,000 is untouched). */
+	var ONES = ["zero","one","two","three","four","five","six","seven","eight","nine","ten",
+		"eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+	var TENS = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+	function twoDigit(n) {
+		if (n < 20) return ONES[n];
+		var t = TENS[Math.floor(n / 10)], o = n % 10;
+		return o ? t + " " + ONES[o] : t;
+	}
+	function speakYear(y) {
+		var a = parseInt(y.slice(0, 2), 10), b = parseInt(y.slice(2), 10);
+		if (b === 0) return twoDigit(a) + " hundred";
+		if (b < 10) return twoDigit(a) + " oh " + ONES[b];
+		return twoDigit(a) + " " + twoDigit(b);
+	}
+	function speakable(text) {
+		return String(text).replace(/(?<![\d,.])(1[89]\d{2}|20\d{2})(?![\d,.])/g,
+			function (y) { return speakYear(y); });
+	}
+
 	/* Speak one utterance in the given voice/language. */
 	function speakTts(toSay, sayLang, voice, opts) {
 		cancel();
-		var u = new global.SpeechSynthesisUtterance(toSay);
+		var u = new global.SpeechSynthesisUtterance(speakable(toSay));
 		u.lang = sayLang;
 		if (voice) u.voice = voice;
 		u.rate = opts.rate || 1;
@@ -217,6 +241,7 @@
 	};
 
 	api._normLang = normLang;
+	api._speakable = speakable;  /* exported for the voice test harness */
 
 	/* Chrome populates the voice list asynchronously; warm it up and re-warm
 	 * when it changes so the first utterance picks the right language. */
