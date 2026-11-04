@@ -40,7 +40,7 @@
 	TalkUI.prototype.build = function () {
 		var self = this;
 		var root = el("div", "talk");
-		root.setAttribute("role", "dialog");
+		root.setAttribute("role", this.opts.mount ? "group" : "dialog");
 		root.setAttribute("aria-label", "Ask HKBK - Assistant mode, voice assistant");
 		root.setAttribute("aria-hidden", "true");
 
@@ -96,6 +96,7 @@
 
 		document.body.appendChild(root);
 		this.root = root;
+		if (this.opts.mount) { this.opts.mount.appendChild(root); root.classList.add("talk--embedded"); }
 		global.addEventListener("pagehide", function () { self._stopForHidden(); });
 		if (global.document && global.document.addEventListener) {
 			global.document.addEventListener("visibilitychange", function () {
@@ -166,6 +167,7 @@
 		document.body.classList.add("talk-open");
 		this.root.setAttribute("aria-hidden", "false");
 		this.root.classList.add("talk--open");
+		if (this.opts.mount) this.opts.mount.classList.add("chat--voice");
 		this._setState("idle", "One moment\u2026");
 		var self = this;
 		var greet = "Hi! I'm the HKBK guide. Ask me about the college, or just say: walk me through the campus.";
@@ -268,6 +270,7 @@
 	TalkUI.prototype.close = function () {
 		this._session = (this._session || 0) + 1;   /* invalidate in-flight replies and retries */
 		document.body.classList.remove("talk-open");
+		if (this.opts.mount) this.opts.mount.classList.remove("chat--voice");
 		this._stopRec();
 		if (this.live) { this.live.stop(); this.live = null; }
 		if (global.HKBKVoice) global.HKBKVoice.cancel();

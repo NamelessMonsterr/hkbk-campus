@@ -59,3 +59,14 @@
  * chat/talk launchers and the voice-guide mini controls so nothing
  * overlaps the input row or the privacy note. */
 .talk-open .launcher,.talk-open .vg-fab{display:none}
+
+/* Assistant is the default view inside the existing Ask HKBK chat shell. */
+.chat--voice > :not(.talk){display:none!important}
+.chat .talk--embedded{position:static;left:auto;right:auto;bottom:auto;width:100%;max-width:none;max-height:calc(100dvh - 44px);border:0;border-radius:0;box-shadow:none;transform:none;display:none;background:var(--bg-raised,#fff);padding:12px 14px}
+.chat .talk--embedded.talk--open{display:grid}
+.chat .talk__title{font-size:19px}
+.chat .talk__bar:before{content:"Ask HKBK";font-family:Georgia,serif;font-size:19px;color:var(--ink,#0b1030)}
+.chat .talk__title{font-family:Inter,sans-serif;font-size:11px;color:var(--mut,#4b5270)}
+.chat .talk__bar{flex-wrap:wrap;gap:7px}
+.chat .talk__close{min-width:44px;min-height:44px}
+.chat .talk__mode{font-size:10px;padding:3px 6px;letter-spacing:0}

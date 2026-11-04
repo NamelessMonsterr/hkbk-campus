@@ -143,11 +143,11 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 <script>
 (function(){var host=document.getElementById("chatHost"),launcher=document.getElementById("launcher");
 var talk=null;
-var ui=new window.HKBKChatUI.ChatUI({mount:host,privacyHref:"eval/admin.html",onTalk:function(){openTalk()},onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
-function openChat(q){if(window.hkbkVoiceGuide)window.hkbkVoiceGuide.dismissAll();ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");if(q)ui.submit(q)}
+var ui=new window.HKBKChatUI.ChatUI({mount:host,privacyHref:"eval/admin.html",onTalk:function(){openTalk()},onNavigate:function(a){var t=document.getElementById(a);if(!t)return;if(window.matchMedia("(max-width:560px)").matches)ui.close();t.scrollIntoView({behavior:"smooth",block:"start"});t.classList.remove("section--flash");void t.offsetWidth;t.classList.add("section--flash");setTimeout(function(){t.classList.remove("section--flash")},1700)},onClose:function(){if(talk&&talk.state!=="closed")talk.close();launcher.hidden=false;launcher.setAttribute("aria-expanded","false")}}).init(window.HKBK_KB);
+function openChat(q){if(window.hkbkVoiceGuide)window.hkbkVoiceGuide.dismissAll();ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");if(q)ui.submit(q);else openTalk()}
 document.querySelectorAll("[data-open-chat]").forEach(function(b){b.addEventListener("click",function(){openChat()})});
 window.hkbkAsk=openChat;
-function openTalk(){if(!window.HKBKTalkUI)return;if(window.hkbkVoiceGuide)window.hkbkVoiceGuide.dismissAll();if(!talk){talk=new window.HKBKTalkUI.TalkUI({kb:window.HKBK_KB,walkBase:"walk/",onClose:function(){}});talk.build()}talk.open()}
+function openTalk(){if(!window.HKBKTalkUI)return;if(window.hkbkVoiceGuide)window.hkbkVoiceGuide.dismissAll();if(!talk){talk=new window.HKBKTalkUI.TalkUI({kb:window.HKBK_KB,mount:ui.root,walkBase:"walk/",onClose:function(){ui.close()}});talk.build()}ui.open();launcher.hidden=true;launcher.setAttribute("aria-expanded","true");talk.open();talk.input.focus()}
 window.hkbkTalkClose=function(){if(talk)talk.close()};
 
 var cq=new URLSearchParams(location.search).get("chatq");if(cq)openChat(cq);})();
