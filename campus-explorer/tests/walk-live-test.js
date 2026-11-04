@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('fs');global.window=global;global.WALK={};require('../js/chatbot-engine.js');require('../js/conversation.js');require('../js/talk-actions.js');require('../../walk/walk-guide.js');require('../../walk/walk-live.js');
+const P=HKBKWalkGuide.WalkGuide.prototype;let at='gate',ended=false;const stops=[{id:'gate',name:'Main Gate',step:0,desc:'Verified gate.'},{id:'football',name:'Football Ground',step:4,desc:'Open ground.'}];
+const g=Object.create(P);g.stops=stops;g.ctl={chapter:()=>at,gotoStop:id=>at=id};g.entryFor=()=>null;g.places=HKBKTalkActions.buildIndex({},stops);g.end=()=>ended=true;
+let pass=0;const ok=(label,x)=>{if(!x)throw Error(label);pass++;console.log('PASS',label)};
+ok('context carries verified scene',g._walkLive({command:'context'}).scene.verified_facts==='Main Gate. Verified gate.');
+ok('next drives next stop',g._walkLive({command:'next'}).scene.id==='football'&&at==='football');
+ok('back drives previous stop',g._walkLive({command:'back'}).scene.id==='gate'&&at==='gate');
+ok('back boundary honest',g._walkLive({command:'back'}).done===false);
+ok('goto finds stop',g._walkLive({command:'goto',place:'football ground'}).scene.id==='football');
+ok('unknown place honest',g._walkLive({command:'goto',place:'moon'}).done===false);
+ok('end invokes shutdown',g._walkLive({command:'end'}).done&&ended);
+const live=require('../js/gemini-live.js');ok('company list unknown without clarification',live.lookupQuestion({ask:()=>{throw Error('should not query')}},'Which companies recruit here?').clarify!==true);
+console.log(pass+' passed, 0 failed');

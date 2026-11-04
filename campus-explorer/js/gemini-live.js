@@ -32,11 +32,13 @@
 		"Speak only what lookup_hkbk returns. If it says there is no information, say so plainly and give the office contact it returns. Never guess numbers, fees, dates or phone numbers from memory.",
 		"If lookup_hkbk reports conflicting sources, say the published sources disagree and the office should confirm.",
 		"When the visitor wants to see a place or start the campus walk, call show_place or start_walk. To scroll the page to a section, call scroll_to.",
+		"On the walk page, use walk_control for next, back, goto, repeat, context or end. For where are we / what is this / tell me about here, call walk_control context and speak only its verified scene facts. A navigation result includes verified scene facts: briefly introduce the new stop. If asked for other HKBK facts, call lookup_hkbk. Never pretend an action succeeded if done is false. End immediately when requested.",
 		"Let the visitor interrupt you; keep answers to one to three sentences unless they ask for more."
 	].join("\n");
 
 	var TOOLS = [{
 		functionDeclarations: [
+			{ name: "walk_control", description: "Control the active guided walk or read verified current scene facts. next/back move one named stop; goto needs a place; context reads current scene; repeat repeats scene; end stops microphone and tour.", parameters: { type: "OBJECT", properties: { command: { type: "STRING", enum: ["next", "back", "goto", "context", "repeat", "end"] }, place: { type: "STRING" } }, required: ["command"] } },
 			{
 				name: "lookup_hkbk",
 				description: "Look up verified HKBK facts for a question about the college. Always call this before answering any factual question about HKBK.",
@@ -131,15 +133,16 @@
 	function runTool(call, deps) {
 		var args = (call && call.args) || {};
 		try {
+			if (call.name === "walk_control") { return { output: deps.walk ? deps.walk(args) : { done: false, note: "The guided walk is not open yet. Call start_walk first." } }; }
 			if (call.name === "lookup_hkbk") {
 				var r = deps.lookup(String(args.question || ""));
 				return { output: r };
 			}
 			if (call.name === "show_place") {
 				var ok = deps.act({ type: "show_place", place: String(args.place || "") });
-				return { output: ok ? { done: true } : { done: false, note: "I could not find that place on the walk." } };
+				return { output: ok && typeof ok === "object" ? ok : ok ? { done: true } : { done: false, note: "I could not find that place on the walk." } };
 			}
-			if (call.name === "start_walk") { deps.act({ type: "start_walk" }); return { output: { done: true } }; }
+			if (call.name === "start_walk") { var start = deps.act({ type: "start_walk" }); return { output: start && typeof start === "object" ? start : { done: !!start } }; }
 			if (call.name === "scroll_to") {
 				var s = deps.act({ type: "scroll", section: String(args.section || "") });
 				return { output: s ? { done: true } : { done: false, note: "That section is not on this page." } };
@@ -148,6 +151,13 @@
 			return { output: { error: "tool_failed" } };
 		}
 		return { output: { error: "unknown_tool" } };
+	}
+
+	function lookupQuestion(engine, question) {
+		if (/(compan|recruit)/i.test(question) && /(which|who|name|list)/i.test(question)) {
+			return { found: false, note: "No verified company-name list is stored. Say that directly; do not ask a clarification or invent names.", refusal_wording: "I do not have a verified list of recruiting companies. Please confirm with the placement office.", contacts: { emailPlacements: "placements@hkbk.edu.in" } };
+		}
+		return lookupPayload(engine.ask(question));
 	}
 
 	/* Turn one engine result into a model-safe tool payload. Only retrieved
@@ -268,7 +278,7 @@
 			if (self.closed) { stream.getTracks().forEach(function (t) { t.stop(); }); throw new Error("session_closed"); }
 			self.stream = stream;
 			self.ctx = new AC();
-			return self._connect(null);
+			return self.ctx.resume().then(function () { return self._connect(null); });
 		}).then(function () {
 			if (self.closed) { self.stop(); throw new Error("session_closed"); }
 			self._startMic();
@@ -370,7 +380,7 @@
 	var api = {
 		MODEL: MODEL, SYSTEM_PROMPT: SYSTEM_PROMPT, TOOLS: TOOLS, LiveSession: LiveSession,
 		buildSetup: buildSetup, audioMessage: audioMessage, toolResponseMessage: toolResponseMessage,
-		runTool: runTool, lookupPayload: lookupPayload, interpretServerMessage: interpretServerMessage,
+		runTool: runTool, lookupQuestion: lookupQuestion, lookupPayload: lookupPayload, interpretServerMessage: interpretServerMessage,
 		floatToPcm16: floatToPcm16, pcm16ToFloat: pcm16ToFloat, downsample: downsample,
 		b64FromBytes: b64FromBytes, bytesFromB64: bytesFromB64
 	};

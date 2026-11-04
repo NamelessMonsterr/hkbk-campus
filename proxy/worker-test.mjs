@@ -203,8 +203,8 @@ section("Live token route (/live-token) - mocked upstream, no real call");
 	check("token setup equals the client's setup (prompt, tools, voice, transcription)",
 		JSON.stringify(buildLiveSetup("gemini-3.8-live")) === JSON.stringify(clientLive.buildSetup({}).setup));
 	const full = buildLiveSetup("gemini-3.8-live");
-	check("token locks systemInstruction + 4 tools (client cannot override)",
-		/lookup_hkbk/.test(full.systemInstruction.parts[0].text) && full.tools[0].functionDeclarations.length === 4);
+	check("token locks systemInstruction + 5 tools (client cannot override)",
+		/lookup_hkbk/.test(full.systemInstruction.parts[0].text) && full.tools[0].functionDeclarations.length === 5);
 }
 
 console.log("\n== Result " + "=".repeat(52));

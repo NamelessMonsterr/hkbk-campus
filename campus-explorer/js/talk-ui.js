@@ -203,9 +203,7 @@
 			endpoint: global.HKBK_TALK_CONFIG.endpoint,
 			tools: {
 				lookup: function (q) {
-					var res = self.engine.ask(q);
-					if (res && res.lang) self.lastLang = res.lang;
-					return global.HKBKGeminiLive.lookupPayload(res);
+					return global.HKBKGeminiLive.lookupQuestion(self.engine, q);
 				},
 				act: function (a) { return self._liveAct(a); }
 			},

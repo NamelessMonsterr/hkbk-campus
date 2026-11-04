@@ -70,6 +70,7 @@ html,body{margin:0;height:100%;background:#0b0b0c;color:#fff;font-family:system-
 #intro small{margin-top:22px;font-size:11px;color:#ffffff60;max-width:480px;line-height:1.6}
 @media(prefers-reduced-motion:reduce){.layer{transition:none}#bg{transition:none}#mmbox{transition:none}}
 @media(max-width:700px){#sname{font-size:16px}#cf{width:100px;height:74px;margin-left:-50px}#mm{width:92px;height:92px}#track{margin-right:108px}#cap{bottom:40px;max-width:55%;font-size:10px}.side{width:38px;height:38px;margin-top:-19px;font-size:17px}#pl{left:8px}#pr{right:8px}#top{padding:10px 12px}}
+.guide__privacy{font-size:12px;line-height:1.45;margin-top:9px;color:#ddd}.guide__resume{margin-top:8px;padding:12px;background:#ffd54a;color:#111;border:0;min-height:44px;font-size:14px}.guide__resume[hidden]{display:none}.guide__caption{max-height:28vh;overflow-y:auto}.guide{max-height:75dvh;overflow-y:auto}@media(max-width:600px){.guide{left:10px;right:10px;bottom:72px;width:auto}.guide__input{min-width:0;width:100%;font-size:16px}.guide__end{min-height:44px}.guide__privacy{font-size:12px}}
 </style></head><body>
 <div id="stage" role="img" aria-label="Campus walk frames" aria-describedby="sname"><div id="bg"></div><img class="layer" id="l0" alt=""><img class="layer" id="l1" alt="" aria-hidden="true"><div id="dip"></div></div>
 <div id="top"><button id="back">&larr; Intro</button>
@@ -137,7 +138,7 @@ function tapB(){if(cur>0)setStep(Math.max(cur-STRIDE,0),-1)}
 $('cf').onclick=function(e){e.stopPropagation();tapF()};$('pr').onclick=tapF;$('pl').onclick=tapB;
 document.addEventListener('keydown',function(e){
   if($('p360').style.display==='block'){if(e.key==='Escape')close360();return}
-  if(!started)return;
+  if(!started || /INPUT|TEXTAREA|BUTTON/.test(e.target.tagName))return;
   if(e.key==='ArrowUp'||e.key==='ArrowRight'||e.key===' '||e.key==='w'){e.preventDefault();tapF()}
   if(e.key==='ArrowDown'||e.key==='ArrowLeft'||e.key==='s'){e.preventDefault();tapB()}});
 var wl=0;$('stage').addEventListener('wheel',function(e){e.preventDefault();var n=Date.now();if(n-wl<180)return;wl=n;if(e.deltaY<0)tapF();else tapB()},{passive:false});
@@ -184,7 +185,9 @@ recenter(posAt(0));
 <script src="../campus-explorer/js/talk-config.js"></script>
 <script src="../campus-explorer/js/conversation.js"></script>
 <script src="../campus-explorer/js/talk-actions.js"></script>
+<script src="../campus-explorer/js/gemini-live.js"></script>
 <script src="walk-guide.js"></script>
+<script src="walk-live.js"></script>
 <script>
 (function(){
   if(!window.HKBKWalkGuide||!window.__walkCtl||!window.HKBK_KB)return;
@@ -192,6 +195,7 @@ recenter(posAt(0));
   var c=window.HKBKVoice&&window.HKBKVoice.getChoice&&window.HKBKVoice.getChoice();
   if(c&&c!=="skip")guide.lastLang=c;
   guide.build();
+  window.__hkbkWalkGuide=guide;
   var b=document.getElementById("guide");
   if(b)b.addEventListener("click",function(){guide.start()});
   if(new URLSearchParams(location.search).get("guide")){setTimeout(function(){guide.start()},900)}

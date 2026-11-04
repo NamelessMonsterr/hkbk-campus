@@ -24,7 +24,7 @@ check("model is the official id, models/ prefixed", s.model === "models/gemini-3
 check("audio responses only", s.generationConfig.responseModalities.length === 1 && s.generationConfig.responseModalities[0] === "AUDIO");
 check("transcription on both sides", !!s.inputAudioTranscription && !!s.outputAudioTranscription);
 var names = s.tools[0].functionDeclarations.map(function (f) { return f.name; }).sort().join(",");
-check("tools: lookup_hkbk, scroll_to, show_place, start_walk", names === "lookup_hkbk,scroll_to,show_place,start_walk", names);
+check("tools: lookup_hkbk, scroll_to, show_place, start_walk, walk_control", names === "lookup_hkbk,scroll_to,show_place,start_walk,walk_control", names);
 check("prompt forces lookup_hkbk and forbids guessing", /MUST go through the lookup_hkbk/.test(s.systemInstruction.parts[0].text) && /Never guess/.test(s.systemInstruction.parts[0].text));
 check("setup carries no key/token", JSON.stringify(s).indexOf("api") === -1 || !/AIza|AQ\./.test(JSON.stringify(s)));
 
