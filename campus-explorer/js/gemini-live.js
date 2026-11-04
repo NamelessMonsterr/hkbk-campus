@@ -239,6 +239,7 @@
 				var ws = new WebSocket(WS_BASE + "?access_token=" + encodeURIComponent(t.token));
 				self.ws = ws;
 				var settled = false;
+				var setupTimer = global.setTimeout(function () { if (!settled) { settled = true; reject(new Error("connection_timeout")); try { ws.close(); } catch (e) {} } }, 12000);
 				ws.onopen = function () {
 					var setup = buildSetup({ model: t.model });
 					/* Pinned fields are overridden by the token; these two are the client's. */
@@ -252,18 +253,18 @@
 						var msg; try { msg = JSON.parse(text); } catch (x) { return; }
 						if (msg.sessionResumptionUpdate && msg.sessionResumptionUpdate.newHandle) self.handle = msg.sessionResumptionUpdate.newHandle;
 						interpretServerMessage(msg).forEach(function (ev) {
-							if (ev.type === "ready") { if (!settled) { settled = true; resolve(); } return; }
+							if (ev.type === "ready") { if (!settled) { settled = true; global.clearTimeout(setupTimer); resolve(); } return; }
 							self._handle(ev);
 						});
 					};
 					if (typeof e.data === "string") go(e.data);
 					else if (e.data && e.data.text) e.data.text().then(go);
 				};
-				ws.onerror = function () { if (!settled) { settled = true; reject(new Error("ws_error")); } };
+				ws.onerror = function () { if (!settled) { settled = true; global.clearTimeout(setupTimer); reject(new Error("ws_error")); } };
 				ws.onclose = function (e) {
 					if (ws !== self.ws) return;
 					self.ready = false;
-					if (!settled) { settled = true; reject(new Error("ws_closed_" + (e && e.code))); return; }
+					if (!settled) { settled = true; global.clearTimeout(setupTimer); reject(new Error("ws_closed_" + (e && e.code))); return; }
 					if (!self.closed) self._recover("closed");
 				};
 			});
