@@ -90,10 +90,21 @@ function run(failures) {
 	s._recover("go_away");
 	return new Promise(function (res) { realSet(function () { global.setTimeout = realSet; res({ ev: ev, calls: calls }); }, 80); });
 }
-Promise.all([run(0), run(2), run(5)]).then(function (r) {
+function runStopped() {
+	var ev = [], calls = [];
+	var s = new live.LiveSession({ onEvent: function (t) { ev.push(t); } });
+	s.handle = "H1";
+	s._connect = function (h) { calls.push(h); return Promise.reject(new Error("x")); };
+	var realSet = global.setTimeout; global.setTimeout = function (f) { return realSet(f, 1); };
+	s._recover("go_away");
+	realSet(function () { s.stop(); }, 3);   /* page hidden / panel closed mid-retry */
+	return new Promise(function (res) { realSet(function () { global.setTimeout = realSet; res({ ev: ev, calls: calls }); }, 80); });
+}
+Promise.all([run(0), run(2), run(5), runStopped()]).then(function (r) {
 	check("clean recover: reconnecting then ready, resumed with the stored handle", r[0].ev.join() === "reconnecting,ready" && r[0].calls.join() === "H1");
 	check("two failures then success: 3 attempts, ends ready", r[1].calls.length === 3 && r[1].ev[r[1].ev.length - 1] === "ready");
 	check("never recovers: stops after exactly 3 attempts and reports closed", r[2].calls.length === 3 && r[2].ev[r[2].ev.length - 1] === "closed");
+	check("stop() mid-retry: no further reconnect attempts, no events after close", r[3].calls.length === 1 && r[3].ev.join() === "reconnecting");
 	console.log("\n  " + pass + " passed, " + fail + " failed");
 	process.exit(fail ? 1 : 0);
 });

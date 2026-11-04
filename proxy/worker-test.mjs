@@ -136,6 +136,9 @@ section("Live token route (/live-token) - mocked upstream, no real call");
 		method: "POST",
 		headers: { "Origin": origin ?? ORIGIN, "CF-Connecting-IP": ip || "9.9.9.9" }
 	});
+	const mockKV = () => { const m = new Map(); return { store: m,
+		get: k => Promise.resolve(m.has(k) ? m.get(k) : null),
+		put: (k, v) => { m.set(k, v); return Promise.resolve(); } } };
 	const realFetch = globalThis.fetch;
 	let calls = [];
 	globalThis.fetch = (url, opts) => { calls.push({ url, opts }); return Promise.resolve(new Response(JSON.stringify({ name: "auth_tokens/abc123" }), { status: 200 })); };
@@ -146,7 +149,7 @@ section("Live token route (/live-token) - mocked upstream, no real call");
 	res = await worker.fetch(liveReq("5.5.5.2", "https://evil.example"), { GEMINI_API_KEY: "k" });
 	check("bad origin -> 403, no upstream call", res.status === 403 && calls.length === 0);
 
-	res = await worker.fetch(liveReq("5.5.5.3"), { GEMINI_API_KEY: "SECRET-KEY-VALUE" });
+	res = await worker.fetch(liveReq("5.5.5.3"), { GEMINI_API_KEY: "SECRET-KEY-VALUE", LIVE_MINT_KV: mockKV() });
 	const body = await res.json();
 	check("happy path -> 200 with token + pinned model", res.status === 200 && body.token === "auth_tokens/abc123" && body.model === "gemini-3.8-live");
 	check("exactly one upstream call, to auth_tokens, key only in header",
@@ -159,16 +162,44 @@ section("Live token route (/live-token) - mocked upstream, no real call");
 
 	calls = [];
 	let last;
-	for (let i = 0; i < 4; i++) last = await worker.fetch(liveReq("5.5.5.4"), { GEMINI_API_KEY: "k" });
+	for (let i = 0; i < 4; i++) last = await worker.fetch(liveReq("5.5.5.4"), { GEMINI_API_KEY: "k", LIVE_MINT_KV: mockKV() });
 	check("burst limit: 4th mint in a minute -> 429 busy, 3 upstream calls", last.status === 429 && calls.length === 3);
 
 	globalThis.fetch = () => Promise.resolve(new Response("{}", { status: 429 }));
-	res = await worker.fetch(liveReq("5.5.5.5"), { GEMINI_API_KEY: "k" });
+	res = await worker.fetch(liveReq("5.5.5.5"), { GEMINI_API_KEY: "k", LIVE_MINT_KV: mockKV() });
 	check("provider 429 -> 503 quota (site shows fallback)", res.status === 503 && (await res.json()).error === "quota");
 	globalThis.fetch = () => Promise.resolve(new Response("{}", { status: 200 }));
-	res = await worker.fetch(liveReq("5.5.5.6"), { GEMINI_API_KEY: "k" });
+	res = await worker.fetch(liveReq("5.5.5.6"), { GEMINI_API_KEY: "k", LIVE_MINT_KV: mockKV() });
 	check("upstream 200 without token -> 502 empty", res.status === 502);
 	globalThis.fetch = realFetch;
+
+	let r2 = await worker.fetch(liveReq("6.6.6.1"), { GEMINI_API_KEY: "k" });
+	check("no KV binding -> 503 not_configured, fail closed, no upstream call", r2.status === 503 && (await r2.json()).error === "not_configured");
+
+	{
+		const kv = mockKV();
+		const rf = globalThis.fetch;
+		globalThis.fetch = () => Promise.resolve(new Response(JSON.stringify({ name: "auth_tokens/abc123" }), { status: 200 }));
+		let ok = 0, limited = 0;
+		for (let i = 0; i < 12; i++) {
+			// fresh IPs so only the SHARED cap can bite (per-IP allows 3/min each)
+			const r = await worker.fetch(liveReq("7.7.7." + i), { GEMINI_API_KEY: "k", LIVE_MINT_KV: kv, LIVE_GLOBAL_PER_MINUTE: "8" });
+			if (r.status === 200) ok++; else if (r.status === 429) limited++;
+		}
+		globalThis.fetch = rf;
+		check("shared global cap: 8 mints pass across different IPs, then 429 busy", ok === 8 && limited === 4);
+	}
+
+	{
+		const brokenKV = { get: () => Promise.reject(new Error("kv down")), put: () => Promise.reject(new Error("kv down")) };
+		let calls2 = [];
+		const rf = globalThis.fetch;
+		globalThis.fetch = (url, opts) => { calls2.push(url); return Promise.resolve(new Response(JSON.stringify({ name: "auth_tokens/x" }), { status: 200 })); };
+		const r = await worker.fetch(liveReq("8.8.8.8"), { GEMINI_API_KEY: "k", LIVE_MINT_KV: brokenKV });
+		globalThis.fetch = rf;
+		check("KV error -> 503 limiter, fail closed, NO upstream mint", r.status === 503 && (await r.json()).error === "limiter" && calls2.length === 0);
+	}
+
 	check("token setup equals the client's setup (prompt, tools, voice, transcription)",
 		JSON.stringify(buildLiveSetup("gemini-3.8-live")) === JSON.stringify(clientLive.buildSetup({}).setup));
 	const full = buildLiveSetup("gemini-3.8-live");

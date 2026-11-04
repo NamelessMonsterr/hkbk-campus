@@ -162,13 +162,20 @@ function buildMessages(body) {
  * The key is the Worker secret GEMINI_API_KEY. Nothing is called until that
  * secret exists; without it the route answers 503 not_configured and the
  * site keeps using the existing browser-STT/TTS pipeline.
- * Guards: same origin allowlist, per-IP burst limit (stricter than chat),
- * one upstream call per request, no retries, nothing logged. Tokens last
- * 2 minutes to START a session and 15 minutes in total (docs default 1/30).
+ * Guards: same origin allowlist, per-IP burst limit (best-effort, in-memory
+ * per isolate - documented, not claimed as exact), a shared best-effort
+ * per-minute counter via Workers KV (eventual consistency, fail-closed), one upstream
+ * call per request, no retries, nothing logged. Cloudflare's own free-plan
+ * limits backstop the shared cap: 1 write/second to the same key (successful-write
+ * throttle) and 1,000 writes/day (hard daily mint ceiling);
+ * when either is spent the mint fails closed and the site shows its
+ * standard-voice fallback. Tokens last 2 minutes to START a session and
+ * 15 minutes in total (docs default 1/30).
  * The model is pinned in the request so a stolen token cannot pick another. */
 const LIVE_MODEL = "gemini-3.8-live";            // official pricing page id; override with LIVE_MODEL var
 const LIVE_TOKEN_URL = "https://generativelanguage.googleapis.com/v1beta/auth_tokens";
 const LIVE_PER_IP_PER_MINUTE = 3;
+const LIVE_GLOBAL_PER_MINUTE = 8;   // best-effort shared counter, NOT an exact quota; override with the LIVE_GLOBAL_PER_MINUTE var
 const LIVE_NEW_SESSION_MS = 2 * 60 * 1000;
 const LIVE_SESSION_MS = 15 * 60 * 1000;
 const liveBuckets = new Map();
@@ -277,6 +284,21 @@ async function handleLiveToken(request, env, origin) {
 	const ip = request.headers.get("CF-Connecting-IP") || "unknown";
 	if (!liveAllow(ip, parseInt(env.LIVE_PER_IP_PER_MINUTE, 10) || LIVE_PER_IP_PER_MINUTE)) {
 		return jsonResponse({ error: "busy" }, 429, origin);
+	}
+	/* Shared best-effort gate: one KV counter per UTC minute across every
+	 * isolate. Read-modify-write can undercount under a race, so this is a
+	 * soft counter, not an exact cap - the enforced backstops are Cloudflare's own
+	 * same-key and daily write limits. Fail CLOSED: no KV, no mint - the
+	 * site falls back to standard voice rather than burning unbounded quota. */
+	if (!env.LIVE_MINT_KV) return jsonResponse({ error: "not_configured" }, 503, origin);
+	const limit = parseInt(env.LIVE_GLOBAL_PER_MINUTE, 10) || LIVE_GLOBAL_PER_MINUTE;
+	const mkey = "mint:" + new Date().toISOString().slice(0, 16);
+	try {
+		const cur = parseInt((await env.LIVE_MINT_KV.get(mkey)) || "0", 10) || 0;
+		if (cur >= limit) return jsonResponse({ error: "busy" }, 429, origin);
+		await env.LIVE_MINT_KV.put(mkey, String(cur + 1), { expirationTtl: 180 });
+	} catch {
+		return jsonResponse({ error: "limiter" }, 503, origin);
 	}
 	const model = env.LIVE_MODEL || LIVE_MODEL;
 	const now = Date.now();

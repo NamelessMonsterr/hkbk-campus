@@ -1,0 +1,7 @@
+name = "hkbk-talk"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[[kv_namespaces]]
+binding = "LIVE_MINT_KV"
+id = "9853613364d2463ebc656f8ac5ba9cbb"

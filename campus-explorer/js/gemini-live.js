@@ -223,6 +223,7 @@
 			if (!res.ok) { var e = new Error("token_" + res.status); e.status = res.status; throw e; }
 			return res.json();
 		}).then(function (t) {
+			if (self.closed) throw new Error("session_closed");
 			if (!t || !t.token) throw new Error("token_empty");
 			return new Promise(function (resolve, reject) {
 				var ws = new WebSocket(WS_BASE + "?access_token=" + encodeURIComponent(t.token));
@@ -264,10 +265,12 @@
 		if (!(this.opts.endpoint || "")) return Promise.reject(new Error("no_endpoint"));
 		var AC = global.AudioContext || global.webkitAudioContext;
 		return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (stream) {
+			if (self.closed) { stream.getTracks().forEach(function (t) { t.stop(); }); throw new Error("session_closed"); }
 			self.stream = stream;
 			self.ctx = new AC();
 			return self._connect(null);
 		}).then(function () {
+			if (self.closed) { self.stop(); throw new Error("session_closed"); }
 			self._startMic();
 			self.ready = true;
 			self._emit("ready");
@@ -288,6 +291,7 @@
 			tries++;
 			var old = self.ws;
 			self._connect(self.handle).then(function () {
+				if (self.closed) { self.stop(); self._recovering = false; return; }
 				if (old && old !== self.ws) { try { old.close(); } catch (e) { /* already closed */ } }
 				self._recovering = false; self.ready = true; self._emit("ready");
 			}, function () {
@@ -303,7 +307,7 @@
 		var proc = this.ctx.createScriptProcessor(4096, 1, 1);
 		var mute = this.ctx.createGain(); mute.gain.value = 0;
 		proc.onaudioprocess = function (e) {
-			if (!self.ready || !self.ws || self.ws.readyState !== 1) return;
+			if (self.closed || !self.ready || !self.ws || self.ws.readyState !== 1) return;
 			var f = downsample(e.inputBuffer.getChannelData(0), self.ctx.sampleRate, IN_RATE);
 			self.ws.send(JSON.stringify(audioMessage(floatToPcm16(f))));
 		};
@@ -357,7 +361,7 @@
 	LiveSession.prototype.stop = function () {
 		this.closed = true; this.ready = false;
 		this._flush();
-		if (this._mic) { try { this._mic.proc.disconnect(); this._mic.src.disconnect(); } catch (e) { /* ignore */ } this._mic = null; }
+		if (this._mic) { try { this._mic.proc.onaudioprocess = null; this._mic.proc.disconnect(); this._mic.src.disconnect(); this._mic.mute.disconnect(); } catch (e) { /* ignore */ } this._mic = null; }
 		if (this.stream) { this.stream.getTracks().forEach(function (t) { t.stop(); }); this.stream = null; }
 		if (this.ws) { try { this.ws.close(); } catch (e) { /* ignore */ } this.ws = null; }
 		if (this.ctx) { try { this.ctx.close(); } catch (e) { /* ignore */ } this.ctx = null; }

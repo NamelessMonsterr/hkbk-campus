@@ -96,6 +96,28 @@
 
 		document.body.appendChild(root);
 		this.root = root;
+		global.addEventListener("pagehide", function () { self._stopForHidden(); });
+		if (global.document && global.document.addEventListener) {
+			global.document.addEventListener("visibilitychange", function () {
+				if (global.document.visibilityState === "hidden") self._stopForHidden();
+			});
+		}
+	};
+
+	/* Privacy stop: the page is hidden or unloading, so the microphone must
+	 * not keep streaming. Kills the live session, classic recognition and TTS,
+	 * invalidates in-flight callbacks (blocks any reconnect), and says so.
+	 * Deliberately does NOT restart anything when the page becomes visible
+	 * again - the visitor reopens Assistant mode themselves. */
+	TalkUI.prototype._stopForHidden = function () {
+		if (this.state === "closed") return;
+		this._session = (this._session || 0) + 1;
+		if (this.live) { this.live.stop(); this.live = null; }
+		this._stopRec();
+		if (global.HKBKVoice) global.HKBKVoice.cancel();
+		this.modeDot.textContent = "mic off";
+		this._setState("idle", "Voice stopped - the page was hidden, so the microphone is off. Close and reopen Assistant mode to talk again.");
+		this._note("Microphone is off. Audio streaming stopped when this page was hidden.");
 	};
 
 	/* ---------- state ---------- */
@@ -157,7 +179,7 @@
 		this._speak(greet, "en", function () { self._listen(); });
 	};
 
-	/* ---------- Gemini Live (internal test flag; classic pipeline is the fallback) ---------- */
+	/* ---------- Gemini Live (default; classic pipeline is the fallback) ---------- */
 
 	/* Live voice is the default Assistant mode when the proxy is configured.
 	 * Opt out with ?live=0 or localStorage hkbkLive=0; any failure falls back
@@ -205,10 +227,10 @@
 			self.modeDot.title = "Live voice: full-duplex conversation, answers grounded in the HKBK knowledge base";
 		}, function (err) {
 			if (self.state === "closed" || session !== self._session) return;
-			var why = (err && err.message) || "failed";
-			var msg = /^token_503|not_configured/.test(why) ? "Live voice is not set up yet" :
-				/^token_429|token_503/.test(why) ? "Live voice is busy or its quota is used up" :
-				/NotAllowed|Permission|denied/i.test(why) ? "Microphone permission was denied" : "Live voice could not start";
+			var why = (((err && err.message) || "") + " " + ((err && err.name) || "")).trim() || "failed";
+			var msg = /NotAllowed|Permission|denied/i.test(why) ? "Microphone permission was denied - allow the mic in your browser's site settings, or type below instead" :
+				/^token_503|not_configured/.test(why) ? "Live voice is not set up yet" :
+				/^token_429|token_503/.test(why) ? "Live voice is busy or its quota is used up" : "Live voice could not start";
 			self._liveFallback(greet, msg);
 		});
 	};
