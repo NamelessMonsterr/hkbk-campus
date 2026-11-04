@@ -132,9 +132,9 @@
 		var greet = "Hi! I'm the HKBK guide. Ask me about the college, or just say: walk me through the campus.";
 		if (this.conversation.isOnline() && !this._privacyNoted) {
 			this._privacyNoted = true;
-			this._note("Online mode: your question is sent to an AI service for phrasing. The facts come only from the verified knowledge base, and nothing is stored there.");
+			this._note("Online mode: your question text is sent to an AI service for phrasing. The facts come only from the verified knowledge base, and nothing is stored there. Voice typing uses your browser's speech recognition, which may send the audio to your browser provider.");
 		} else if (!this.conversation.isOnline()) {
-			this._note("Offline mode: answers come only from the knowledge base on this device. Nothing leaves your phone.");
+			this._note("Offline mode: answers come only from the knowledge base on this device - no question text is sent to any AI service. Voice typing uses your browser's speech recognition, which may send the audio to your browser provider.");
 		}
 		this._speak(greet, "en", function () { self._listen(); });
 	};
@@ -233,7 +233,7 @@
 		this._setState("thinking", "Thinking\u2026");
 		this.conversation.reply(text).then(function (r) {
 			if (r.engine && r.engine.lang) self.lastLang = r.engine.lang;
-			if (global.HKBKUsage && global.HKBKUsage.enabled()) {
+			if (global.HKBKUsage && global.HKBKUsage.enabled() && r.engine && r.engine.type !== "smalltalk") {
 				global.HKBKUsage.log(r.engine.type === "answer" ? "answer" : (r.engine.type === "clarify" ? "clarify" : "refusal"), {
 					entryId: r.engine.entryId || null,
 					category: r.engine.category || null,

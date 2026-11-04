@@ -137,6 +137,26 @@ var tests = [
 				check("engine answered confidently instead (acceptable)", body.outcome === "answer" && body.facts.length === 1);
 			}
 		});
+	},
+	function () {
+		section("Small talk stays local and warm");
+		var calls = 0;
+		var convo = HKBKTalk.createConversation({ engine: new HKBKChat.Engine(kb), config: { endpoint: "https://proxy.test/talk" },
+			fetchImpl: function () { calls++; return Promise.reject(new Error("must not be called for small talk")); } });
+		return Promise.all([
+			convo.reply("hi").then(function (r) {
+				check("greeting gets a warm reply", /ask me anything/i.test(r.text), r.text);
+				check("greeting is marked smalltalk", r.engine.type === "smalltalk");
+			}),
+			convo.reply("thanks").then(function (r) { check("thanks gets a warm reply", /welcome/i.test(r.text), r.text); }),
+			convo.reply("bye").then(function (r) { check("bye gets a warm reply", /bye/i.test(r.text), r.text); }),
+			convo.reply("who are you").then(function (r) { check("identity question answered", /HKBK guide/i.test(r.text), r.text); })
+		]).then(function () {
+			check("no model call spent on small talk", calls === 0, calls + " calls");
+			return convo.reply("what is the hostel fee");
+		}).then(function (r) {
+			check("real questions still reach the engine", r.engine.type !== "smalltalk", r.engine.type);
+		});
 	}
 ];
 

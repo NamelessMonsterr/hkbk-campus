@@ -26,8 +26,15 @@ const UPSTREAM = "https://api.groq.com/openai/v1/chat/completions";
 
 const MAX_QUESTION_CHARS = 1200;
 const MAX_TOKENS = 220;          // short spoken replies
-const PER_IP_PER_DAY = 20;       // a campus visitor asks a handful of things
-const GLOBAL_PER_DAY = 800;      // stays under the free 1,000 req/day even if buckets reset
+// Protective defaults, derived from the Groq free tier verified on
+// 2026-11-04 (1,000 requests/day org-wide): the global cap stays under it
+// with headroom even if an isolate's in-memory bucket resets, and the
+// per-visitor cap leaves room for ~40 distinct visitors a day.
+// Both are deployment settings, not product limits: override with the
+// PER_IP_DAILY / GLOBAL_DAILY worker vars if the owner approves different
+// values. When a cap trips, visitors silently get the offline KB answer.
+const PER_IP_PER_DAY = 20;
+const GLOBAL_PER_DAY = 800;
 const UPSTREAM_TIMEOUT_MS = 6000;
 
 // Best-effort in-memory buckets. A Worker isolate resets under load or
@@ -38,13 +45,13 @@ let globalDay = null, globalCount = 0;
 
 function dayKey() { return new Date().toISOString().slice(0, 10); }
 
-function allow(ip) {
+function allow(ip, perIp, globalCap) {
 	const day = dayKey();
 	if (globalDay !== day) { globalDay = day; globalCount = 0; }
-	if (globalCount >= GLOBAL_PER_DAY) return false;
+	if (globalCount >= globalCap) return false;
 	let b = ipBuckets.get(ip);
 	if (!b || b.day !== day) { b = { day, count: 0 }; ipBuckets.set(ip, b); }
-	if (b.count >= PER_IP_PER_DAY) return false;
+	if (b.count >= perIp) return false;
 	b.count++; globalCount++;
 	return true;
 }
@@ -139,7 +146,9 @@ export default {
 		if (!env.GROQ_API_KEY) return jsonResponse({ error: "not_configured" }, 503, origin);
 
 		const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-		if (!allow(ip)) return jsonResponse({ error: "busy" }, 429, origin);
+		const perIp = parseInt(env.PER_IP_DAILY, 10) || PER_IP_PER_DAY;
+		const globalCap = parseInt(env.GLOBAL_DAILY, 10) || GLOBAL_PER_DAY;
+		if (!allow(ip, perIp, globalCap)) return jsonResponse({ error: "busy" }, 429, origin);
 
 		let body;
 		try { body = await request.json(); } catch { return jsonResponse({ error: "bad_json" }, 400, origin); }

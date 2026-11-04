@@ -22,7 +22,10 @@ A single Cloudflare Worker (`worker.js`) that:
 - caps input at 1200 characters and output at 220 tokens,
 - applies a 6-second upstream timeout and returns the site's offline answer
   unchanged on any failure,
-- rate-limits per IP (20/day) and globally (800/day) with in-memory buckets,
+- rate-limits per IP (default 20/day) and globally (default 800/day) with
+  in-memory buckets - protective defaults derived from the verified Groq free
+  tier (1,000 requests/day org-wide); both are owner-adjustable via the
+  PER_IP_DAILY / GLOBAL_DAILY worker vars without a redeploy,
 - logs nothing about the conversation.
 
 ## Deploy (about 10 minutes, free)

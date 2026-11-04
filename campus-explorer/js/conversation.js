@@ -96,7 +96,28 @@
 		 *   onlineError: string|null
 		 * }>
 		 */
+
+	/* Small talk needs no facts and no model: answered locally in both modes.
+	 * Returns the reply text, or null when the turn is a real question. */
+	function smallTalk(q) {
+		var t = String(q || "").trim().toLowerCase().replace(/[!.?]+$/g, "");
+		if (/^(hi+|hello|hey|namaste|namaskara|good (morning|afternoon|evening))$/.test(t))
+			return "Hi! Ask me anything about HKBK - courses, fees, campus life - or say: walk me through the campus.";
+		if (/^(thanks|thank you|thankyou|thx|thank u|dhanyavad|shukriya)$/.test(t))
+			return "You're welcome! Anything else about the college?";
+		if (/^(bye|goodbye|see you|tata|good night)$/.test(t))
+			return "Bye! Good luck with your college hunt.";
+		if (/^(who are you|what are you|your name|what can you do)$/.test(t))
+			return "I'm the HKBK guide. I answer questions about the college from its verified knowledge base, and I can walk you around the campus - just say so.";
+		return null;
+	}
+
 		function reply(question) {
+			var small = smallTalk(question);
+			if (small) {
+				return Promise.resolve({ text: small, mode: config.endpoint && fetchImpl ? "online" : "offline",
+					engine: { type: "smalltalk", lang: "en", confidence: 1 }, onlineError: null });
+			}
 			var res = engine.ask(question);
 			if (!config.endpoint || !fetchImpl) {
 				return Promise.resolve({ text: res.answer, mode: "offline", engine: res, onlineError: null });
