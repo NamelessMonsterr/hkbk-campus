@@ -213,6 +213,25 @@ check("follow-up stays on a hostel-related entry",
 	(follow.type === "clarify" && (follow.suggestions || []).some(function (s2) { return /hostel/.test(s2.entryId); })),
 	"got " + follow.type + "/" + follow.entryId);
 
+section("Follow-up cue: bare 'that' resolves against the previous topic");
+engine.endSession();
+engine.ask("what is the hostel fee");
+var thatFollow = engine.ask("is that per year?");
+check("bare 'that' follow-up adopts the fee topic",
+	thatFollow.type === "answer" && thatFollow.entryId === "fees-hostel",
+	"got " + thatFollow.type + "/" + thatFollow.entryId);
+engine.endSession();
+engine.ask("what is the hostel fee");
+var parking = engine.ask("parking?");
+check("out-of-vocabulary follow-up still refuses, no topic drag",
+	parking.type === "out_of_scope", "got " + parking.type + "/" + parking.entryId);
+engine.endSession();
+engine.ask("what is the hostel fee");
+var plc = engine.ask("what about placements");
+check("new topic with a cue is not dragged onto the fee entry",
+	plc.entryId !== "fees-hostel" && !(plc.suggestions || []).some(function (s3) { return s3.entryId === "fees-hostel"; }),
+	"got " + plc.type + "/" + plc.entryId);
+
 section("LLM hook is absent by default");
 check("engine answers with no LLM configured", engine.llmHook === null);
 check("hook is settable", (function () {

@@ -521,7 +521,7 @@
 	// which fired on ordinary questions like "is there a metro station nearby"
 	// and dragged the previous topic into an unrelated query.
 	var FOLLOWUP_CUES = {
-		en: ["it", "that one", "they", "those", "what about", "how about", "and for"],
+		en: ["it", "that", "they", "those", "what about", "how about", "and for"],
 		kn: ["\u0C85\u0CA6\u0CC1", "\u0C85\u0CB2\u0CCD\u0CB2\u0CBF", "\u0CB9\u0CBE\u0C97\u0CC6"],
 		hi: ["\u0935\u0939", "\u0909\u0938", "\u0935\u0939\u093E\u0901", "\u0914\u0930"],
 		ur: ["\u0648\u06C1", "\u0627\u0633", "\u0648\u06C1\u0627\u06BA"]
@@ -1019,7 +1019,25 @@
 			var prev = this.memory.last();
 			if (prev && prev.entryId && confidence < this.config.strongMatch && looksLikeFollowUp(query, lang)) {
 				var prevEntry = this.index.entryById[prev.entryId];
-				if (prevEntry) {
+				/* A cue word does not make it a follow-up when the query brings
+				 * its own NEW covered vocabulary: "what about placements"
+				 * after a fee answer is a topic change, not an ellipsis.
+				 * Rescue only when every recognised content token already
+				 * belongs to the previous entry's own documents. */
+				var prevTokens = Object.create(null);
+				this.index.docs.forEach(function (d) {
+					if (d.entryId === prev.entryId) Object.keys(d.tf).forEach(function (t) { prevTokens[t] = 1; });
+				});
+				/* ...but an anaphor ("it", "that", "they", "those") overrides:
+				 * "what about the fee for it" brings new aspect vocabulary
+				 * while pointing back at the same topic. Only opener-style
+				 * cues ("what about X") are blocked by new topic tokens. */
+				var anaphor = /\b(it|that|they|those)\b/.test(normalise(query));
+				var introducesNewTopic = !anaphor && tokens.some(function (t) {
+					return this.index.vocab[t] && !prevTokens[t];
+				}, this);
+				if (introducesNewTopic) trace.steps.push({ step: "followup_context", from: prev.entryId, adopted: false, reason: "new_topic_tokens" });
+				if (prevEntry && !introducesNewTopic) {
 					var augmented = tokens.concat(tokenise((prevEntry.tags || []).join(" "), lang));
 					var withContext = this.retrieve(augmented, lang, trace, "retrieval_with_context");
 					if (withContext.entry && withContext.confidence > confidence) {
