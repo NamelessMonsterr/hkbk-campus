@@ -1,5 +1,5 @@
 /*
- * talk-ui.js - "Talk to HKBK", the voice-first conversation surface.
+ * talk-ui.js - "Assistant mode", the voice-first conversation surface of Ask HKBK.
  *
  * A bottom sheet over the homepage: big mic, live captions, small typed
  * fallback. The loop: listen -> engine retrieves -> (online proxy phrases |
@@ -41,11 +41,11 @@
 		var self = this;
 		var root = el("div", "talk");
 		root.setAttribute("role", "dialog");
-		root.setAttribute("aria-label", "Talk to HKBK voice assistant");
+		root.setAttribute("aria-label", "Ask HKBK - Assistant mode, voice assistant");
 		root.setAttribute("aria-hidden", "true");
 
 		var bar = el("div", "talk__bar");
-		bar.appendChild(el("span", "talk__title", "Talk to HKBK"));
+		bar.appendChild(el("span", "talk__title", "Assistant mode"));
 		this.modeDot = el("span", "talk__mode", this.conversation.isOnline() ? "online" : "offline");
 		this.modeDot.title = this.conversation.isOnline()
 			? "Online: replies are phrased by an AI service from verified facts only"

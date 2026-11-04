@@ -158,8 +158,27 @@
 		if (b < 10) return twoDigit(a) + " oh " + ONES[b];
 		return twoDigit(a) + " " + twoDigit(b);
 	}
+	/* Proper-name respellings, speech only: nudge browser voices toward the
+	 * local reading. Best-effort and tunable - the visitor's ear is the final
+	 * check; displayed text always keeps the official spelling. */
+	var SPEAK_ALIASES = [
+		[/\bHKBKCE\b/g, "H K B K C E"],
+		[/\bManyata\b/g, "Manyaata"],
+		[/\bNagawara\b/g, "Naagavara"]
+	];
+	/* All-caps acronyms (HKBK, KCET, CSE, MBA...) are spelled letter by
+	 * letter - the convention Indian-English listeners expect, and safe for
+	 * any voice. Runs of 2-7 capitals only, so ordinary words are untouched. */
+	/* ...except the few everyone says as a word. */
+	var WORD_ACRONYMS = { PIN: 1, GATE: 1, JEE: 1 };
+	function spellAcronyms(text) {
+		return text.replace(/\b[A-Z]{2,7}\b/g, function (a) { return WORD_ACRONYMS[a] ? a : a.split("").join(" "); });
+	}
 	function speakable(text) {
-		return String(text).replace(/(?<![\d,.])(1[89]\d{2}|20\d{2})(?![\d,.])/g,
+		var out = String(text);
+		for (var i = 0; i < SPEAK_ALIASES.length; i++) out = out.replace(SPEAK_ALIASES[i][0], SPEAK_ALIASES[i][1]);
+		out = spellAcronyms(out);
+		return out.replace(/(?<![\d,.])(1[89]\d{2}|20\d{2})(?!\d|\.\d)/g,
 			function (y) { return speakYear(y); });
 	}
 

@@ -217,6 +217,16 @@ ok(V._speakable("version 0.8.0") === "version 0.8.0", "dotted version untouched"
 ok(V._speakable("the 2007 batch") === "the twenty oh seven batch", "zero-decade year spoken with oh");
 ok(V._speakable("1900 onwards") === "nineteen hundred onwards", "round century reads as hundred");
 ok(V._speakable("19975 entries") === "19975 entries", "five-digit count untouched");
+ok(V._speakable("Established 1997. It grew.") === "Established nineteen ninety seven. It grew.", "year at sentence end still normalizes");
+ok(V._speakable("ratio 1997.5 exactly") === "ratio 1997.5 exactly", "decimal untouched");
+
+/* pronunciation layer: acronyms spelled out, flagged names respelled (speech only) */
+ok(V._speakable("HKBK College of Engineering") === "H K B K College of Engineering", "HKBK spelled letter by letter");
+ok(V._speakable("through KCET, COMEDK or management quota") === "through K C E T, C O M E D K or management quota", "exam acronyms spelled");
+ok(V._speakable("MBA and CSE intake") === "M B A and C S E intake", "degree acronyms spelled");
+ok(V._speakable("opposite Manyata Tech Park") === "opposite Manyaata Tech Park", "Manyata respelled for speech");
+ok(V._speakable("the Nagawara side") === "the Naagavara side", "Nagawara respelled for speech");
+ok(V._speakable("ordinary Words Stay Put") === "ordinary Words Stay Put", "mixed-case words untouched");
 
 console.log("voice-test: " + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);

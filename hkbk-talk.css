@@ -46,9 +46,6 @@
 @media(max-width:700px){.guide{left:10px;right:10px;max-width:none;bottom:126px}}
 
 /* Talk launcher sits just above the Ask HKBK launcher. */
-.launcher--talk{right:22px;bottom:78px;background:var(--blue,#1b3dff);color:#fff;border-color:var(--blue,#1b3dff)}
-.launcher--talk .launcher__dot{background:#ffd54a;box-shadow:0 0 8px #ffd54a}
-@media(max-width:560px){.launcher--talk{right:12px;bottom:68px}}
 
 /* Chat header Talk button matches the other header buttons. */
 .chat__talk{background:none;border:1px solid var(--hex-line,rgba(11,16,48,.35));color:var(--fg,#0b1030);border-radius:999px;

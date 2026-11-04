@@ -91,9 +91,9 @@
 		this._hfBtn = hfB;
 
 		if (this.opts.onTalk) {
-			var talkB = el("button", "chat__talk", "Talk");
+			var talkB = el("button", "chat__talk", "Assistant mode");
 			talkB.type = "button";
-			talkB.title = "Talk to the guide - voice conversation";
+			talkB.title = "Assistant mode - a voice conversation with the guide";
 			talkB.addEventListener("click", function () { self.close(); self.opts.onTalk(); });
 			head.appendChild(talkB);
 		}
