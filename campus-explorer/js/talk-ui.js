@@ -62,6 +62,9 @@
 		root.appendChild(this.statusEl);
 
 		this.captionEl = el("div", "talk__caption", "");
+		this.captionEl.tabIndex = 0;
+		this.captionEl.setAttribute("role", "region");
+		this.captionEl.setAttribute("aria-label", "Conversation transcript. Scroll to read the full reply.");
 		root.appendChild(this.captionEl);
 
 		var mid = el("div", "talk__mid");

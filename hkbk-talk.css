@@ -70,3 +70,7 @@
 .chat .talk__bar{flex-wrap:wrap;gap:7px}
 .chat .talk__close{min-width:44px;min-height:44px}
 .chat .talk__mode{font-size:10px;padding:3px 6px;letter-spacing:0}
+/* Reserve the scrollbar lane so mobile overlay scrollbars never cover words. */
+.chat .talk__caption{min-width:0;max-width:100%;overflow-x:hidden;overflow-y:auto;scrollbar-gutter:stable;padding-right:8px;overflow-wrap:anywhere;touch-action:pan-y;overscroll-behavior:contain}
+.chat .talk__line,.chat .talk__line span{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.chat .talk__caption:focus-visible{outline:2px solid var(--blue,#1b3dff);outline-offset:2px}
