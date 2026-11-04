@@ -46,7 +46,7 @@ section("Happy path");
 	check("reply forwarded", body.reply.indexOf("Hostel fees") === 0);
 	check("CORS header for the site", res.headers.get("Access-Control-Allow-Origin") === ORIGIN);
 	const sent = up.calls[0].body;
-	check("model pinned to gpt-oss-120b", sent.model === "openai/gpt-oss-120b");
+	check("model pinned to the owner-chosen qwen/qwen3.8-27b", sent.model === "qwen/qwen3.8-27b");
 	check("system prompt forbids invention", /Never invent/.test(sent.messages[0].content));
 	check("facts reach the model", /Hostel fee is X/.test(sent.messages[sent.messages.length - 1].content));
 	check("visitor question last", /visitor: what is the hostel fee/.test(sent.messages[sent.messages.length - 1].content));

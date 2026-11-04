@@ -21,7 +21,7 @@ const ALLOWED_ORIGINS = [
 	"http://localhost",
 	"http://127.0.0.1"
 ];
-const MODEL = "openai/gpt-oss-120b";
+const MODEL = "qwen/qwen3.8-27b";  // owner-chosen 2026-11-04; override via the MODEL worker var
 const UPSTREAM = "https://api.groq.com/openai/v1/chat/completions";
 
 const MAX_QUESTION_CHARS = 1200;

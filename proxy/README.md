@@ -17,7 +17,7 @@ A single Cloudflare Worker (`worker.js`) that:
 
 - accepts `POST /talk` with `{facts, question, history}` from the allowed
   site origins only (CORS allowlist in `ALLOWED_ORIGINS`),
-- calls Groq's `openai/gpt-oss-120b` chat completions with a grounding
+- calls Groq's `qwen/qwen3.8-27b` chat completions (owner-chosen 2026-11-04; adjustable via the MODEL worker var) with a grounding
   system prompt (rephrase the given facts, add nothing, stay under ~60 words),
 - caps input at 1200 characters and output at 220 tokens,
 - applies a 6-second upstream timeout and returns the site's offline answer
@@ -48,7 +48,7 @@ A single Cloudflare Worker (`worker.js`) that:
 ## Cost envelope
 
 - Cloudflare Workers free plan: 100,000 requests/day, 10 ms CPU per request.
-- Groq free tier for `openai/gpt-oss-120b` at the time of writing:
+- Groq free tier for `qwen/qwen3.8-27b` at the time of writing:
   30 requests/minute, 1,000 requests/day, 8,000 tokens/minute
   (verify the current numbers at https://console.groq.com/docs/rate-limits -
   limits are per organisation and change).
