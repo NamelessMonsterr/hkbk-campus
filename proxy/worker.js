@@ -155,6 +155,161 @@ function buildMessages(body) {
 	];
 }
 
+/* ---- Gemini Live ephemeral token route (/live-token) --------------------
+ * The browser connects straight to the Live API over WebSocket, so it needs a
+ * credential. It never gets the real key: this route mints a short-lived,
+ * single-use ephemeral token (docs: ephemeral tokens, v1beta auth_tokens).
+ * The key is the Worker secret GEMINI_API_KEY. Nothing is called until that
+ * secret exists; without it the route answers 503 not_configured and the
+ * site keeps using the existing browser-STT/TTS pipeline.
+ * Guards: same origin allowlist, per-IP burst limit (stricter than chat),
+ * one upstream call per request, no retries, nothing logged. Tokens last
+ * 2 minutes to START a session and 15 minutes in total (docs default 1/30).
+ * The model is pinned in the request so a stolen token cannot pick another. */
+const LIVE_MODEL = "gemini-3.8-live";            // official pricing page id; override with LIVE_MODEL var
+const LIVE_TOKEN_URL = "https://generativelanguage.googleapis.com/v1beta/auth_tokens";
+const LIVE_PER_IP_PER_MINUTE = 3;
+const LIVE_NEW_SESSION_MS = 2 * 60 * 1000;
+const LIVE_SESSION_MS = 15 * 60 * 1000;
+const liveBuckets = new Map();
+const LIVE_SYSTEM_PROMPT = "You are the voice guide of the HKBK Group of Institutions website, Bengaluru, talking with a visitor out loud.\nSound like a warm, relaxed person: short turns, natural wording, no lists, no markdown, never say you are an AI model unless asked.\nEnglish is the default language; reply in the language the visitor uses.\nSmall talk, greetings, thanks and chit-chat: answer naturally and steer gently back to what you can help with.\nEVERY question about HKBK (courses, fees, hostel, placements, admissions, eligibility, locations, dates, contacts) MUST go through the lookup_hkbk tool first.\nSpeak only what lookup_hkbk returns. If it says there is no information, say so plainly and give the office contact it returns. Never guess numbers, fees, dates or phone numbers from memory.\nIf lookup_hkbk reports conflicting sources, say the published sources disagree and the office should confirm.\nWhen the visitor wants to see a place or start the campus walk, call show_place or start_walk. To scroll the page to a section, call scroll_to.\nLet the visitor interrupt you; keep answers to one to three sentences unless they ask for more.";
+const LIVE_TOOLS = [
+ {
+  "functionDeclarations": [
+   {
+    "name": "lookup_hkbk",
+    "description": "Look up verified HKBK facts for a question about the college. Always call this before answering any factual question about HKBK.",
+    "parameters": {
+     "type": "OBJECT",
+     "properties": {
+      "question": {
+       "type": "STRING",
+       "description": "The visitor's question, in their own words"
+      }
+     },
+     "required": [
+      "question"
+     ]
+    }
+   },
+   {
+    "name": "show_place",
+    "description": "Open the campus walk at a named place (for example main gate, admin block, library, hostel).",
+    "parameters": {
+     "type": "OBJECT",
+     "properties": {
+      "place": {
+       "type": "STRING"
+      }
+     },
+     "required": [
+      "place"
+     ]
+    }
+   },
+   {
+    "name": "start_walk",
+    "description": "Start the guided campus walk from the beginning.",
+    "parameters": {
+     "type": "OBJECT",
+     "properties": {}
+    }
+   },
+   {
+    "name": "scroll_to",
+    "description": "Scroll the current page to a section: programmes, departments, placements, campus, news or admissions.",
+    "parameters": {
+     "type": "OBJECT",
+     "properties": {
+      "section": {
+       "type": "STRING"
+      }
+     },
+     "required": [
+      "section"
+     ]
+    }
+   }
+  ]
+ }
+];
+
+/* The token carries the setup (official AuthToken schema: fields named in
+ * fieldMask are taken from the token and override the client's setup
+ * message). So a visitor cannot swap the prompt, tools or model. Kept equal
+ * to campus-explorer/js/gemini-live.js buildSetup() by a test. */
+/* Fields the token pins. Everything else (only sessionResumption and
+ * contextWindowCompression are meaningful) comes from the client so a dropped
+ * connection can resume the same conversation with a handle. Verified on the
+ * live API: a client-supplied handle resumed context while tools stayed locked. */
+const LIVE_LOCKED_FIELDS = "model,generationConfig,systemInstruction,tools,inputAudioTranscription,outputAudioTranscription";
+
+function buildLiveSetup(model) {
+	return {
+		model: "models/" + model,
+		generationConfig: {
+			responseModalities: ["AUDIO"],
+			speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } }
+		},
+		systemInstruction: { parts: [{ text: LIVE_SYSTEM_PROMPT }] },
+		tools: LIVE_TOOLS,
+		inputAudioTranscription: {},
+		outputAudioTranscription: {}
+	};
+}
+export { buildLiveSetup };
+
+
+function liveAllow(ip, perMinute) {
+	const now = Date.now();
+	let b = liveBuckets.get(ip);
+	if (!b || now - b.windowStart >= 60000) { b = { windowStart: now, count: 0 }; liveBuckets.set(ip, b); }
+	if (b.count >= perMinute) return false;
+	b.count++;
+	if (liveBuckets.size > 2000) {
+		for (const [k, v] of liveBuckets) { if (now - v.windowStart >= 60000) liveBuckets.delete(k); if (liveBuckets.size <= 1500) break; }
+	}
+	return true;
+}
+
+async function handleLiveToken(request, env, origin) {
+	if (!env.GEMINI_API_KEY) return jsonResponse({ error: "not_configured" }, 503, origin);
+	const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+	if (!liveAllow(ip, parseInt(env.LIVE_PER_IP_PER_MINUTE, 10) || LIVE_PER_IP_PER_MINUTE)) {
+		return jsonResponse({ error: "busy" }, 429, origin);
+	}
+	const model = env.LIVE_MODEL || LIVE_MODEL;
+	const now = Date.now();
+	const ctl = new AbortController();
+	const timer = setTimeout(() => ctl.abort(), UPSTREAM_TIMEOUT_MS);
+	let upstream;
+	try {
+		upstream = await fetch(LIVE_TOKEN_URL, {
+			method: "POST",
+			headers: { "x-goog-api-key": env.GEMINI_API_KEY, "Content-Type": "application/json" },
+			body: JSON.stringify({
+				uses: 1,
+				expireTime: new Date(now + LIVE_SESSION_MS).toISOString(),
+				newSessionExpireTime: new Date(now + LIVE_NEW_SESSION_MS).toISOString(),
+				fieldMask: LIVE_LOCKED_FIELDS,
+				bidiGenerateContentSetup: buildLiveSetup(model)
+			}),
+			signal: ctl.signal
+		});
+	} catch {
+		clearTimeout(timer);
+		return jsonResponse({ error: "upstream" }, 502, origin);
+	}
+	clearTimeout(timer);
+	if (upstream.status === 429) return jsonResponse({ error: "quota" }, 503, origin);
+	if (!upstream.ok) return jsonResponse({ error: "upstream_" + upstream.status }, 502, origin);
+	let data;
+	try { data = await upstream.json(); } catch { return jsonResponse({ error: "upstream_parse" }, 502, origin); }
+	const token = data && typeof data.name === "string" ? data.name : "";
+	if (!token) return jsonResponse({ error: "empty" }, 502, origin);
+	return jsonResponse({ token, model, expiresInSeconds: Math.floor(LIVE_SESSION_MS / 1000) }, 200, origin);
+}
+
 export default {
 	async fetch(request, env) {
 		const origin = corsOrigin(request);
@@ -172,6 +327,7 @@ export default {
 		}
 		if (request.method !== "POST") return jsonResponse({ error: "method" }, 405, origin);
 		if (!origin) return jsonResponse({ error: "origin" }, 403, null);
+		if (new URL(request.url).pathname === "/live-token") return handleLiveToken(request, env, origin);
 		if (!env.GROQ_API_KEY) return jsonResponse({ error: "not_configured" }, 503, origin);
 
 		const ip = request.headers.get("CF-Connecting-IP") || "unknown";

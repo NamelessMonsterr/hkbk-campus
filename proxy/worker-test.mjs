@@ -5,7 +5,9 @@
  * Uses a mock global fetch for the Groq upstream: proves grounding payload
  * shape, guard rails and failure mapping without spending a single token.
  */
-import worker from "./worker.js";
+import worker, { buildLiveSetup } from "./worker.js";
+import { createRequire } from "node:module";
+const clientLive = createRequire(import.meta.url)("../campus-explorer/js/gemini-live.js");
 
 let pass = 0, fail = 0;
 function check(label, condition, detail) {
@@ -126,6 +128,52 @@ section("Preflight");
 		method: "OPTIONS", headers: { "Origin": ORIGIN, "Access-Control-Request-Method": "POST" }
 	}), {});
 	check("OPTIONS -> 204 with CORS", res.status === 204 && res.headers.get("Access-Control-Allow-Origin") === ORIGIN);
+}
+
+section("Live token route (/live-token) - mocked upstream, no real call");
+{
+	const liveReq = (ip, origin) => new Request("https://talk.example/live-token", {
+		method: "POST",
+		headers: { "Origin": origin ?? ORIGIN, "CF-Connecting-IP": ip || "9.9.9.9" }
+	});
+	const realFetch = globalThis.fetch;
+	let calls = [];
+	globalThis.fetch = (url, opts) => { calls.push({ url, opts }); return Promise.resolve(new Response(JSON.stringify({ name: "auth_tokens/abc123" }), { status: 200 })); };
+
+	let res = await worker.fetch(liveReq("5.5.5.1"), {});
+	check("no GEMINI_API_KEY -> 503 not_configured, no upstream call", res.status === 503 && calls.length === 0);
+
+	res = await worker.fetch(liveReq("5.5.5.2", "https://evil.example"), { GEMINI_API_KEY: "k" });
+	check("bad origin -> 403, no upstream call", res.status === 403 && calls.length === 0);
+
+	res = await worker.fetch(liveReq("5.5.5.3"), { GEMINI_API_KEY: "SECRET-KEY-VALUE" });
+	const body = await res.json();
+	check("happy path -> 200 with token + pinned model", res.status === 200 && body.token === "auth_tokens/abc123" && body.model === "gemini-3.8-live");
+	check("exactly one upstream call, to auth_tokens, key only in header",
+		calls.length === 1 && calls[0].url === "https://generativelanguage.googleapis.com/v1beta/auth_tokens" &&
+		calls[0].opts.headers["x-goog-api-key"] === "SECRET-KEY-VALUE" && !JSON.stringify(body).includes("SECRET-KEY-VALUE"));
+	const sent = JSON.parse(calls[0].opts.body);
+	check("single-use token, model pinned, short expiry",
+		sent.uses === 1 && /systemInstruction/.test(sent.fieldMask) && /tools/.test(sent.fieldMask) && !/sessionResumption/.test(sent.fieldMask) && sent.bidiGenerateContentSetup.model === "models/gemini-3.8-live" &&
+		new Date(sent.newSessionExpireTime) - Date.now() <= 125000 && new Date(sent.expireTime) - Date.now() <= 905000);
+
+	calls = [];
+	let last;
+	for (let i = 0; i < 4; i++) last = await worker.fetch(liveReq("5.5.5.4"), { GEMINI_API_KEY: "k" });
+	check("burst limit: 4th mint in a minute -> 429 busy, 3 upstream calls", last.status === 429 && calls.length === 3);
+
+	globalThis.fetch = () => Promise.resolve(new Response("{}", { status: 429 }));
+	res = await worker.fetch(liveReq("5.5.5.5"), { GEMINI_API_KEY: "k" });
+	check("provider 429 -> 503 quota (site shows fallback)", res.status === 503 && (await res.json()).error === "quota");
+	globalThis.fetch = () => Promise.resolve(new Response("{}", { status: 200 }));
+	res = await worker.fetch(liveReq("5.5.5.6"), { GEMINI_API_KEY: "k" });
+	check("upstream 200 without token -> 502 empty", res.status === 502);
+	globalThis.fetch = realFetch;
+	check("token setup equals the client's setup (prompt, tools, voice, transcription)",
+		JSON.stringify(buildLiveSetup("gemini-3.8-live")) === JSON.stringify(clientLive.buildSetup({}).setup));
+	const full = buildLiveSetup("gemini-3.8-live");
+	check("token locks systemInstruction + 4 tools (client cannot override)",
+		/lookup_hkbk/.test(full.systemInstruction.parts[0].text) && full.tools[0].functionDeclarations.length === 4);
 }
 
 console.log("\n== Result " + "=".repeat(52));

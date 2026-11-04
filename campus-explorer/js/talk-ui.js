@@ -153,13 +153,101 @@
 		} else if (!this.conversation.isOnline()) {
 			this._note("Offline mode: answers come only from the knowledge base on this device - no question text is sent to any AI service. Voice typing uses your browser's speech recognition, which may send the audio to your browser provider.");
 		}
+		if (this._liveEnabled()) { this._openLive(greet); return; }
 		this._speak(greet, "en", function () { self._listen(); });
+	};
+
+	/* ---------- Gemini Live (internal test flag; classic pipeline is the fallback) ---------- */
+
+	/* Live voice is the default Assistant mode when the proxy is configured.
+	 * Opt out with ?live=0 or localStorage hkbkLive=0; any failure falls back
+	 * to the standard voice pipeline and says so. */
+	TalkUI.prototype._liveEnabled = function () {
+		if (!global.HKBKGeminiLive || !global.HKBK_TALK_CONFIG || !global.HKBK_TALK_CONFIG.endpoint) return false;
+		if (!(global.navigator && global.navigator.mediaDevices && global.navigator.mediaDevices.getUserMedia) || typeof global.WebSocket !== "function") return false;
+		try {
+			if (/[?&]live=0\b/.test(global.location.search) || global.localStorage.getItem("hkbkLive") === "0") return false;
+		} catch (e) { /* storage blocked: keep the default */ }
+		return true;
+	};
+
+	TalkUI.prototype._openLive = function (greet) {
+		var self = this;
+		var session = this._session;
+		this._setState("thinking", "Connecting\u2026");
+		this._note("Live voice: while Assistant mode is open your microphone audio streams to Google's Gemini service, which may use free-tier content to improve its products. Facts come only from the HKBK knowledge base. Close this panel to stop the mic.");
+		var userText = "", modelText = "";
+		this.live = new global.HKBKGeminiLive.LiveSession({
+			endpoint: global.HKBK_TALK_CONFIG.endpoint,
+			tools: {
+				lookup: function (q) {
+					var res = self.engine.ask(q);
+					if (res && res.lang) self.lastLang = res.lang;
+					return global.HKBKGeminiLive.lookupPayload(res);
+				},
+				act: function (a) { return self._liveAct(a); }
+			},
+			onEvent: function (type, d) {
+				if (self.state === "closed" || session !== self._session) return;
+				if (type === "ready" || type === "idle" || type === "turn_complete" || type === "interrupted") self._setState("listening", "Listening \u2013 your mic is live");
+				else if (type === "speaking") self._setState("speaking", "Speaking \u2013 talk over me any time");
+				else if (type === "tool") self._setState("thinking", "Looking that up\u2026");
+				else if (type === "reconnecting") self._setState("thinking", "Reconnecting\u2026");
+				else if (type === "user_text") { modelText = ""; userText += d.text; self._caption("you", userText.trim()); }
+				else if (type === "model_text") { userText = ""; modelText += d.text; self._caption("guide", modelText.trim()); }
+				else if (type === "closed") self._liveFallback(greet, "The live voice connection could not be restored");
+			}
+		});
+		this.live.start().then(function () {
+			if (self.state === "closed" || session !== self._session) { self.live.stop(); return; }
+			self._clearFallback();
+			self.modeDot.textContent = "live";
+			self.modeDot.title = "Live voice: full-duplex conversation, answers grounded in the HKBK knowledge base";
+		}, function (err) {
+			if (self.state === "closed" || session !== self._session) return;
+			var why = (err && err.message) || "failed";
+			var msg = /^token_503|not_configured/.test(why) ? "Live voice is not set up yet" :
+				/^token_429|token_503/.test(why) ? "Live voice is busy or its quota is used up" :
+				/NotAllowed|Permission|denied/i.test(why) ? "Microphone permission was denied" : "Live voice could not start";
+			self._liveFallback(greet, msg);
+		});
+	};
+
+	/* Live failed: say so, then continue with the classic voice pipeline. */
+	TalkUI.prototype._liveFallback = function (greet, why) {
+		var self = this;
+		if (this.live) { this.live.stop(); this.live = null; }
+		this._note(why + " - using the standard voice assistant instead.");
+		this.modeDot.textContent = "standard voice";
+		if (this.state === "closed") return;
+		this._speak(greet, "en", function () { self._listen(); });
+	};
+
+	/* Tool actions from the live model. Navigation waits a moment so the
+	 * model can finish its sentence. Returns whether the action resolved. */
+	TalkUI.prototype._liveAct = function (a) {
+		var base = this.opts.walkBase || "walk/";
+		function go(stop) { global.setTimeout(function () { global.location.href = base + "index.html?guide=1&stop=" + encodeURIComponent(stop); }, 2500); }
+		if (a.type === "start_walk") { go("gate"); return true; }
+		if (a.type === "show_place") {
+			var act = global.HKBKTalkActions.parse("show me " + a.place, { places: this.places });
+			if (act && act.stopId) { go(act.stopId); return true; }
+			return false;
+		}
+		if (a.type === "scroll") {
+			var anchor = global.HKBKTalkActions._matchSection(a.section);
+			var t = anchor && document.getElementById(anchor);
+			if (t) { t.scrollIntoView({ behavior: "smooth", block: "start" }); return true; }
+			return false;
+		}
+		return false;
 	};
 
 	TalkUI.prototype.close = function () {
 		this._session = (this._session || 0) + 1;   /* invalidate in-flight replies and retries */
 		document.body.classList.remove("talk-open");
 		this._stopRec();
+		if (this.live) { this.live.stop(); this.live = null; }
 		if (global.HKBKVoice) global.HKBKVoice.cancel();
 		this.conversation.clear();          // session memory dies with the session
 		this.root.classList.remove("talk--open");
@@ -233,6 +321,7 @@
 
 	/* Mic tap = start listening, or barge-in while the guide speaks. */
 	TalkUI.prototype._micTap = function () {
+		if (this.live) return;   /* live mode is always listening; typing still works below */
 		if (this.state === "listening") { this._stopRec(); this._setState("idle", "Tap the mic and just talk"); return; }
 		if (this.state === "speaking" && global.HKBKVoice) global.HKBKVoice.cancel();  // barge-in
 		this._listen();
@@ -242,6 +331,7 @@
 
 	TalkUI.prototype._hear = function (text) {
 		var self = this;
+		if (this.live && this.live.ready) { this._caption("you", text); this.live.sendText(text); return; }
 		this._silenceRetries = 0;
 		this._caption("you", text);
 
