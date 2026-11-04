@@ -8,10 +8,12 @@
  *
  * Grounding rules are enforced in the system prompt: the model receives only
  * the retrieved knowledge-base entries and must answer from them or refuse
- * with the provided fallback words. Cost guards: per-IP daily bucket and a
- * global daily budget (both in-memory, best-effort per isolate - documented,
- * not claimed as exact), a character cap, small max_tokens, one upstream
- * call per request, no retries, no logging of question text.
+ * with the provided fallback words. Cost guards: a per-request question
+ * length cap (payload size limit, not an allowance), a per-IP per-minute
+ * burst limit (best-effort in-memory per isolate - documented, not claimed
+ * as exact), small max_tokens, one upstream call per request, no retries,
+ * no logging of question text. The real quota is the provider's own org
+ * limit; when it is spent the site openly shows its local fallback.
  *
  * Deploy: see proxy/README.md. Not deployed until the owner says so.
  */
