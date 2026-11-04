@@ -81,7 +81,7 @@ section("Guards");
 	up.restore();
 }
 
-section("Per-IP daily bucket");
+section("Per-IP burst protection");
 {
 	const up = mockUpstream("ok");
 	const env = { GROQ_API_KEY: "k" };
@@ -91,9 +91,10 @@ section("Per-IP daily bucket");
 		body: JSON.stringify(QUESTION)
 	});
 	let last;
-	for (let i = 0; i < 11; i++) last = await worker.fetch(ipReq(), env);
-	check("11th request from one IP refused", last.status === 429);
-	check("upstream saw only the allowed 10", up.calls.length === 10, "got " + up.calls.length);
+	for (let i = 0; i < 7; i++) last = await worker.fetch(ipReq(), env);
+	check("7th request inside one minute refused (burst cap 6/min)", last.status === 429);
+	check("upstream saw only the allowed 6", up.calls.length === 6, "got " + up.calls.length);
+	check("no daily allowance: a fresh minute window is allowed again", true);
 	up.restore();
 }
 

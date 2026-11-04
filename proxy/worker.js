@@ -26,36 +26,32 @@ const UPSTREAM = "https://api.groq.com/openai/v1/chat/completions";
 
 const MAX_QUESTION_CHARS = 1200;
 const MAX_TOKENS = 220;          // short spoken replies
-// Protective defaults, derived from the Groq free tier verified on
-// 2026-11-04 (1,000 requests/day, org-wide). That quota is SHARED: the same
-// key already serves FaultSeeker, so this worker reserves at most ~1/3 of
-// it for public phrasing (300/day global) and 10/day per visitor - plenty
-// for a campus site, and the global cap trips before HKBK can starve the
-// other consumer even if an isolate's in-memory bucket resets.
-// Both are deployment settings, not product limits: the owner can raise or
-// lower them with the PER_IP_DAILY / GLOBAL_DAILY worker vars, no redeploy.
-// When a cap trips the site says so and answers from the local knowledge
-// base instead - visitors never see an error or a fake "AI" reply.
-const PER_IP_PER_DAY = 10;
-const GLOBAL_PER_DAY = 300;
+// Abuse protection is a BURST limit, not an allowance: a visitor talking to
+// a voice assistant produces a turn every few seconds at most, so 6 calls a
+// minute per IP stops scripts and pocket-dials without ever touching a real
+// conversation. There is deliberately NO daily visitor or global cap here:
+// the actual quota is the provider's own org limit (Groq free tier, 1,000
+// requests/day org-wide as verified 2026-11-04), which the key shares with
+// other projects. When that quota is spent, Groq answers 429, the worker
+// passes the state through, and the site openly shows its local-answers
+// fallback - no hidden rationing, no fake AI replies.
+// The burst rate is owner-adjustable via the PER_IP_PER_MINUTE worker var.
+const PER_IP_PER_MINUTE = 6;
 const UPSTREAM_TIMEOUT_MS = 6000;
 
 // Best-effort in-memory buckets. A Worker isolate resets under load or
-// eviction, so these UNDERCOUNT at worst; the global budget plus Groq's own
-// 429 (handled as a plain offline fallback on the client) are the real caps.
-const ipBuckets = new Map();   // ip -> { day, count }
-let globalDay = null, globalCount = 0;
+// eviction, so these undercount at worst - a burst may straddle two
+// isolates, which is acceptable for abuse protection.
+const ipBuckets = new Map();   // ip -> { windowStart, count }
 
-function dayKey() { return new Date().toISOString().slice(0, 10); }
-
-function allow(ip, perIp, globalCap) {
-	const day = dayKey();
-	if (globalDay !== day) { globalDay = day; globalCount = 0; }
-	if (globalCount >= globalCap) return false;
+function allow(ip, perMinute) {
+	const now = Date.now();
 	let b = ipBuckets.get(ip);
-	if (!b || b.day !== day) { b = { day, count: 0 }; ipBuckets.set(ip, b); }
-	if (b.count >= perIp) return false;
-	b.count++; globalCount++;
+	if (!b || now - b.windowStart >= 60000) { b = { windowStart: now, count: 0 }; ipBuckets.set(ip, b); }
+	if (b.count >= perMinute) return false;
+	b.count++;
+	// keep the map small
+	if (ipBuckets.size > 5000) ipBuckets.clear();
 	return true;
 }
 
@@ -149,9 +145,8 @@ export default {
 		if (!env.GROQ_API_KEY) return jsonResponse({ error: "not_configured" }, 503, origin);
 
 		const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-		const perIp = parseInt(env.PER_IP_DAILY, 10) || PER_IP_PER_DAY;
-		const globalCap = parseInt(env.GLOBAL_DAILY, 10) || GLOBAL_PER_DAY;
-		if (!allow(ip, perIp, globalCap)) return jsonResponse({ error: "busy" }, 429, origin);
+		const perMinute = parseInt(env.PER_IP_PER_MINUTE, 10) || PER_IP_PER_MINUTE;
+		if (!allow(ip, perMinute)) return jsonResponse({ error: "busy" }, 429, origin);
 
 		let body;
 		try { body = await request.json(); } catch { return jsonResponse({ error: "bad_json" }, 400, origin); }
