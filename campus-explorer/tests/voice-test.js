@@ -230,5 +230,47 @@ ok(V._speakable("opposite Manyata Tech Park") === "opposite Manyaata Tech Park",
 ok(V._speakable("the Nagawara side") === "the Naagavara side", "Nagawara respelled for speech");
 ok(V._speakable("ordinary Words Stay Put") === "ordinary Words Stay Put", "mixed-case words untouched");
 
-console.log("voice-test: " + passed + " passed, " + failed + " failed");
-process.exit(failed ? 1 : 0);
+/* hung-speech watchdog: an utterance that never produces events must not
+ * wedge the conversation (the "stuck Speaking..." failure from the user
+ * video). Also: speak() must be deferred past the cancel() in the same tick
+ * (the dropped-utterance race), and a hang AFTER onstart must still finish. */
+var synth = {
+	calls: [],
+	speaking: true,   /* pretend speech is active: engages the cancel-race defer */
+	getVoices: function () { return []; },
+	speak: function (u) { synth.calls.push(u); /* hung: fires no events */ },
+	cancel: function () { synth.speaking = false; }
+};
+globalThis.SpeechSynthesisUtterance = function (t) { this.text = t; };
+globalThis.speechSynthesis = synth;
+
+var endCount = 0;
+V.speak("hello there", "en", { onend: function () { endCount++; }, watchdogMs: 120 });
+ok(synth.calls.length === 0, "speak is deferred past an active cancel in its tick (race guard)");
+
+setTimeout(function () {
+	ok(synth.calls.length === 1, "hung utterance was queued exactly once");
+	ok(endCount === 1, "watchdog advances the conversation when speech never starts");
+
+	/* hang after onstart: post-start watchdog still finishes */
+	var u2ended = 0;
+	synth.speak = function (u) { synth.calls.push(u); setTimeout(function () { if (u.onstart) u.onstart(); }, 10); };
+	V.speak("a second line that starts but never ends", "en", { onend: function () { u2ended++; }, watchdogMs: 150 });
+	setTimeout(function () {
+		ok(u2ended === 1, "post-start watchdog finishes a mid-speech hang");
+
+		/* healthy utterance: start + natural end, exactly one onend, no watchdog interference */
+		synth.speak = function (u) {
+			synth.calls.push(u);
+			setTimeout(function () { if (u.onstart) u.onstart(); }, 10);
+			setTimeout(function () { if (u.onend) u.onend(); }, 40);
+		};
+		var healthyEnd = 0;
+		V.speak("short healthy line", "en", { onend: function () { healthyEnd++; }, watchdogMs: 400 });
+		setTimeout(function () {
+			ok(healthyEnd === 1, "healthy utterance ends naturally, exactly once");
+			console.log("voice-test: " + passed + " passed, " + failed + " failed");
+			process.exit(failed ? 1 : 0);
+		}, 700);
+	}, 600);
+}, 600);

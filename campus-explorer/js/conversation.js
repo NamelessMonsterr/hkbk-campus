@@ -18,6 +18,57 @@
 
 	var DEFAULTS = { endpoint: "", timeoutMs: 8000, historyTurns: 6 };
 
+	/* Speech recognition does not return clean typed text: it splits repeated
+	 * words into segments ("hi hi"), drops or adds punctuation, and glues
+	 * address terms on ("hey hkbk"). Normalize before any small-talk decision
+	 * so the voice path and the typed path behave the same. */
+	function normChatter(q) {
+		var t = String(q || "").toLowerCase();
+		t = t.replace(/[^\p{L}\p{N} ]/gu, " ");
+		t = t.replace(/\s+/g, " ").trim();
+		var w = t.split(" "), out = [];
+		for (var i = 0; i < w.length; i++) if (w[i] && w[i] !== out[out.length - 1]) out.push(w[i]);
+		t = out.join(" ");
+		var dbl = /^(hi|hello|hey)\1$/.exec(t);   /* "hihi", "hellohello" from glued segments */
+		if (dbl) t = dbl[1];
+		return t;
+	}
+
+	/* Small talk needs no facts and no model: answered locally in both modes.
+	 * Returns the reply text, or null when the turn is a real question.
+	 * Matching stays anchored to the whole turn so real queries ("high
+	 * cutoff", "hay fever hostel allergy") can never be swallowed. */
+	function smallTalk(q) {
+		var t = normChatter(q);
+		if (!t) return null;
+		if (/^(hi+|hello+|hey+|namaste|namaskara|salaam|vanakkam)( (there|hkbk|guide|sir|madam|everyone))?$/.test(t)
+			|| /^good (morning|afternoon|evening|day)$/.test(t))
+			return "Hi! Ask me anything about HKBK - courses, fees, campus life - or say: walk me through the campus.";
+		if (/^(thanks|thank you|thankyou|thank u|thx|dhanyavad|dhanyavada|shukriya|thanks a lot|thank you so much)( (hkbk|guide))?$/.test(t))
+			return "You're welcome! Anything else about the college?";
+		if (/^(bye|goodbye|see you|tata|good night|goodnight)( (hkbk|guide|bye))?$/.test(t))
+			return "Bye! Good luck with your college hunt.";
+		if (/^(who are you|what are you|your name|what can you do|what do you do|help|help me)$/.test(t))
+			return "I'm the HKBK guide. I answer questions about the college from its verified knowledge base, and I can walk you around the campus - just say so.";
+		return null;
+	}
+
+	/* A turn that is not a question at all (a filler, a reaction, a mis-heard
+	 * word) must not get the formal refusal with office contacts - that reads
+	 * like a search box rejecting input, not a guide talking. Pivot warmly to
+	 * what the guide can do. A turn that carries any question signal keeps
+	 * the honest formal refusal: we do not have that fact, here is the
+	 * office. Both wordings are local and deterministic; neither reaches the
+	 * model. */
+	var QUESTION_SIGNAL = /(what|when|where|who|whom|whose|how|why|which|tell|show|fee|fees|cost|price|charge|date|deadline|eligib|admiss|hostel|placement|course|branch|seat|cut ?off|rank|contact|number|phone|mail|address|facult|exam|scholarship|loan|document|certificate|bus|transport|canteen|food|mess|timing|location|reach|apply|quota|salary|package|company|companies|internship|\d)/;
+	function chatterReply(q) {
+		var t = normChatter(q);
+		if (!t || t.split(" ").length > 5) return null;
+		if (QUESTION_SIGNAL.test(t)) return null;
+		return "I'm best with questions about HKBK - fees, admissions, campus life, placements. Try one of those, or say: walk me through the campus.";
+	}
+
+
 	function createConversation(options) {
 		options = options || {};
 		var engine = options.engine;
@@ -116,21 +167,6 @@
 		 * }>
 		 */
 
-	/* Small talk needs no facts and no model: answered locally in both modes.
-	 * Returns the reply text, or null when the turn is a real question. */
-	function smallTalk(q) {
-		var t = String(q || "").trim().toLowerCase().replace(/[!.?]+$/g, "");
-		if (/^(hi+|hello|hey|namaste|namaskara|good (morning|afternoon|evening))$/.test(t))
-			return "Hi! Ask me anything about HKBK - courses, fees, campus life - or say: walk me through the campus.";
-		if (/^(thanks|thank you|thankyou|thx|thank u|dhanyavad|shukriya)$/.test(t))
-			return "You're welcome! Anything else about the college?";
-		if (/^(bye|goodbye|see you|tata|good night)$/.test(t))
-			return "Bye! Good luck with your college hunt.";
-		if (/^(who are you|what are you|your name|what can you do)$/.test(t))
-			return "I'm the HKBK guide. I answer questions about the college from its verified knowledge base, and I can walk you around the campus - just say so.";
-		return null;
-	}
-
 		/* A conflicted fact must keep its caveat in voice too: when the KB
 		 * answer does not already carry one, append the conflict note so the
 		 * spoken/shown answer never reads as definitive. */
@@ -151,6 +187,13 @@
 			} catch (e) {
 				return Promise.resolve({ text: "Something broke on my side. Try that again?", mode: "offline",
 					engine: { type: "error", lang: "en" }, onlineError: "engine_error" });
+			}
+			if (res && res.type === "out_of_scope") {
+				var pivot = chatterReply(question);
+				if (pivot) {
+					return Promise.resolve({ text: pivot, mode: "offline",
+						engine: { type: "smalltalk", lang: res.lang || "en", confidence: 1 }, onlineError: null });
+				}
 			}
 			if (!config.endpoint || !fetchImpl) {
 				return Promise.resolve({ text: withConflict(res, res.answer), mode: "offline", engine: res, onlineError: null });
@@ -181,7 +224,7 @@
 		};
 	}
 
-	var api = { createConversation: createConversation };
+	var api = { createConversation: createConversation, smallTalk: smallTalk, chatterReply: chatterReply };
 	global.HKBKTalk = api;
 	if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -196,15 +196,56 @@
 
 	/* Speak one utterance in the given voice/language. */
 	function speakTts(toSay, sayLang, voice, opts) {
+		var wasActive = false;
+		try { wasActive = !!(global.speechSynthesis.speaking || global.speechSynthesis.pending); } catch (e) {}
 		cancel();
 		var u = new global.SpeechSynthesisUtterance(speakable(toSay));
 		u.lang = sayLang;
 		if (voice) u.voice = voice;
 		u.rate = opts.rate || 1;
-		if (opts.onend) u.onend = opts.onend;
-		u.onerror = function () { if (opts.onend) opts.onend(); };
+		/* Chrome (seen worst on Windows) can silently drop an utterance queued
+		 * in the same tick as cancel(): no start, end or error event ever
+		 * fires, which used to wedge the assistant in its "Speaking..." state
+		 * with the whole conversation stuck behind it. Speak on a later tick,
+		 * and back every utterance with a watchdog: if it never starts (or
+		 * hangs mid-speech), cancel the stuck queue and let the conversation
+		 * continue - captioned and typed, just not aloud. */
+		var settled = false;
+		var watchdog = null;
+		function stuck() {
+			if (settled) return;
+			try { global.speechSynthesis.cancel(); } catch (e) {}
+			done();
+		}
+		function done() {
+			if (settled) return;
+			settled = true;
+			if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+			if (currentUtterance === u) currentUtterance = null;
+			if (opts.onend) opts.onend();
+		}
+		watchdog = setTimeout(stuck, opts.watchdogMs || 2000);
+		u.onstart = function () {
+			if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+			/* Started fine - now guard against a mid-speech hang. Generous
+			 * budget: ~120ms per character, minimum 4s, capped at 30s. */
+			var maxMs = opts.watchdogMs || Math.min(30000, 4000 + String(toSay).length * 120);
+			watchdog = setTimeout(stuck, maxMs);
+		};
+		u.onend = function () { done(); };
+		u.onerror = function () { done(); };
 		currentUtterance = u;
-		global.speechSynthesis.speak(u);
+		/* The dropped-utterance race only exists when cancel() actually aborted
+		 * speech; with nothing playing, cancel() is a no-op and speaking
+		 * synchronously is safe (and keeps first-turn latency at zero). */
+		if (!wasActive) {
+			try { global.speechSynthesis.speak(u); } catch (e) { done(); }
+			return;
+		}
+		setTimeout(function () {
+			if (settled) return;
+			try { global.speechSynthesis.speak(u); } catch (e) { done(); }
+		}, 60);
 	}
 
 	/* speak(text, langCode, opts): opts.audioUrl, opts.onend,

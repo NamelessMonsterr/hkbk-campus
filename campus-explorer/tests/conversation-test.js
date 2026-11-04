@@ -157,6 +157,42 @@ var tests = [
 			check("real questions still reach the engine", r.engine.type !== "smalltalk", r.engine.type);
 		});
 	}
+,
+	function () {
+		section("video-reported greeting bug: recognizer variants greet, chatter pivots warmly, real questions keep the formal refusal");
+		var calls = 0;
+		var convo = HKBKTalk.createConversation({ engine: new HKBKChat.Engine(kb), config: { endpoint: "https://example.invalid/talk" },
+			fetchImpl: function () { calls++; return Promise.reject(new Error("must not be called for local turns")); } });
+		var greets = ["hi", "Hi!", "hihi", "hi hi", "hello there", "hey hkbk", "namaste", "good morning", "thanks a lot", "bye bye", "help"];
+		var chain = Promise.resolve();
+		greets.forEach(function (q) {
+			chain = chain.then(function () {
+				return convo.reply(q).then(function (r) {
+					check("'" + q + "' is small talk, not a refusal", r.engine.type === "smalltalk" && r.text.indexOf("reliable information") === -1, r.engine.type + " | " + r.text.slice(0, 50));
+				});
+			});
+		});
+		return chain.then(function () {
+			var chatters = ["hmm", "ok", "asdf", "lol"];
+			var c2 = Promise.resolve();
+			chatters.forEach(function (q) {
+				c2 = c2.then(function () {
+					return convo.reply(q).then(function (r) {
+						check("chatter '" + q + "' pivots warmly (no office-contacts refusal)", r.engine.type === "smalltalk" && /walk me through the campus/.test(r.text), r.text.slice(0, 60));
+					});
+				});
+			});
+			return c2;
+		}).then(function () {
+			return convo.reply("what is the cutoff for aeronautical");
+		}).then(function (r) {
+			check("real unknown question keeps formal refusal", r.engine.type === "out_of_scope" && /reliable information/.test(r.text), r.engine.type + " | " + r.text.slice(0, 50));
+			check("no model call spent on greetings or chatter", calls === 0, calls + " calls");
+			return convo.reply("high cutoff cse");
+		}).then(function (r) {
+			check("greeting normalization never swallows a real course query", r.engine.type === "answer", r.engine.type);
+		});
+	}
 ];
 
 (function run(i) {

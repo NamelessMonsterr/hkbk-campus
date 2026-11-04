@@ -139,7 +139,7 @@
 			mic.type = "button";
 			mic.title = "Tap to speak your question";
 			mic.setAttribute("aria-label", "Speak your question");
-			var micCap = el("span", "chat__bigmic__cap", "Tap to speak");
+			var micCap = el("span", "chat__bigmic__cap", "Type by voice");
 			mic.addEventListener("click", function () {
 				if (self._listening) { self._stopListening(); return; }
 				self._listenOnce();
@@ -410,10 +410,26 @@
 		// fake loading state hiding real work.
 		global.setTimeout(function () {
 			var t0 = (global.performance && performance.now) ? performance.now() : Date.now();
+			var small = global.HKBKTalk && typeof global.HKBKTalk.smallTalk === "function" ? global.HKBKTalk.smallTalk(question) : null;
+			if (small) {
+				thinking.remove();
+				self.addBot(small);
+				if (self.speakOn && global.HKBKVoice) {
+					global.HKBKVoice.speak(small, "en", { onend: function () { if (self.handsFree) self._listenOnce(); } });
+				} else if (self.handsFree) {
+					self._listenOnce();
+				}
+				self.busy = false;
+				return;
+			}
 			var res;
 			try {
 				res = self.engine.ask(question);
 				if (res && res.lang) { self._lastLang = res.lang; }
+				if (res && res.type === "out_of_scope" && global.HKBKTalk && typeof global.HKBKTalk.chatterReply === "function") {
+					var pivot = global.HKBKTalk.chatterReply(question);
+					if (pivot) res = { type: "smalltalk", answer: pivot, lang: res.lang || "en", confidence: 1 };
+				}
 			} catch (err) {
 				thinking.remove();
 				self.addBot("Something broke while looking that up. Please try rephrasing.", "error");
@@ -582,7 +598,7 @@
 		var reset = function () {
 			self._listening = false;
 			if (self._micBtn) self._micBtn.classList.remove("chat__bigmic--on");
-			if (self._micCap) self._micCap.textContent = "Tap to speak";
+			if (self._micCap) self._micCap.textContent = "Type by voice";
 		};
 		rec.onresult = function (ev) {
 			var txt = "";
@@ -614,7 +630,7 @@
 		if (this._rec) { try { this._rec.stop(); } catch (e) {} }
 		this._listening = false;
 		if (this._micBtn) this._micBtn.classList.remove("chat__bigmic--on");
-		if (this._micCap) this._micCap.textContent = "Tap to speak";
+		if (this._micCap) this._micCap.textContent = "Type by voice";
 	};
 
 	ChatUI.prototype.close = function () {
