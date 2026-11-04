@@ -24,6 +24,7 @@ const ALLOWED_ORIGINS = [
 	"https://talk-mode-v2.hkbk-campus-preview.pages.dev",  // versioned fix preview (year-speech)
 	"https://talk-mode-v3.hkbk-campus-preview.pages.dev",  // versioned fix preview (Indian voice preference)
 	"https://talk-mode-v4.hkbk-campus-preview.pages.dev",  // versioned fix preview (regenerated tour audio)
+	"https://talk-mode-v5.hkbk-campus-preview.pages.dev",  // versioned fix preview (follow-up anchoring + walk resume)
 	"http://localhost",
 	"http://127.0.0.1"
 ];
