@@ -59,10 +59,17 @@
 				handoff: res.handoff || null,
 				kbVersion: (res.source && res.source.kbVersion) || null,
 				history: history.slice(-config.historyTurns),
-				/* The visitor asked for a figure but the retrieved facts hold
-				 * no numbers: the model must admit the gap, not rephrase
-				 * unrelated text (rule 2 in the worker prompt). */
-				noFigures: /how (many|much)|number of|count of/i.test(question) && factsFor(res).every(function (f) { return !/\d/.test(f.text); })
+				/* The visitor asked for a figure about a THING the retrieved
+				 * facts never mention ("how many beds" vs a hostel blurb
+				 * that says nothing about beds): the model must admit the
+				 * gap, not rephrase unrelated text (rule 2 in the worker). */
+				noFigures: (function () {
+					var m = /how many (\w+)|how much (\w+)|(?:number|count) of (\w+)/i.exec(question);
+					if (!m) return false;
+					var noun = (m[1] || m[2] || m[3] || "").toLowerCase().replace(/s$/, "");
+					if (noun.length < 3) return false;
+					return factsFor(res).every(function (f) { return f.text.toLowerCase().indexOf(noun) === -1; });
+				})()
 			};
 			var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
 			var timedOut = false;
