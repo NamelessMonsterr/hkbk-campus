@@ -20,6 +20,7 @@
 
 const ALLOWED_ORIGINS = [
 	"https://namelessmonsterr.github.io",
+	"https://talk-mode.hkbk-campus-preview.pages.dev",  // preview branch alias (not the live site)
 	"http://localhost",
 	"http://127.0.0.1"
 ];
