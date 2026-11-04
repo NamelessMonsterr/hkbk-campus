@@ -187,8 +187,10 @@
 		var out = String(text);
 		for (var i = 0; i < SPEAK_ALIASES.length; i++) out = out.replace(SPEAK_ALIASES[i][0], SPEAK_ALIASES[i][1]);
 		out = spellAcronyms(out);
-		return out.replace(/(?<![\d,.])(1[89]\d{2}|20\d{2})(?!\d|\.\d)/g,
-			function (y) { return speakYear(y); });
+		/* No lookbehind: Safari < 16.4 cannot parse (?<!...) and the whole
+		 * module would fail to load, silencing every speech path. */
+		return out.replace(/(^|[^\d,.])((?:1[89]\d{2}|20\d{2}))(?!\d|\.\d)/g,
+			function (m, pre, y) { return pre + speakYear(y); });
 	}
 
 	/* Speak one utterance in the given voice/language. */

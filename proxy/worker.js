@@ -22,6 +22,7 @@ const ALLOWED_ORIGINS = [
 	"https://namelessmonsterr.github.io",
 	"https://talk-mode.hkbk-campus-preview.pages.dev",  // preview branch alias (not the live site)
 	"https://talk-mode-v2.hkbk-campus-preview.pages.dev",  // versioned fix preview (year-speech)
+	"https://talk-mode-v3.hkbk-campus-preview.pages.dev",  // versioned fix preview (Indian voice preference)
 	"http://localhost",
 	"http://127.0.0.1"
 ];
