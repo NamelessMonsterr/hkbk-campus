@@ -57,15 +57,30 @@ function allow(ip, perMinute) {
 	if (!b || now - b.windowStart >= 60000) { b = { windowStart: now, count: 0 }; ipBuckets.set(ip, b); }
 	if (b.count >= perMinute) return false;
 	b.count++;
-	// keep the map small
-	if (ipBuckets.size > 5000) ipBuckets.clear();
+	// keep the map small: evict the stalest buckets, never reset everyone
+	// (a global clear would let an attacker erase every active limit at once)
+	if (ipBuckets.size > 5000) {
+		for (const [k, v] of ipBuckets) {
+			if (now - v.windowStart >= 60000) ipBuckets.delete(k);
+			if (ipBuckets.size <= 4000) break;
+		}
+	}
 	return true;
 }
 
 function corsOrigin(request) {
 	const origin = request.headers.get("Origin") || "";
+	let parsed = null;
+	try { parsed = new URL(origin); } catch { return null; }
 	for (const allowed of ALLOWED_ORIGINS) {
-		if (origin === allowed || origin.startsWith(allowed + ":")) return origin;
+		if (origin === allowed) return origin;
+		/* A ":port" suffix is accepted only for local development origins -
+		 * never for the public site/preview hostnames. */
+		if ((allowed === "http://localhost" || allowed === "http://127.0.0.1") &&
+			parsed.protocol === "http:" && parsed.host.startsWith(allowed.slice(7) + ":")) {
+			const port = parsed.port;
+			if (port && /^\d+$/.test(port)) return origin;
+		}
 	}
 	return null;
 }
@@ -163,6 +178,10 @@ export default {
 		const perMinute = parseInt(env.PER_IP_PER_MINUTE, 10) || PER_IP_PER_MINUTE;
 		if (!allow(ip, perMinute)) return jsonResponse({ error: "busy" }, 429, origin);
 
+		/* Reject oversized bodies before parsing: the model-facing caps limit
+		 * the question, not the JSON envelope (facts/history could be huge). */
+		const declared = parseInt(request.headers.get("Content-Length") || "0", 10);
+		if (declared > 65536) return jsonResponse({ error: "too_large" }, 413, origin);
 		let body;
 		try { body = await request.json(); } catch { return jsonResponse({ error: "bad_json" }, 400, origin); }
 		if (!body || typeof body.question !== "string" || !body.question.trim()) {

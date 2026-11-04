@@ -77,7 +77,7 @@
 			if (ctl) {
 				timer = setTimeout(function () { timedOut = true; ctl.abort(); }, config.timeoutMs);
 			}
-			return fetchImpl(config.endpoint, {
+			var core = fetchImpl(config.endpoint, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
@@ -91,12 +91,20 @@
 						return null;
 					}
 					return body.reply.trim();
-				});
+				}).then(null, function () { lastOnlineError = "bad_json"; return null; });
 			}, function () {
 				if (timer) clearTimeout(timer);
 				lastOnlineError = timedOut ? "timeout" : "network";
 				return null;
 			});
+			if (!ctl) {
+				/* No AbortController (older browser): race a promise-level
+				 * timeout so a stalled request still falls back offline. */
+				core = Promise.race([core, new Promise(function (resolve) {
+					timer = setTimeout(function () { lastOnlineError = "timeout"; resolve(null); }, config.timeoutMs);
+				})]);
+			}
+			return core;
 		}
 
 		/*
@@ -134,12 +142,25 @@
 		function reply(question) {
 			var small = smallTalk(question);
 			if (small) {
-				return Promise.resolve({ text: small, mode: config.endpoint && fetchImpl ? "online" : "offline",
+				return Promise.resolve({ text: small, /* local in every mode: never label it online */ mode: "offline",
 					engine: { type: "smalltalk", lang: "en", confidence: 1 }, onlineError: null });
 			}
-			var res = engine.ask(question);
+			var res;
+			try {
+				res = engine.ask(question);
+			} catch (e) {
+				return Promise.resolve({ text: "Something broke on my side. Try that again?", mode: "offline",
+					engine: { type: "error", lang: "en" }, onlineError: "engine_error" });
+			}
 			if (!config.endpoint || !fetchImpl) {
 				return Promise.resolve({ text: withConflict(res, res.answer), mode: "offline", engine: res, onlineError: null });
+			}
+			/* Grounding enforcement, page-side and deterministic: a refusal is
+			 * never sent to the model for phrasing, so no worker/model fault can
+			 * turn "I don't know" into a confident answer. The model only ever
+			 * rephrases answers and clarifications built from KB facts. */
+			if (res.type === "out_of_scope") {
+				return Promise.resolve({ text: res.answer, mode: "online", engine: res, onlineError: null });
 			}
 			return onlineReply(res, question).then(function (text) {
 				if (text) {

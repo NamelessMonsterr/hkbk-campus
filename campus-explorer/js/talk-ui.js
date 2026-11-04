@@ -157,6 +157,7 @@
 	};
 
 	TalkUI.prototype.close = function () {
+		this._session = (this._session || 0) + 1;   /* invalidate in-flight replies and retries */
 		document.body.classList.remove("talk-open");
 		this._stopRec();
 		if (global.HKBKVoice) global.HKBKVoice.cancel();
@@ -216,7 +217,8 @@
 			if (ev && ev.error === "no-speech" && self.state === "listening") {
 				self._silenceRetries++;
 				if (self._silenceRetries < 2) {
-					setTimeout(function () { if (self.state !== "closed") self._listen(); }, 400);
+					var retrySession = self._session;
+					setTimeout(function () { if (self.state !== "closed" && retrySession === self._session) self._listen(); }, 400);
 				} else {
 					self._setState("idle", "I didn't hear anything - tap the mic when you're ready");
 				}
@@ -248,7 +250,11 @@
 		if (action) { this._act(action, text); return; }
 
 		this._setState("thinking", "Thinking\u2026");
+		var session = this._session;
 		this.conversation.reply(text).then(function (r) {
+			/* A reply that lands after close (or a newer session) must not
+			 * speak or listen again - the conversation is over. */
+			if (self.state === "closed" || session !== self._session) return;
 			if (r.mode === "offline" && self.conversation.isOnline()) self._showFallback(r.onlineError);
 			else if (r.mode === "online") self._clearFallback();
 			if (r.engine && r.engine.lang) self.lastLang = r.engine.lang;
@@ -267,6 +273,7 @@
 			}
 			self._speak(r.text + extra, r.engine.lang, function () { self._listen(); });
 		}, function () {
+			if (self.state === "closed" || session !== self._session) return;
 			self._speak("Something broke on my side. Try that again?", "en", function () { self._listen(); });
 		});
 	};

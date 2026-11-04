@@ -89,15 +89,13 @@ var tests = [
 		});
 	},
 	function () {
-		section("Out-of-scope stays honest online");
+		section("Out-of-scope never reaches the model");
 		var f = mockFetchOk("I don't have that; here is the office number.");
 		var c = conv(f);
 		return c.reply("what is the capital of France").then(function (r) {
-			var body = f.calls[0].body;
-			check("outcome is out_of_scope", body.outcome === "out_of_scope");
-			check("no facts offered to the model", body.facts.length === 0);
-			check("KB refusal text travels for the model to reuse", typeof body.refusal === "string" && body.refusal.length > 10);
-			check("office contacts travel", body.handoff && body.handoff.reception);
+			check("no worker call spent on a refusal", f.calls.length === 0);
+			check("refusal is the KB text verbatim, unphrased by any model", r.text === r.engine.answer);
+			check("refusal reported as an online-mode turn", r.mode === "online");
 		});
 	},
 	function () {
