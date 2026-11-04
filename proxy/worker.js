@@ -92,7 +92,10 @@ const SYSTEM_PROMPT = [
 	"   descriptions from your own knowledge.",
 	"2. If the facts do not answer the question, say plainly that you do not",
 	"   have that information and give the office contact from the provided",
-	"   refusal text. Do not guess.",
+	"   refusal text. Do not guess. This also applies when the facts are",
+	"   about the right place or topic but lack the specific detail asked",
+	"   (a count, date, name, price): say you do not have that specific",
+	"   detail instead of rephrasing facts that do not contain it.",
 	"3. Speak like a person: 1-3 short sentences, no lists, no markdown, no",
 	"   'As an AI'. Warm and direct.",
 	"4. Reply in the visitor's language (the lang field).",
@@ -127,7 +130,8 @@ function buildMessages(body) {
 		`conflict: ${body.conflict ? "true" : "false"}`,
 		facts ? `facts:\n${facts}` : "facts: (none)",
 		body.refusal ? `refusal text: ${String(body.refusal).slice(0, 600)}` : null,
-		body.handoff ? `office contacts: ${JSON.stringify(body.handoff).slice(0, 400)}` : null
+		body.handoff ? `office contacts: ${JSON.stringify(body.handoff).slice(0, 400)}` : null,
+		body.noFigures ? "note: the visitor asked for a figure, but the facts contain no numbers - say plainly that you do not have that figure, in one warm sentence, and point to the office." : null
 	].filter(Boolean).join("\n");
 	return [
 		{ role: "system", content: SYSTEM_PROMPT },

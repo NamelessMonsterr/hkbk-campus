@@ -58,7 +58,11 @@
 				refusal: res.type === "out_of_scope" ? res.answer : null,
 				handoff: res.handoff || null,
 				kbVersion: (res.source && res.source.kbVersion) || null,
-				history: history.slice(-config.historyTurns)
+				history: history.slice(-config.historyTurns),
+				/* The visitor asked for a figure but the retrieved facts hold
+				 * no numbers: the model must admit the gap, not rephrase
+				 * unrelated text (rule 2 in the worker prompt). */
+				noFigures: /how (many|much)|number of|count of/i.test(question) && factsFor(res).every(function (f) { return !/\d/.test(f.text); })
 			};
 			var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
 			var timedOut = false;
